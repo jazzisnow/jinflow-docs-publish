@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix — Should We Split by Year?</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .layout { display: flex; width: 100%; height: 100%; }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative; width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent; overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0; transform-origin: top left;
+    pointer-events: none; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; padding: 4px;
+  }
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600; color: var(--navy);
+    text-align: center; line-height: 1.2; overflow: hidden; max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area { flex: 1; position: relative; height: 100%; overflow: hidden; }
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 7vh 10vw;
+    opacity: 0; transition: opacity 1.2s ease; pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase; margin-bottom: 2vh;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2.5vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 2.8vw, 2.3rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.95rem, 1.6vw, 1.3rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate); max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+  .red { color: var(--red); }
+  .green { color: var(--green); }
+  .amber { color: var(--amber); }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider { width: 60px; height: 3px; background: var(--teal); border-radius: 2px; margin: 2vh 0; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2.5vh 1.5vw; text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+  .stat-num {
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700; color: var(--teal); line-height: 1; margin-bottom: 0.6vh;
+  }
+  .stat-num.red { color: var(--red); }
+  .stat-num.amber { color: var(--amber); }
+  .stat-num.green { color: var(--green); }
+  .stat-label {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  .data-table {
+    width: 100%; max-width: 950px; margin-top: 2vh;
+    border-collapse: collapse; font-size: clamp(0.72rem, 1vw, 0.9rem);
+  }
+  .data-table th {
+    background: var(--light-gray); font-weight: 600; text-align: left;
+    padding: 1vh 1.2vw; border-bottom: 2px solid #cbd5e1;
+    color: var(--navy); white-space: nowrap;
+  }
+  .data-table th.num { text-align: right; }
+  .data-table td {
+    padding: 0.8vh 1.2vw; border-bottom: 1px solid var(--light-gray); vertical-align: top;
+  }
+  .data-table td.num {
+    text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .data-table tr:nth-child(even) { background: #f8fafc; }
+
+  .compare {
+    display: flex; gap: 2.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+  .compare-card {
+    flex: 1; border-radius: 12px; padding: 2.5vh 2vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+  .compare-card.bad { background: var(--red-soft); border: 1px solid #fecaca; }
+  .compare-card.good { background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .compare-card.neutral { background: var(--amber-soft); border: 1px solid #fde68a; }
+  .compare-card.info { background: var(--purple-soft); border: 1px solid #c4b5fd; }
+  .compare-card.teal-card { background: #f0fdfa; border: 1px solid #99f6e4; }
+  .compare-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem); font-weight: 600; margin-bottom: 0.8vh;
+  }
+  .compare-card.bad .compare-title { color: #991b1b; }
+  .compare-card.good .compare-title { color: #166534; }
+  .compare-card.neutral .compare-title { color: #92400e; }
+  .compare-card.info .compare-title { color: #5b21b6; }
+  .compare-card.teal-card .compare-title { color: #115e59; }
+  .compare-text {
+    font-size: clamp(0.78rem, 1vw, 0.9rem); color: var(--slate); line-height: 1.5;
+  }
+
+  .impacts { list-style: none; max-width: 750px; width: 100%; margin-top: 1.5vh; }
+  .impacts li {
+    font-size: clamp(0.9rem, 1.4vw, 1.15rem);
+    line-height: 1.7; color: var(--navy); padding: 0.7vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.1);
+    display: flex; align-items: baseline; gap: 0.8rem;
+  }
+  .impacts li:last-child { border-bottom: none; }
+  .bullet {
+    display: inline-block; width: 8px; height: 8px; min-width: 8px;
+    border-radius: 50%; margin-top: 0.5em;
+  }
+  .bullet.red { background: var(--red); }
+  .bullet.green { background: var(--green); }
+  .bullet.teal { background: var(--teal); }
+  .bullet.amber { background: var(--amber); }
+
+  .bar-chart { width: 100%; max-width: 700px; margin-top: 2vh; }
+  .bar-row { display: flex; align-items: center; gap: 1vw; margin-bottom: 0.8vh; }
+  .bar-label {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    font-weight: 500; min-width: 130px; text-align: right; color: var(--navy);
+  }
+  .bar-track { flex: 1; height: 22px; background: var(--light-gray); border-radius: 4px; overflow: hidden; }
+  .bar-fill {
+    height: 100%; border-radius: 4px; background: var(--teal);
+    display: flex; align-items: center; justify-content: flex-end; padding-right: 8px;
+    font-size: clamp(0.65rem, 0.85vw, 0.78rem); font-weight: 600; color: var(--white); min-width: 30px;
+  }
+  .bar-fill.red { background: var(--red); }
+  .bar-fill.amber { background: var(--amber); }
+  .bar-fill.green { background: var(--green); }
+  .bar-fill.navy { background: var(--navy); }
+
+  .card-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2vw; max-width: 960px; width: 100%; margin-top: 2vh;
+  }
+  .card {
+    background: var(--white); border-radius: 12px; padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+  .card-icon { font-size: clamp(1.8rem, 2.8vw, 2.4rem); margin-bottom: 0.8vh; }
+  .card-title {
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+  .card-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem); color: var(--warm-gray); line-height: 1.5;
+  }
+
+  .section-slide { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+  .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .section-slide .logo { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  .verdict-box {
+    max-width: 700px; width: 100%; margin-top: 2vh;
+    border: 3px solid var(--teal); border-radius: 16px;
+    padding: 3vh 3vw; text-align: center;
+    background: linear-gradient(135deg, #f0fdfa 0%, var(--white) 100%);
+  }
+  .verdict-label {
+    font-size: clamp(0.85rem, 1.1vw, 0.95rem);
+    font-weight: 600; color: var(--teal); text-transform: uppercase;
+    letter-spacing: 0.08em; margin-bottom: 1vh;
+  }
+  .verdict-text {
+    font-size: clamp(1.3rem, 2.2vw, 1.8rem);
+    font-weight: 700; color: var(--navy); line-height: 1.3;
+  }
+
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 5vh 5vw; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .compare { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<div class="sidebar" id="sidebar"></div>
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ======================================= -->
+  <!-- 1: TITLE -->
+  <!-- ======================================= -->
+  <div class="slide active">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">Should We Filter to<br>a Single Year?</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Hospital Zeta has data from January 2023 to December 2024.<br>
+      Would limiting to 2024 reveal sharper insights &mdash; or just lose information?
+    </p>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 2: THE QUESTION -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">The Question</div>
+    <h2 class="fade-in">Two Years of Data. Do We Need Both?</h2>
+    <div class="compare fade-in">
+      <div class="compare-card info">
+        <div class="compare-title">Option A: Keep Both Years</div>
+        <div class="compare-text">
+          Jan 2023 &ndash; Dec 2024<br>
+          <strong>2.27 million</strong> billing rows<br>
+          <strong>68,441</strong> cases<br>
+          <strong>CHF 33.2M</strong> billed<br><br>
+          Full picture, but is there noise?
+        </div>
+      </div>
+      <div class="compare-card neutral">
+        <div class="compare-title">Option B: 2024 Only</div>
+        <div class="compare-text">
+          Jan 2024 &ndash; Dec 2024<br>
+          <strong>1.14 million</strong> billing rows<br>
+          <strong>33,805</strong> cases<br>
+          <strong>CHF 17.1M</strong> billed<br><br>
+          Cleaner cut, but do we lose signal?
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 3: SECTION - THE EVIDENCE -->
+  <!-- ======================================= -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Evidence</div>
+    <h2 class="fade-in">Let's Compare<br>2023 vs 2024, Side by Side</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Seven dimensions, one conclusion</p>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 4: BILLING VOLUME -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">Test 1: Billing</div>
+    <h2 class="fade-in">Billing Volume Is Nearly Identical</h2>
+    <div class="compare fade-in">
+      <div class="compare-card teal-card">
+        <div class="compare-title">2023</div>
+        <div class="compare-text">
+          <strong style="font-size: clamp(1.4rem, 2vw, 1.8rem); color: var(--teal);">CHF 16.1M</strong><br><br>
+          1,133,000 billing rows<br>
+          34,226 distinct cases<br>
+          6,138 distinct materials<br><br>
+          <strong>86.1%</strong> of rows = CHF 0
+        </div>
+      </div>
+      <div class="compare-card teal-card">
+        <div class="compare-title">2024</div>
+        <div class="compare-text">
+          <strong style="font-size: clamp(1.4rem, 2vw, 1.8rem); color: var(--teal);">CHF 17.1M</strong><br><br>
+          1,141,000 billing rows<br>
+          35,765 distinct cases<br>
+          6,057 distinct materials<br><br>
+          <strong>86.1%</strong> of rows = CHF 0
+        </div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh; font-size: clamp(0.8rem, 1.1vw, 0.95rem);">
+      <span class="green">Verdict: stable.</span> The CHF 1M increase (~6%) is consistent with normal healthcare cost inflation.
+    </p>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 5: CASES -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">Test 2: Cases</div>
+    <h2 class="fade-in">Patient Volume: Virtually the Same</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num">34,636</div>
+        <div class="stat-label">Cases in 2023</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">33,805</div>
+        <div class="stat-label">Cases in 2024</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num green">-2.4%</div>
+        <div class="stat-label">Change</div>
+      </div>
+    </div>
+    <div class="compare fade-in" style="margin-top: 2vh;">
+      <div class="compare-card good">
+        <div class="compare-title">Usage Records</div>
+        <div class="compare-text">
+          2023: <strong>1,129,508</strong> rows<br>
+          2024: <strong>1,136,061</strong> rows<br>
+          Change: <span class="green">+0.6%</span>
+        </div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">DRG Coverage</div>
+        <div class="compare-text">
+          2023: <strong>29.6%</strong> of cases have a DRG code<br>
+          2024: <strong>31.2%</strong> of cases have a DRG code<br>
+          Change: <span class="green">+1.6pp</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 6: SITE SPLIT -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">Test 3: Sites</div>
+    <h2 class="fade-in">Brig vs Visp: Identical Split</h2>
+    <div class="bar-chart fade-in">
+      <div class="bar-row">
+        <div class="bar-label">Brig 2023</div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width: 89.8%;">89.8% &mdash; CHF 14.5M</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Brig 2024</div>
+        <div class="bar-track">
+          <div class="bar-fill navy" style="width: 89.9%;">89.9% &mdash; CHF 15.3M</div>
+        </div>
+      </div>
+      <div class="bar-row" style="margin-top: 1vh;">
+        <div class="bar-label">Visp 2023</div>
+        <div class="bar-track">
+          <div class="bar-fill amber" style="width: 10.2%;">10.2%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label">Visp 2024</div>
+        <div class="bar-track">
+          <div class="bar-fill red" style="width: 10.1%;">10.1%</div>
+        </div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      The Brig/Visp revenue share is <span class="highlight">89.8% vs 89.9%</span>. Year-over-year deviation: <span class="green">0.1 percentage points</span>. The structural dominance of Brig's oncology department is a constant, not a trend.
+    </p>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 7: TOP MATERIALS -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">Test 4: Top Materials</div>
+    <h2 class="fade-in">Same Products Dominate Both Years</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>2023</th>
+          <th class="num">CHF</th>
+          <th>2024</th>
+          <th class="num">CHF</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1</td>
+          <td>Keytruda</td>
+          <td class="num red">2.15M</td>
+          <td>Keytruda</td>
+          <td class="num red">2.26M</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>Darzalex</td>
+          <td class="num">812K</td>
+          <td>Darzalex</td>
+          <td class="num">993K</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>PRIVIGEN</td>
+          <td class="num">720K</td>
+          <td>PRIVIGEN</td>
+          <td class="num">761K</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>Opdivo</td>
+          <td class="num">500K</td>
+          <td>Perjeta</td>
+          <td class="num">386K</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>Ogivri</td>
+          <td class="num">422K</td>
+          <td>Opdivo</td>
+          <td class="num">380K</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh; font-size: clamp(0.8rem, 1.1vw, 0.95rem);">
+      The top 3 are <span class="highlight">identical in both years</span>. Positions 4&ndash;5 shuffle slightly (Perjeta rises, Ogivri drops), but the same cancer drugs dominate throughout.
+    </p>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 8: AVERAGE PRICE -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">Test 5: Pricing</div>
+    <h2 class="fade-in">Average Billed Amount: Steady</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num">101.90</div>
+        <div class="stat-label">Avg. CHF per<br>non-zero billing row<br>2023</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">107.64</div>
+        <div class="stat-label">Avg. CHF per<br>non-zero billing row<br>2024</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num amber">+5.6%</div>
+        <div class="stat-label">Year-over-year<br>change</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      A 5.6% increase in average unit cost is consistent with pharmaceutical price inflation. No structural break &mdash; the same pricing patterns apply in both years. A single-year view would give <span class="red">no baseline to judge whether prices are drifting</span>.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 9: SECTION - THE WAREHOUSE -->
+  <!-- ======================================= -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Warehouse</div>
+    <h2 class="fade-in">What About the I/O Gap?</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">This is where the years get interesting</p>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 10: IO BY YEAR -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">Test 6: I/O Coefficient</div>
+    <h2 class="fade-in">The Warehouse Gap Is Stable Across Years</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Year</th>
+          <th class="num">Transfer Qty</th>
+          <th class="num">Usage Qty</th>
+          <th class="num">Avg Coefficient</th>
+          <th class="num">CHF Gap</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="color: var(--warm-gray);">
+          <td>2022</td>
+          <td class="num">1,514,186</td>
+          <td class="num">0</td>
+          <td class="num red">0.000</td>
+          <td class="num red">-11.7M</td>
+        </tr>
+        <tr>
+          <td>2023</td>
+          <td class="num">1,277,203</td>
+          <td class="num">600,532</td>
+          <td class="num amber">0.551</td>
+          <td class="num">-5.0M</td>
+        </tr>
+        <tr>
+          <td>2024</td>
+          <td class="num">1,288,180</td>
+          <td class="num">614,554</td>
+          <td class="num amber">0.625</td>
+          <td class="num">-5.4M</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh; font-size: clamp(0.8rem, 1.1vw, 0.95rem);">
+      2023 and 2024 show the same pattern: about <span class="highlight">55&ndash;63% of transfers are documented</span>. The 2023&rarr;2024 improvement (+7.4pp) is only visible because we have both years.
+    </p>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 11: THE 2022 ANOMALY -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">The Anomaly</div>
+    <h2 class="fade-in">2022: Ghost Movements With No Matching Data</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num red">303,812</div>
+        <div class="stat-label">Movement records<br>from 2022</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num red">0</div>
+        <div class="stat-label">Matching cases<br>in 2022</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num red">0</div>
+        <div class="stat-label">Matching billing<br>in 2022</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      The movement file contains 303K rows from 2022, but the case and billing data only starts in January 2023. This creates an artificial I/O gap of <span class="red">CHF 11.7M</span> that doesn't represent real waste &mdash; it's just an incomplete data export. <span class="highlight">This should be filtered at the probe level</span>, not by discarding entire years.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 12: SECTION - WHAT WE'D LOSE -->
+  <!-- ======================================= -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Trade-offs</div>
+    <h2 class="fade-in">What Would We Lose<br>by Filtering to 2024?</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">The cost of cutting a year</p>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 13: WHAT WE LOSE -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">Lost Signals</div>
+    <h2 class="fade-in">Five Things a Single Year Can't Tell You</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet red"></span><span><strong>Trends vanish</strong> &mdash; The I/O coefficient improved from 0.551 to 0.625. With one year, you'd never know.</span></li>
+      <li><span class="bullet red"></span><span><strong>No price baseline</strong> &mdash; Average cost rose 5.6%. Is that normal? You need a prior year to compare.</span></li>
+      <li><span class="bullet amber"></span><span><strong>Seasonal patterns hidden</strong> &mdash; Q4 billing dips and summer lulls need two cycles to distinguish from noise.</span></li>
+      <li><span class="bullet amber"></span><span><strong>Weaker probe evidence</strong> &mdash; Same material flagged in both years = structural issue. Same material flagged in one year = maybe a data entry error.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Half the sample</strong> &mdash; 22 probes produce 223K findings. Halving the data halves each probe's confidence.</span></li>
+    </ul>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 14: WHAT WE'D GAIN -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">Gains?</div>
+    <h2 class="fade-in">What Would We Gain From Filtering?</h2>
+    <div class="compare fade-in">
+      <div class="compare-card good">
+        <div class="compare-title">Marginal Benefit</div>
+        <div class="compare-text">
+          Slightly smaller dataset to present<br><br>
+          Can say "this is current year data" in a pitch<br><br>
+          Removes the 2022 movement anomaly (but that should be a probe-level fix)
+        </div>
+      </div>
+      <div class="compare-card bad">
+        <div class="compare-title">Actual Cost</div>
+        <div class="compare-text">
+          Lose all trend detection<br><br>
+          Lose cross-year validation (persistent vs one-off issues)<br><br>
+          Lose the pricing baseline<br><br>
+          Halve sample size for every probe<br><br>
+          <strong>No probe changes its conclusion</strong> &mdash; all 22 fire the same patterns in both years
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 15: SUMMARY TABLE -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">Summary</div>
+    <h2 class="fade-in">Test Results at a Glance</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Dimension</th>
+          <th>2023</th>
+          <th>2024</th>
+          <th>Difference</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Billing volume</td>
+          <td class="num">CHF 16.1M</td>
+          <td class="num">CHF 17.1M</td>
+          <td class="num green">+6%</td>
+        </tr>
+        <tr>
+          <td>Cases</td>
+          <td class="num">34,636</td>
+          <td class="num">33,805</td>
+          <td class="num green">-2.4%</td>
+        </tr>
+        <tr>
+          <td>Brig CHF share</td>
+          <td class="num">89.8%</td>
+          <td class="num">89.9%</td>
+          <td class="num green">+0.1pp</td>
+        </tr>
+        <tr>
+          <td>Zero-amount rows</td>
+          <td class="num">86.1%</td>
+          <td class="num">86.1%</td>
+          <td class="num green">0.0pp</td>
+        </tr>
+        <tr>
+          <td>Avg. billed (non-zero)</td>
+          <td class="num">CHF 101.90</td>
+          <td class="num">CHF 107.64</td>
+          <td class="num amber">+5.6%</td>
+        </tr>
+        <tr>
+          <td>I/O coefficient</td>
+          <td class="num">0.551</td>
+          <td class="num">0.625</td>
+          <td class="num green">+13%</td>
+        </tr>
+        <tr>
+          <td>Top 3 materials</td>
+          <td colspan="2" style="text-align: center;">Keytruda, Darzalex, PRIVIGEN</td>
+          <td class="num green">identical</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh; font-size: clamp(0.8rem, 1.1vw, 0.95rem);">
+      Every dimension tells the same story: <span class="highlight">structurally stable, no break between years</span>.
+    </p>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 16: VERDICT -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">Verdict</div>
+    <h2 class="fade-in">Our Recommendation</h2>
+    <div class="verdict-box fade-in">
+      <div class="verdict-label">Conclusion</div>
+      <div class="verdict-text">
+        Keep both years.<br>
+        <span style="font-weight: 400; font-size: clamp(0.9rem, 1.4vw, 1.15rem); color: var(--slate);">
+          The two-year view is strictly more informative.<br>
+          Splitting adds no insight. It only removes signal.
+        </span>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2.5vh;">
+      The only fix needed is <span class="highlight">probe-level filtering</span> of the 2022 movement anomaly &mdash;<br>
+      not a wholesale year restriction that would blind us to trends.
+    </p>
+  </div>
+
+  <!-- ======================================= -->
+  <!-- 17: CLOSING -->
+  <!-- ======================================= -->
+  <div class="slide">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">More Data, More Confidence.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      2 years &middot; 68,441 cases &middot; 7 comparison tests<br>
+      All stable. All pointing the same way.<br><br>
+      The strength of the analysis <em>is</em> the two-year window.
+    </p>
+    <p class="subtitle fade-in" style="margin-top: 4vh; font-size: clamp(1.2rem, 2vw, 1.6rem); font-weight: 300; color: var(--teal);">
+      Thank you.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+</div>
+
+<div class="brand">nuMetrix</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = 'nuMetrix';
+    } else {
+      var title = slide.querySelector('h1, h2');
+      var logo = slide.querySelector('.logo');
+      if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var n = 0;
+    for (var i = 0; i <= index; i++) {
+      if (!slides[i].classList.contains('breathing')) n++;
+    }
+    counter.textContent = n + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

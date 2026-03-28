@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>jinflow.io — From Framework to Domain</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+    --rose: #e11d48;
+    --rose-soft: #fff1f2;
+    --cyan: #0891b2;
+    --cyan-soft: #ecfeff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout { display: flex; width: 100%; height: 100%; }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+  .thumb.jin-thumb { background: linear-gradient(135deg, #1a3a4a 0%, #0f2938 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label,
+  .thumb.jin-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area { flex: 1; position: relative; height: 100%; overflow: hidden; }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 7vh 10vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 2vh;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2.5vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 2.8vw, 2.3rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.95rem, 1.6vw, 1.3rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+  .indigo { color: var(--indigo); font-weight: 500; }
+  .purple { color: var(--purple); }
+  .amber { color: var(--amber); }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 2vh 0;
+  }
+
+  /* ── Section slides ── */
+  .section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+  }
+  .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .section-slide .logo { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  .jin-slide {
+    background: linear-gradient(135deg, #1a3a4a 0%, #0f2938 100%);
+  }
+  .jin-slide h1, .jin-slide h2 { color: var(--white); }
+  .jin-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .jin-slide .logo { color: var(--teal-light); }
+  .jin-slide .divider { background: var(--teal-light); }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.5vw; margin-top: 2vh;
+  }
+
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.5vh 2vw;
+    font-weight: 600; font-size: clamp(0.82rem, 1.1vw, 1rem);
+    color: var(--navy); text-align: center; min-width: 100px;
+  }
+  .flow-box.filled { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .flow-box.teal-filled { background: var(--teal); border-color: var(--teal); color: var(--white); }
+  .flow-box.indigo-filled { background: var(--indigo); border-color: var(--indigo); color: var(--white); }
+
+  .flow-arrow {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Stat cards ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2.5vh 1.5vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.6vh;
+  }
+
+  .stat-label {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Impact list ── */
+  .impacts {
+    list-style: none; max-width: 750px; width: 100%; margin-top: 1.5vh;
+  }
+  .impacts li {
+    font-size: clamp(0.9rem, 1.4vw, 1.15rem);
+    line-height: 1.7; color: var(--navy);
+    padding: 0.7vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.1);
+    display: flex; align-items: baseline; gap: 0.8rem;
+  }
+  .impacts li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block; width: 8px; height: 8px; min-width: 8px;
+    border-radius: 50%; margin-top: 0.5em;
+  }
+  .bullet.teal { background: var(--teal); }
+  .bullet.indigo { background: var(--indigo); }
+  .bullet.purple { background: var(--purple); }
+  .bullet.amber { background: var(--amber); }
+  .bullet.green { background: var(--green); }
+
+  /* ── Comparison cards ── */
+  .compare {
+    display: flex; gap: 2.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .compare-card {
+    flex: 1; border-radius: 12px; padding: 2.5vh 2vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+  .compare-card.engine { background: var(--indigo-soft); border: 1px solid #c7d2fe; }
+  .compare-card.domain { background: var(--amber-soft); border: 1px solid #fde68a; }
+  .compare-card.ai { background: var(--purple-soft); border: 1px solid #c4b5fd; }
+  .compare-card.good { background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .compare-card.cyan { background: var(--cyan-soft); border: 1px solid #a5f3fc; }
+
+  .compare-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; margin-bottom: 0.8vh;
+  }
+  .compare-card.engine .compare-title { color: #3730a3; }
+  .compare-card.domain .compare-title { color: #92400e; }
+  .compare-card.ai .compare-title { color: #5b21b6; }
+  .compare-card.good .compare-title { color: #166534; }
+  .compare-card.cyan .compare-title { color: #155e75; }
+
+  .compare-text {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--slate); line-height: 1.5;
+  }
+  .compare-text strong { color: var(--navy); }
+  .compare-text code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9em; background: rgba(0,0,0,0.06);
+    padding: 0.1em 0.4em; border-radius: 3px;
+  }
+
+  /* ── Data table ── */
+  .data-table {
+    width: 100%; max-width: 950px; margin-top: 2vh;
+    border-collapse: collapse;
+    font-size: clamp(0.72rem, 1vw, 0.9rem);
+  }
+  .data-table th {
+    background: var(--light-gray);
+    font-weight: 600; text-align: left;
+    padding: 1vh 1.2vw;
+    border-bottom: 2px solid #cbd5e1;
+    color: var(--navy); white-space: nowrap;
+  }
+  .data-table td {
+    padding: 0.8vh 1.2vw;
+    border-bottom: 1px solid var(--light-gray);
+    vertical-align: top;
+  }
+  .data-table td.mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.85em;
+  }
+  .data-table tr:nth-child(even) { background: #f8fafc; }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2vw; max-width: 960px; width: 100%; margin-top: 2vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-icon {
+    font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+    margin-bottom: 0.8vh;
+  }
+  .card-title {
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+  .card-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Domain cards (2-col) ── */
+  .domain-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .domain-card {
+    background: var(--white); border-radius: 10px;
+    padding: 2vh 1.5vw; text-align: left;
+    border: 1px solid rgba(42, 143, 143, 0.12);
+    box-shadow: 0 1px 8px rgba(26, 39, 68, 0.03);
+  }
+
+  .domain-name {
+    font-size: clamp(0.85rem, 1.1vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.3vh;
+  }
+
+  .domain-entities {
+    font-size: clamp(0.7rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.4; margin-bottom: 0.5vh;
+  }
+
+  .domain-probes {
+    font-size: clamp(0.68rem, 0.85vw, 0.78rem);
+    color: var(--teal); font-style: italic; line-height: 1.4;
+  }
+
+  /* ── Branding + counter ── */
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 5vh 5vw; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .compare { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+    .domain-grid { grid-template-columns: 1fr; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<div class="sidebar" id="sidebar"></div>
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- TITLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide active jin-slide">
+    <div class="logo fade-in">jinflow.io</div>
+    <h1 class="fade-in">One Framework.<br>Many Domains.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      A pluggable diagnostic analytics platform<br>
+      with AI as the domain expert &mdash;<br>
+      and nuMetrix as the first proof.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE VISION -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Vision</div>
+    <div class="quote fade-in">
+      Never just hospitals.<br>
+      Always a framework.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      From the start, the idea was an <span class="highlight">application framework</span><br>
+      with a strong processing pipeline, a rich frontend,<br>
+      and AI playing the role of subject matter expert.<br><br>
+      The hospital was the first domain &mdash; not the only one.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE TRIAD -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Three Pillars</div>
+    <h2 class="fade-in">Framework + Domain + AI</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">The Engine</div>
+        <div class="compare-text">
+          Pipeline. Compilers. Contracts.<br>
+          Taxonomy engine. Explorer shell.<br>
+          Multi-tenant isolation.<br><br>
+          <strong>How</strong> to ingest, validate, diagnose, and present.
+        </div>
+      </div>
+      <div class="compare-card domain">
+        <div class="compare-title">The Domain</div>
+        <div class="compare-text">
+          Entity schemas. Probe rules.<br>
+          Source-system mappings.<br>
+          Interpretation. Regulatory context.<br><br>
+          <strong>What</strong> to look for and <strong>why</strong> it matters.
+        </div>
+      </div>
+      <div class="compare-card ai">
+        <div class="compare-title">The AI</div>
+        <div class="compare-text">
+          Subject matter expertise on demand.<br>
+          Data formats. Business logic.<br>
+          Medical knowledge. Regulations.<br><br>
+          <strong>Who</strong> brings the domain knowledge &mdash; at scale.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE FIRST PROOF -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The First Proof</div>
+    <h2 class="fade-in">nuMetrix &mdash; hospitals and material flow</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num">5</div>
+        <div class="stat-label">tenants<br>including real SZO data</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3</div>
+        <div class="stat-label">source systems<br>OPALE &middot; SAP &middot; Navision</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">27</div>
+        <div class="stat-label">probes + assessments<br>compiled from YAML</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">4</div>
+        <div class="stat-label">pyramid layers<br>probes &rarr; hypotheses &rarr; diagnoses</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      A full diagnostic pipeline for hospital material flow analytics.<br>
+      <span class="highlight">Built on the jinflow framework. The first instantiation, not the last.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: THE ARCHITECTURE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Architecture</div>
+    <h2 class="fade-in">Engine vs. Domain</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">80% engine. 20% domain knowledge. By design.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE 80/20 -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Split</div>
+    <h2 class="fade-in">The engine doesn't know what a &ldquo;case&rdquo; is.<br>The domain pack does.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">Engine (80%)</div>
+        <div class="compare-text">
+          Medallion pipeline (Bronze &rarr; Silver &rarr; Gold)<br>
+          Probe compiler (YAML &rarr; SQL)<br>
+          Hypothesis + Diagnosis compilers<br>
+          Findings contract (10 standard columns)<br>
+          Taxonomy engine (tree + closure table)<br>
+          Explorer (probe discovery, interpretation, i18n)<br>
+          Multi-tenant platform layer<br>
+          Orchestration (Dagster, rebuild scripts)<br><br>
+          <strong>Knows how. Knows nothing about why.</strong>
+        </div>
+      </div>
+      <div class="compare-card domain">
+        <div class="compare-title">Domain Pack (20%)</div>
+        <div class="compare-text">
+          Gold contract (entity schemas)<br>
+          Source-system dispatch (column mappings)<br>
+          Probe YAML definitions (business rules)<br>
+          Hypothesis + Diagnosis YAMLs<br>
+          Registry (tri-lingual display text)<br>
+          Interpretation rules (context overrides)<br>
+          i18n labels<br>
+          Synthetic data profiles<br><br>
+          <strong>Knows why. All declarative. All swappable.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- DOMAIN PACK STRUCTURE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Domain Pack</div>
+    <h2 class="fade-in">A directory. YAML and JSON. No code.</h2>
+    <div class="flow fade-in">
+      <div class="flow-box filled"><strong>domains/</strong><br><small>hospital-materialflow/</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>contract.json</strong><br><small>entity schema</small></div>
+      <div class="flow-arrow">+</div>
+      <div class="flow-box"><strong>probes/*.yaml</strong><br><small>business rules</small></div>
+      <div class="flow-arrow">+</div>
+      <div class="flow-box"><strong>source_systems/</strong><br><small>column mappings</small></div>
+      <div class="flow-arrow">+</div>
+      <div class="flow-box teal-filled"><strong>i18n + registry</strong><br><small>human language</small></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Self-contained. Versioned. Declarative.<br>
+      The engine discovers and loads it via a path variable.<br>
+      <span class="highlight">Swap the directory &rarr; swap the domain.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- WHAT TRANSFERS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">What Transfers</div>
+    <h2 class="fade-in">The patterns are universal</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet indigo"></span><span><strong>Balance probes</strong> &mdash; compare two aggregates. Usage vs billing in hospitals. Received vs sold in retail. Ordered vs delivered in construction.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Duplicate detection</strong> &mdash; same shape everywhere. Duplicate billings, duplicate invoices, duplicate shipments.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Trend analysis</strong> &mdash; rolling average drift. Material costs, lead times, defect rates. The math is identical.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Mandatory item</strong> &mdash; &ldquo;this entity must have that child.&rdquo; Implant with hip replacement. Fire extinguisher with building inspection. Safety sheet with chemical batch.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Taxonomy hierarchies</strong> &mdash; cost centres, product categories, regional structures. Same closure table, different labels.</span></li>
+    </ul>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: AI AS SME -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Multiplier</div>
+    <h2 class="fade-in">AI as Subject Matter Expert</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">The framework is the engineering. AI is the domain knowledge.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- WHAT AI BROUGHT TO nuMETRIX -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">What AI Brought</div>
+    <h2 class="fade-in">nuMetrix was built with AI<br>as the domain expert.</h2>
+    <div class="card-grid fade-in">
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--indigo);">ERP</div>
+        <div class="card-title">Data Formats</div>
+        <div class="card-desc">OPALE CSV schemas. SAP MM table structures (AUFK, MARA, EKPO). Navision column conventions. Three source systems mapped without a consultant.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--teal);">Ops</div>
+        <div class="card-title">Operational Knowledge</div>
+        <div class="card-desc">Material flow logic. Movement types (TRANSFER, ISSUE, RETURN). DRG billing rules. I/O coefficients. Ward vs OR documentation practices.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--purple);">Med</div>
+        <div class="card-title">Medical &amp; Regulatory</div>
+        <div class="card-desc">Implant traceability. Controlled substance law (BtMG). MiGEL reimbursement codes. Oncology drug catalogues. Swiss KVG billing obligations.</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      No hospital consulting engagement. No six-month discovery phase.<br>
+      <span class="highlight">AI brought the SME knowledge. The framework made it actionable.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE SCALE INSIGHT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Scale Insight</div>
+    <h2 class="fade-in">New domain = new conversation.<br>Same framework.</h2>
+    <div class="flow fade-in">
+      <div class="flow-box indigo-filled"><strong>jinflow</strong><br><small>engine</small></div>
+      <div class="flow-arrow">+</div>
+      <div class="flow-box"><strong>AI SME</strong><br><small>domain knowledge</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>Domain Pack</strong><br><small>contracts + probes + i18n</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>Running<br>Instance</strong></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      To enter retail: ask AI about SAP Retail schemas, shrinkage patterns,<br>
+      planogram compliance, margin erosion &mdash; generate the domain pack.<br><br>
+      To enter pharma: ask AI about batch records, LIMS formats,<br>
+      yield calculations, GMP compliance &mdash; generate the domain pack.<br><br>
+      <span class="highlight">The framework stays. The expertise is injected.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- AI + FRAMEWORK = MOAT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Compound Effect</div>
+    <h2 class="fade-in">Each domain pack makes AI smarter<br>for the next one.</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet purple"></span><span>Hospital deployment reveals that <strong>balance probes need interpretation rules</strong> &mdash; DRG inpatient vs outpatient. The engine gains the interpretation layer.</span></li>
+      <li><span class="bullet purple"></span><span>Retail deployment reveals that <strong>shrinkage probes need seasonal adjustment</strong>. The DSL gains a <code>seasonal</code> modifier. All domains benefit.</span></li>
+      <li><span class="bullet purple"></span><span>Each domain's <strong>calibrated thresholds</strong> inform the next. &ldquo;What does normal look like?&rdquo; gets answered by data, not guesswork.</span></li>
+      <li><span class="bullet teal"></span><span>AI accumulates cross-domain patterns. <strong>The framework gets better at every domain because it's been to others.</strong></span></li>
+    </ul>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: SIX DOMAINS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Domains</div>
+    <h2 class="fade-in">Where jinflow Fits</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Six industries. Same engine. Different domain packs.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- DOMAINS 1-6 -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Six Domains</div>
+    <h2 class="fade-in">Material/resource flows + financial reconciliation</h2>
+    <div class="domain-grid fade-in">
+      <div class="domain-card">
+        <div class="domain-name">Manufacturing</div>
+        <div class="domain-entities">Work orders, BOMs, inventory, shipments</div>
+        <div class="domain-probes">Phantom consumption, BOM vs actual variance, scrap anomalies</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Pharma &amp; Life Sciences</div>
+        <div class="domain-entities">Batches, formulations, QC results, distribution</div>
+        <div class="domain-probes">Yield deviation, expiry risk, recall traceability gaps</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Facility Management</div>
+        <div class="domain-entities">Service orders, assets, maintenance, procurement</div>
+        <div class="domain-probes">Unused contracts, maintenance backlog trends, cost overruns</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Retail &amp; Warehouse</div>
+        <div class="domain-entities">Purchase orders, stock movements, sales, returns</div>
+        <div class="domain-probes">Shrinkage detection, dead stock, supplier delivery anomalies</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Public Sector Procurement</div>
+        <div class="domain-entities">Tenders, contracts, invoices, deliveries</div>
+        <div class="domain-probes">Duplicate invoicing, contract compliance, budget overruns</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Construction</div>
+        <div class="domain-entities">Projects, material requisitions, deliveries, invoices</div>
+        <div class="domain-probes">Material waste, subcontractor billing anomalies</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE COMMON PATTERN -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Pattern</div>
+    <h2 class="fade-in">Every domain has the same shape</h2>
+    <div class="flow fade-in">
+      <div class="flow-box"><strong>Multiple ERPs</strong><br><small>different column names</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>Canonical Model</strong><br><small>validated entities</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>Diagnostic Probes</strong><br><small>reconciliation + anomalies</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>Hypotheses</strong><br><small>business language</small></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Multiple source systems &rarr; canonical model &rarr; financial/operational reconciliation<br>
+      &rarr; diagnostic probes &rarr; management-level hypotheses.<br><br>
+      <span class="highlight">The strongest fit is anywhere you see this shape.</span><br>
+      The entity names change. The architecture doesn't.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- RETAIL EXAMPLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Example: Retail</div>
+    <h2 class="fade-in">Same probe types. Different vocabulary.</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Probe Type</th>
+          <th>Hospital (nuMetrix)</th>
+          <th>Retail (jinflow)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">balance</td><td>Usage value vs billed amount</td><td>Received qty vs (sold + on hand)</td></tr>
+        <tr><td class="mono">mandatory_item</td><td>Hip replacement &rarr; implant</td><td>Store type &rarr; core assortment</td></tr>
+        <tr><td class="mono">trend</td><td>Material cost drift per month</td><td>Margin erosion over rolling window</td></tr>
+        <tr><td class="mono">distribution_outlier</td><td>DRG cost outlier per case</td><td>Return rate anomaly per product</td></tr>
+        <tr><td class="mono">assessment</td><td>Case financial integrity</td><td>Store health score</td></tr>
+      </tbody>
+    </table>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      The probe compiler generates identical SQL structures.<br>
+      Only the <span class="highlight">entity names</span> and <span class="highlight">thresholds</span> change.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: THE MOAT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Moat</div>
+    <h2 class="fade-in">What Cannot Be Copied</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">The engine is reproducible. The domain packs are not.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE FOUR LAYERS OF MOAT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Four Layers</div>
+    <h2 class="fade-in">Each domain pack encodes<br>knowledge that accumulates.</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><strong>Regulatory knowledge.</strong> Swiss KVG. BetmG. MiGEL. GMP. Food safety. Each domain has its legal landscape. The domain pack encodes it.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Calibrated thresholds.</strong> SZO's I/O coefficient of 0.39 tells you what &ldquo;normal&rdquo; looks like at a Swiss regional hospital. You can't guess this. You earn it from data.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Interpretation rules.</strong> &ldquo;A 40% billing delta on a DRG inpatient case is expected. On an outpatient case, it's CHF 2,500 at risk.&rdquo; The difference between noise and signal.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Source-system expertise.</strong> OPALE's 5-digit mandate prefix. SAP BWART 301 = TRANSFER. Navision's &ldquo;Negative Adjmt.&rdquo; = ISSUE. Earned through ingestion, not documentation.</span></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- COMMERCIAL MODEL -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Business</div>
+    <h2 class="fade-in">Open engine. Expert domain packs.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">jinflow Engine</div>
+        <div class="compare-text">
+          Pipeline, compilers, Explorer shell.<br>
+          Open or source-available.<br>
+          Drives adoption and trust.<br><br>
+          <strong>The platform. Free to evaluate.</strong>
+        </div>
+      </div>
+      <div class="compare-card domain">
+        <div class="compare-title">Domain Packs</div>
+        <div class="compare-text">
+          Probes, interpretation rules,<br>
+          regulatory context, calibrated thresholds.<br>
+          Subscription per tenant.<br><br>
+          <strong>The expertise. The revenue.</strong>
+        </div>
+      </div>
+      <div class="compare-card cyan">
+        <div class="compare-title">Custom Domains</div>
+        <div class="compare-text">
+          Consulting engagement to build<br>
+          a domain pack for a new industry.<br>
+          AI-accelerated. Weeks, not months.<br><br>
+          <strong>The growth engine.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- CLOSING -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide jin-slide">
+    <div class="logo fade-in">jinflow.io</div>
+    <h1 class="fade-in" style="line-height: 1.3;">The framework<br>that learns every domain<br>it enters.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      nuMetrix proved it works for hospitals.<br>
+      The engine is domain-agnostic. The domain packs are pluggable.<br>
+      AI brings the expertise. Each deployment makes the next one faster.<br><br>
+      <span style="color: var(--teal-light); font-weight: 500;">One framework. Many domains. Infinite expertise.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+</div>
+
+<div class="brand">jinflow.io</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    var isJin = slide.classList.contains('jin-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (isJin) thumb.classList.add('jin-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = 'jinflow';
+    } else {
+      var title = slide.querySelector('h1, h2');
+      var logo = slide.querySelector('.logo');
+      if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var n = 0;
+    for (var j = 0; j <= index; j++) {
+      if (!slides[j].classList.contains('breathing')) n++;
+    }
+    counter.textContent = n + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

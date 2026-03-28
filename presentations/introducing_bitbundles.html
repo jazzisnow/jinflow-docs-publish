@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix — Introducing BitBundles</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout {
+    display: flex; width: 100%; height: 100%;
+  }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area {
+    flex: 1; position: relative; height: 100%; overflow: hidden;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 10px; right: 18px;
+    font-size: 0.72rem; color: var(--warm-gray); opacity: 0.6;
+    z-index: 100;
+  }
+  .slide-counter.hidden { display: none; }
+
+  /* ── Slides ── */
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4vh 5vw;
+    overflow-y: auto;
+  }
+  .slide.active { display: flex; }
+
+  .slide.section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+    color: var(--white);
+  }
+
+  .slide.breathing {
+    background: var(--bg);
+    justify-content: center;
+  }
+
+  /* ── Typography ── */
+  .logo {
+    font-size: clamp(0.7rem, 0.9vw, 0.85rem);
+    font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--teal);
+    margin-bottom: 1.5vh;
+  }
+  .section-slide .logo { color: var(--teal-light); }
+
+  h1 {
+    font-size: clamp(1.6rem, 3.2vw, 2.8rem);
+    font-weight: 700; line-height: 1.2;
+    text-align: center; max-width: 850px;
+  }
+
+  h2 {
+    font-size: clamp(1.2rem, 2.2vw, 1.9rem);
+    font-weight: 600; line-height: 1.3;
+    text-align: center; max-width: 800px;
+    margin-bottom: 1vh;
+  }
+  .section-slide h2 { color: var(--white); }
+
+  .subtitle {
+    font-size: clamp(0.85rem, 1.2vw, 1.05rem);
+    line-height: 1.7; color: var(--slate);
+    text-align: center; max-width: 750px;
+    margin-top: 1.5vh;
+  }
+  .section-slide .subtitle { color: #94a3b8; }
+
+  .highlight { color: var(--teal); font-weight: 600; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal); border-radius: 2px;
+    margin: 1.5vh 0;
+  }
+
+  .quote {
+    font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.5vw; margin-top: 2vh;
+  }
+
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.5vh 2vw;
+    font-weight: 600; font-size: clamp(0.82rem, 1.1vw, 1rem);
+    color: var(--navy); text-align: center; min-width: 100px;
+  }
+
+  .flow-box.filled {
+    background: var(--navy); border-color: var(--navy); color: var(--white);
+  }
+
+  .flow-box.teal-filled {
+    background: var(--teal); border-color: var(--teal); color: var(--white);
+  }
+
+  .flow-box.indigo-filled {
+    background: var(--indigo); border-color: var(--indigo); color: var(--white);
+  }
+
+  .flow-arrow {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Stat cards ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2.5vh 1.5vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.6vh;
+  }
+
+  .stat-label {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Code block ── */
+  .code-block {
+    background: var(--navy); color: #e2e8f0;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: clamp(0.68rem, 0.95vw, 0.85rem);
+    line-height: 1.7; padding: 2.5vh 2.5vw;
+    border-radius: 10px; max-width: 800px;
+    width: 100%; margin-top: 2vh; white-space: pre;
+    overflow-x: auto;
+  }
+
+  .code-block .comment { color: #94a3b8; }
+  .code-block .key { color: var(--teal-light); }
+  .code-block .val { color: #fbbf24; }
+  .code-block .str { color: #86efac; }
+
+  /* ── Data table ── */
+  .data-table {
+    width: 100%; max-width: 950px; margin-top: 2vh;
+    border-collapse: collapse;
+    font-size: clamp(0.72rem, 1vw, 0.9rem);
+  }
+
+  .data-table th {
+    background: var(--light-gray);
+    font-weight: 600; text-align: left;
+    padding: 1vh 1.2vw;
+    border-bottom: 2px solid #cbd5e1;
+    color: var(--navy); white-space: nowrap;
+  }
+
+  .data-table td {
+    padding: 0.8vh 1.2vw;
+    border-bottom: 1px solid var(--light-gray);
+    vertical-align: top;
+  }
+
+  .data-table td.mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.85em;
+  }
+
+  .data-table tr:nth-child(even) { background: #f8fafc; }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2vw; max-width: 960px; width: 100%; margin-top: 2vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-icon {
+    font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+    margin-bottom: 0.8vh;
+  }
+
+  .card-title {
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+
+  .card-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Comparison ── */
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .comparison-col {
+    background: var(--white); border-radius: 12px;
+    padding: 3vh 2.5vw;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .comparison-col h3 {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 1.5vh;
+    text-align: center;
+  }
+
+  .comparison-col ul {
+    list-style: none; padding: 0;
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    line-height: 1.8; color: var(--slate);
+  }
+
+  .comparison-col li::before {
+    content: ''; display: inline-block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--teal); margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  /* ── Animations ── */
+  .fade-in {
+    opacity: 0; transform: translateY(15px);
+    animation: fadeUp 0.6s ease forwards;
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in:nth-child(2) { animation-delay: 0.15s; }
+  .fade-in:nth-child(3) { animation-delay: 0.3s; }
+  .fade-in:nth-child(4) { animation-delay: 0.45s; }
+  .fade-in:nth-child(5) { animation-delay: 0.6s; }
+  .fade-in:nth-child(6) { animation-delay: 0.75s; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="main-area">
+    <div class="slide-counter" id="counter"></div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 1: TITLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide active">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">Introducing BitBundles</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Human-curated narrative groupings of SME knowledge.<br>
+      The story layer on top of atomic expert insights.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 2: THE PROBLEM -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Problem</div>
+    <div class="quote fade-in">
+      SMEs don&rsquo;t think in atoms.<br>
+      They think in stories.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      An SMEbit says: &ldquo;Material 638876A has the wrong description.&rdquo;<br>
+      Another says: &ldquo;Orphan materials hide financial exposure.&rdquo;<br>
+      A third says: &ldquo;The OR tracks implants on paper.&rdquo;<br><br>
+      Individually useful. But together they tell a bigger story:<br>
+      <span class="highlight">the material data foundation is fragile, and each gap amplifies the next.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 3: WHAT IS A BITBUNDLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Solution</div>
+    <h2 class="fade-in">A BitBundle is a narrative container</h2>
+    <div class="card-grid fade-in">
+      <div class="card">
+        <div class="card-icon">&#9998;</div>
+        <div class="card-title">Narrative</div>
+        <div class="card-desc">A written story explaining why these SMEbits belong together and what they collectively reveal.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">&#9733;</div>
+        <div class="card-title">Curated</div>
+        <div class="card-desc">Someone maintains it &mdash; chooses what belongs, writes the story, keeps it current. Named and credited.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">&#9694;</div>
+        <div class="card-title">Opinionated</div>
+        <div class="card-desc">Two curators may bundle the same SMEbits differently. That&rsquo;s not a conflict &mdash; it&rsquo;s a feature.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">&#9675;</div>
+        <div class="card-title">Metadata-Only</div>
+        <div class="card-desc">No SQL, no verdicts, no computation. BitBundles organize knowledge, not evaluate it.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 4: WHAT IT IS NOT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Conceptual Clarity</div>
+    <h2 class="fade-in">What a BitBundle is not</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Concept</th>
+          <th>What it does</th>
+          <th>Executable?</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>SMEbit</strong></td>
+          <td>Atomic expert observation or check</td>
+          <td>Optional (Level 1)</td>
+        </tr>
+        <tr>
+          <td><strong style="color: var(--indigo)">BitBundle</strong></td>
+          <td>Narrative grouping of SMEbits</td>
+          <td>No &mdash; pure metadata</td>
+        </tr>
+        <tr>
+          <td><strong>Hypothesis</strong></td>
+          <td>Testable business question with evidence scoring</td>
+          <td>Yes &mdash; SQL verdicts</td>
+        </tr>
+        <tr>
+          <td><strong>Assessment</strong></td>
+          <td>Algorithmic health score from probe findings</td>
+          <td>Yes &mdash; SQL aggregation</td>
+        </tr>
+        <tr>
+          <td><strong>Tag</strong></td>
+          <td>Flat label for filtering</td>
+          <td>No</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      Tags are anonymous and flat. Bundles have a curator, a narrative, ordered membership, and a lifecycle.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 5: SECTION — THE m:n RELATIONSHIP -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Architecture</div>
+    <h2 class="fade-in">The m:n Relationship</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      One SMEbit, many bundles. One bundle, many SMEbits.<br>
+      SMEbits are independent. BitBundles depend on SMEbits &mdash; never the reverse.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 6: RELATIONSHIP DIAGRAM -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Knowledge Graph</div>
+    <h2 class="fade-in">SMEbits live independently &mdash; bundles are an optional layer</h2>
+    <div class="comparison fade-in">
+      <div class="comparison-col">
+        <h3 style="color: var(--indigo);">&#9670; Material Data Quality</h3>
+        <ul>
+          <li>Wrong description (638876A)</li>
+          <li>Orphan material investigation</li>
+          <li>OR paper tracking</li>
+        </ul>
+      </div>
+      <div class="comparison-col">
+        <h3 style="color: var(--indigo);">&#9670; OR Workflow Gaps</h3>
+        <ul>
+          <li>OR paper tracking</li>
+          <li>CC format change</li>
+          <li>Midnight case split</li>
+        </ul>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      &ldquo;OR paper tracking&rdquo; belongs in both bundles. Forcing it into one loses context.<br>
+      Most SMEbits will never belong to any bundle &mdash; and that&rsquo;s fine.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 7: PIPELINE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Pipeline</div>
+    <h2 class="fade-in">Same pattern as every compiler</h2>
+    <div class="flow fade-in">
+      <div class="flow-box"><strong>bb_*.yaml</strong><br><small>curated bundles</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>bitbundlecheck.py</strong><br><small>validate + cross-ref</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>bitbundlecompile.py</strong><br><small>generate SQL</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>dbt build</strong><br><small>tag:smebit</small></div>
+    </div>
+    <div class="stats fade-in" style="margin-top: 3vh; max-width: 700px;">
+      <div class="stat">
+        <div class="stat-num">2</div>
+        <div class="stat-label">Generated tables<br>registry + memberships</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">15</div>
+        <div class="stat-label">Registry columns<br>tri-lingual metadata</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">6</div>
+        <div class="stat-label">Membership columns<br>notes + sort order</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 8: YAML ANATOMY -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">YAML Anatomy</div>
+    <h2 class="fade-in">A BitBundle in 30 lines</h2>
+    <div class="code-block fade-in"><span class="key">bitbundle_id</span>: <span class="val">bb_zeta_material_data_quality</span>
+<span class="key">version</span>: <span class="str">"1.0.0"</span>
+
+<span class="key">curator</span>:
+  <span class="key">name</span>: <span class="str">"Marie-Claire Dubois"</span>
+  <span class="key">role</span>: <span class="str">"Leiterin Materialwirtschaft, SZO"</span>
+  <span class="key">date</span>: <span class="val">2026-03-02</span>
+
+<span class="key">scope</span>:
+  <span class="key">tenant_id</span>: <span class="val">hospital_zeta</span>
+
+<span class="key">title</span>:
+  <span class="key">en</span>: <span class="str">"Material Master Data Quality at SZO"</span>
+  <span class="key">de</span>: <span class="str">"Materialstammdaten-Qualitaet am SZO"</span>
+
+<span class="key">narrative</span>:
+  <span class="key">en</span>: <span class="str">|</span>
+    <span class="str">The material master data at SZO has several known</span>
+    <span class="str">quality issues that compound each other...</span>
+
+<span class="key">smebits</span>:
+  - <span class="key">smebit_id</span>: <span class="val">smebit_zeta_material_638876a_wrong_description</span>
+    <span class="key">note</span>: <span class="str">"Wrong descriptions lead to price validation failures"</span>
+  - <span class="key">smebit_id</span>: <span class="val">smebit_orphan_material_investigation</span>
+  - <span class="key">smebit_id</span>: <span class="val">smebit_zeta_or_paper_tracking</span>
+
+<span class="key">status</span>: <span class="val">active</span></div>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 9: SECTION — EXPLORER -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Explorer</div>
+    <h2 class="fade-in">Three New Views</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      List page &bull; Detail page &bull; Cross-references on SMEbit detail
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 10: EXPLORER DETAIL -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Explorer Integration</div>
+    <h2 class="fade-in">Navigable from both directions</h2>
+    <div class="comparison fade-in">
+      <div class="comparison-col">
+        <h3>&#9670; BitBundle &rarr; SMEbits</h3>
+        <ul>
+          <li>Full narrative text</li>
+          <li>Curator card (name, role, date)</li>
+          <li>Ordered member list</li>
+          <li>Per-member curator notes</li>
+          <li>Category + verdict badges</li>
+          <li>Click through to SMEbit detail</li>
+        </ul>
+      </div>
+      <div class="comparison-col">
+        <h3>&#10070; SMEbit &rarr; BitBundles</h3>
+        <ul>
+          <li>&ldquo;Part of&rdquo; section on detail page</li>
+          <li>Linked bundle titles</li>
+          <li>Click through to bundle detail</li>
+          <li>Tri-lingual display</li>
+          <li>Sidebar nav with &#9670; icon</li>
+          <li>No bundle? No section shown</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 11: DESIGN DECISIONS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Design Decisions</div>
+    <h2 class="fade-in">Why this shape, not another</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Decision</th>
+          <th>Choice</th>
+          <th>Rationale</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Not executable</td>
+          <td>Metadata-only</td>
+          <td>That&rsquo;s what hypotheses are for</td>
+        </tr>
+        <tr>
+          <td>Flat, not nested</td>
+          <td>No hierarchy</td>
+          <td>Nesting creates taxonomies &mdash; premature</td>
+        </tr>
+        <tr>
+          <td>m:n, not 1:n</td>
+          <td>One SMEbit, many bundles</td>
+          <td>Knowledge belongs to multiple stories</td>
+        </tr>
+        <tr>
+          <td>Cross-tenant</td>
+          <td>scope.tenant_id: null</td>
+          <td>System knowledge spans hospitals</td>
+        </tr>
+        <tr>
+          <td>dbt tag</td>
+          <td>smebit (existing)</td>
+          <td>Builds automatically, no rebuild.sh changes</td>
+        </tr>
+        <tr>
+          <td>Note field</td>
+          <td>String or dict</td>
+          <td>Pragmatic: English-only or full tri-lingual</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12: THE BIGGER PICTURE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Knowledge Landscape</div>
+    <h2 class="fade-in">Where BitBundles sit</h2>
+    <div class="flow fade-in" style="flex-direction: column; gap: 1vh;">
+      <div class="flow" style="gap: 1.5vw;">
+        <div class="flow-box indigo-filled"><strong>BitBundles</strong><br><small>narrative groupings</small></div>
+      </div>
+      <div class="flow-arrow" style="transform: rotate(90deg);">&rarr;</div>
+      <div class="flow" style="gap: 1.5vw;">
+        <div class="flow-box filled"><strong>SMEbits</strong><br><small>atomic knowledge</small></div>
+      </div>
+      <div class="flow-arrow" style="transform: rotate(90deg); opacity: 0.3;">&darr;</div>
+      <div class="flow" style="gap: 1.5vw;">
+        <div class="flow-box"><strong>Probes</strong><br><small>findings</small></div>
+        <div class="flow-box"><strong>Hypotheses</strong><br><small>verdicts</small></div>
+        <div class="flow-box"><strong>Diagnoses</strong><br><small>root causes</small></div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      SMEbits anchor to the analytical pyramid (probes, hypotheses) through optional links.<br>
+      BitBundles sit <em>alongside</em>, providing narrative — not computation.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 13: CLOSING -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">nuMetrix</div>
+    <div class="quote fade-in">
+      An SMEbit is knowledge.<br>
+      A BitBundle is narrative.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      The difference between a list of facts and a story<br>
+      is someone who decided what belongs together and why.
+    </p>
+  </div>
+
+  </div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) {
+    return !s.classList.contains('breathing');
+  }).length;
+
+  // ── Build thumbnail sidebar ──
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = 'nuMetrix';
+    } else {
+      var title = slide.querySelector('h1, h2');
+      var logo = slide.querySelector('.logo');
+      if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var num = 0;
+    for (var i = 0; i <= index; i++) {
+      if (!slides[i].classList.contains('breathing')) num++;
+    }
+    counter.textContent = num + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

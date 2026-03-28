@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix — The Knowledge-Driven Workflow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout {
+    display: flex; width: 100%; height: 100%;
+  }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area {
+    flex: 1; position: relative; height: 100%; overflow: hidden;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 10px; right: 18px;
+    font-size: 0.72rem; color: var(--warm-gray); opacity: 0.6;
+    z-index: 100;
+  }
+  .slide-counter.hidden { display: none; }
+
+  /* ── Slides ── */
+  .slide {
+    position: absolute; inset: 0;
+    display: none;
+    flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4vh 5vw;
+    overflow-y: auto;
+  }
+  .slide.active { display: flex; }
+
+  .slide.section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+    color: var(--white);
+  }
+
+  .slide.breathing {
+    background: var(--bg);
+    justify-content: center;
+  }
+
+  /* ── Typography ── */
+  .logo {
+    font-size: clamp(0.7rem, 0.9vw, 0.85rem);
+    font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--teal);
+    margin-bottom: 1.5vh;
+  }
+  .section-slide .logo { color: var(--teal-light); }
+
+  h1 {
+    font-size: clamp(1.6rem, 3.2vw, 2.8rem);
+    font-weight: 700; line-height: 1.2;
+    text-align: center; max-width: 850px;
+  }
+
+  h2 {
+    font-size: clamp(1.2rem, 2.2vw, 1.9rem);
+    font-weight: 600; line-height: 1.3;
+    text-align: center; max-width: 800px;
+    margin-bottom: 1vh;
+  }
+  .section-slide h2 { color: var(--white); }
+
+  .subtitle {
+    font-size: clamp(0.85rem, 1.2vw, 1.05rem);
+    line-height: 1.7; color: var(--slate);
+    text-align: center; max-width: 750px;
+    margin-top: 1.5vh;
+  }
+  .section-slide .subtitle { color: #94a3b8; }
+
+  .highlight { color: var(--teal); font-weight: 600; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal); border-radius: 2px;
+    margin: 1.5vh 0;
+  }
+
+  .quote {
+    font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.5vw; margin-top: 2vh;
+  }
+
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.5vh 2vw;
+    font-weight: 600; font-size: clamp(0.82rem, 1.1vw, 1rem);
+    color: var(--navy); text-align: center; min-width: 100px;
+  }
+
+  .flow-box.filled {
+    background: var(--navy); border-color: var(--navy); color: var(--white);
+  }
+
+  .flow-box.teal-filled {
+    background: var(--teal); border-color: var(--teal); color: var(--white);
+  }
+
+  .flow-box.indigo-filled {
+    background: var(--indigo); border-color: var(--indigo); color: var(--white);
+  }
+
+  .flow-box.amber-filled {
+    background: var(--amber); border-color: var(--amber); color: var(--white);
+  }
+
+  .flow-arrow {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Stat cards ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2.5vh 1.5vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.6vh;
+  }
+
+  .stat-label {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Data table ── */
+  .data-table {
+    width: 100%; max-width: 950px; margin-top: 2vh;
+    border-collapse: collapse;
+    font-size: clamp(0.72rem, 1vw, 0.9rem);
+  }
+
+  .data-table th {
+    background: var(--light-gray);
+    font-weight: 600; text-align: left;
+    padding: 1vh 1.2vw;
+    border-bottom: 2px solid #cbd5e1;
+    color: var(--navy); white-space: nowrap;
+  }
+
+  .data-table td {
+    padding: 0.8vh 1.2vw;
+    border-bottom: 1px solid var(--light-gray);
+    vertical-align: top;
+  }
+
+  .data-table td.mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.85em;
+  }
+
+  .data-table tr:nth-child(even) { background: #f8fafc; }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2vw; max-width: 960px; width: 100%; margin-top: 2vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-icon {
+    font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+    margin-bottom: 0.8vh;
+  }
+
+  .card-title {
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+
+  .card-desc {
+    font-size: clamp(0.72rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Comparison columns ── */
+  .comparison {
+    display: flex; gap: 3vw; margin-top: 2vh;
+    max-width: 900px; width: 100%;
+  }
+
+  .comparison-col {
+    flex: 1; background: var(--white);
+    border-radius: 12px; padding: 2.5vh 2vw;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .comparison-col h3 {
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    font-weight: 600; margin-bottom: 1vh;
+  }
+
+  .comparison-col ul {
+    list-style: none; padding: 0;
+  }
+
+  .comparison-col li {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--slate); padding: 0.5vh 0;
+    border-bottom: 1px solid var(--light-gray);
+    line-height: 1.5;
+  }
+
+  .comparison-col li:last-child { border-bottom: none; }
+
+  /* ── Code block ── */
+  .code-block {
+    background: var(--navy); color: #e2e8f0;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: clamp(0.68rem, 0.95vw, 0.85rem);
+    line-height: 1.7; padding: 2.5vh 2.5vw;
+    border-radius: 10px; max-width: 800px;
+    width: 100%; margin-top: 2vh; white-space: pre;
+    overflow-x: auto;
+  }
+
+  .code-block .comment { color: #94a3b8; }
+  .code-block .key { color: var(--teal-light); }
+  .code-block .val { color: #fbbf24; }
+  .code-block .str { color: #86efac; }
+
+  /* ── Badge ── */
+  .badge {
+    display: inline-block; padding: 0.3vh 1vw;
+    border-radius: 999px; font-size: clamp(0.7rem, 0.9vw, 0.82rem);
+    font-weight: 600; margin: 0.3vh 0.3vw;
+  }
+  .badge-teal { background: rgba(42, 143, 143, 0.12); color: var(--teal); }
+  .badge-amber { background: var(--amber-soft); color: var(--amber); }
+  .badge-red { background: var(--red-soft); color: var(--red); }
+  .badge-green { background: var(--green-soft); color: var(--green); }
+  .badge-purple { background: var(--purple-soft); color: var(--purple); }
+  .badge-indigo { background: var(--indigo-soft); color: var(--indigo); }
+
+  /* ── Vertical flow ── */
+  .vflow {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0.8vh; margin-top: 2vh;
+  }
+
+  .vflow-arrow {
+    font-size: clamp(1rem, 1.5vw, 1.4rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Animations ── */
+  .fade-in {
+    opacity: 0; transform: translateY(15px);
+    animation: fadeUp 0.6s ease forwards;
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in:nth-child(2) { animation-delay: 0.15s; }
+  .fade-in:nth-child(3) { animation-delay: 0.3s; }
+  .fade-in:nth-child(4) { animation-delay: 0.45s; }
+  .fade-in:nth-child(5) { animation-delay: 0.6s; }
+  .fade-in:nth-child(6) { animation-delay: 0.75s; }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="main-area">
+    <div class="slide-counter" id="counter"></div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 1: TITLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide active">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">The Knowledge-Driven Workflow</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      From conversation to computation in four steps.<br>
+      How domain expertise enters the analytical engine.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 2: THE GAP -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Gap</div>
+    <div class="quote fade-in">
+      Data tells you <em>what</em> is happening.<br>
+      People tell you <em>why</em>.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Probes detect anomalies. Hypotheses frame questions. Diagnoses propose root causes.<br>
+      But the insight that <em>&ldquo;if a material has purchases, the flag is wrong, not the date&rdquo;</em><br>
+      &mdash; that comes from a person, not a query.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 3: THE WORKFLOW OVERVIEW -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Workflow</div>
+    <h2 class="fade-in">Four steps, one cycle</h2>
+    <div class="flow fade-in">
+      <div class="flow-box filled"><strong>1. Capture</strong><br><small>SMEbit YAML</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>2. Analyze</strong><br><small>consequences</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>3. Implement</strong><br><small>instruments</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box amber-filled"><strong>4. Rebuild</strong><br><small>&amp; review</small></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Each cycle adds knowledge to the system. The SMEbit is the handshake format<br>
+      between human expertise and the analytical engine.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: STEP 1 -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Step 1</div>
+    <h2 class="fade-in">Capture</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Domain knowledge enters the system as an SMEbit &mdash;<br>
+      attributed, scoped, and tri-lingual.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 5: KNOWLEDGE SOURCES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Sources of Knowledge</div>
+    <h2 class="fade-in">Who tells us <em>why</em>?</h2>
+    <div class="card-grid fade-in">
+      <div class="card">
+        <div class="card-icon">&#128105;&#8205;&#9879;&#65039;</div>
+        <div class="card-title">Material Managers</div>
+        <div class="card-desc">Business rules, catalog decisions, classification logic</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">&#129658;</div>
+        <div class="card-title">Clinical Staff</div>
+        <div class="card-desc">Process workarounds, tracking gaps, manual steps</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">&#128187;</div>
+        <div class="card-title">IT Leads</div>
+        <div class="card-desc">System behaviors, interface quirks, midnight splits</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">&#128176;</div>
+        <div class="card-title">Billing Specialists</div>
+        <div class="card-desc">Pricing logic, reimbursement rules, invoice patterns</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 6: SMEBIT ANATOMY -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">SMEbit Anatomy</div>
+    <h2 class="fade-in">Structured knowledge, not free text</h2>
+    <div class="code-block fade-in"><span class="key">smebit_id</span>: <span class="val">smebit_zeta_validity_activity_classification</span>
+
+<span class="key">provider</span>:
+  <span class="key">name</span>: <span class="str">Ronnie</span>
+  <span class="key">role</span>: <span class="str">Material Management</span>
+  <span class="key">date</span>: <span class="val">2026-03-03</span>
+
+<span class="key">category</span>: <span class="val">business_rule</span>
+
+<span class="key">content</span>:
+  <span class="key">en</span>: <span class="str">|</span>
+    <span class="str">When is_active contradicts validity dates,</span>
+    <span class="str">purchasing activity tells us which field is wrong.</span>
+
+<span class="key">why</span>:
+  <span class="key">en</span>: <span class="str">|</span>
+    <span class="str">The flag and dates are maintained by different processes.</span>
+    <span class="str">Activity is the ground truth for which reflects reality.</span>
+
+<span class="key">anchors</span>:
+  - <span class="key">probe_id</span>: <span class="val">probe_active_date_expired</span>
+  - <span class="key">probe_id</span>: <span class="val">probe_inactive_date_valid</span></div>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: STEP 2 -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Step 2</div>
+    <h2 class="fade-in">Consequence Analysis</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      The critical step. Once knowledge is captured,<br>
+      we ask: <em>what does this change?</em>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 8: DECISION TABLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">What Changes?</div>
+    <h2 class="fade-in">Five questions for every SMEbit</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Question</th>
+          <th>Outcome</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Does this sharpen an existing probe?</td>
+          <td>Add enrichment joins, new evidence fields</td>
+        </tr>
+        <tr>
+          <td>Does this warrant a new probe?</td>
+          <td>Write new YAML or hand-written SQL</td>
+        </tr>
+        <tr>
+          <td>Does this confirm or refine a hypothesis?</td>
+          <td>Update evidence chain, adjust thresholds</td>
+        </tr>
+        <tr>
+          <td>Does this explain a confirmed hypothesis?</td>
+          <td>Create or refine a diagnosis</td>
+        </tr>
+        <tr>
+          <td>Does this belong with other SMEbits?</td>
+          <td>Create or extend a BitBundle</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 9: RONNIE'S EXAMPLE — THE INSIGHT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Example</div>
+    <h2 class="fade-in">Ronnie&rsquo;s activity classification rule</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      &ldquo;When is_active contradicts the validity dates,<br>
+      check if the material has purchases.&rdquo;
+    </p>
+    <table class="data-table fade-in" style="margin-top: 2vh;">
+      <thead>
+        <tr>
+          <th>Probe</th>
+          <th>Has Purchases</th>
+          <th>Likely Wrong Field</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Active + date expired</td>
+          <td><span class="badge badge-green">Yes</span></td>
+          <td><span class="badge badge-amber">Date</span> &mdash; article genuinely in use</td>
+        </tr>
+        <tr>
+          <td>Active + date expired</td>
+          <td><span class="badge badge-red">No</span></td>
+          <td><span class="badge badge-amber">Flag</span> &mdash; article genuinely expired</td>
+        </tr>
+        <tr>
+          <td>Inactive + date valid</td>
+          <td><span class="badge badge-green">Yes</span></td>
+          <td><span class="badge badge-amber">Flag</span> &mdash; article genuinely in use</td>
+        </tr>
+        <tr>
+          <td>Inactive + date valid</td>
+          <td><span class="badge badge-red">No</span></td>
+          <td><span class="badge badge-amber">Date</span> &mdash; article genuinely inactive</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 10: CONSEQUENCE — WHAT CHANGED -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Consequences</div>
+    <h2 class="fade-in">One insight, three changes</h2>
+    <div class="comparison fade-in" style="max-width: 950px;">
+      <div class="comparison-col">
+        <h3 style="color: var(--teal);">Before</h3>
+        <ul>
+          <li><code>entity_filter</code> &mdash; Material-only, no fact joins</li>
+          <li>Severity: all <span class="badge badge-amber">medium</span></li>
+          <li>Evidence: material fields only</li>
+          <li>No indication of <em>which field</em> is wrong</li>
+        </ul>
+      </div>
+      <div class="comparison-col">
+        <h3 style="color: var(--indigo);">After</h3>
+        <ul>
+          <li><code>hand_written</code> &mdash; joins billing + usage</li>
+          <li>Severity: <span class="badge badge-red">high</span> when real spend &gt; CHF 1K</li>
+          <li>Evidence: + has_purchases, likely_wrong_field</li>
+          <li>Sub-classification per Ronnie&rsquo;s rule</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: STEP 3 -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Step 3</div>
+    <h2 class="fade-in">Implement</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Edit or create instruments. Validate. Compile.<br>
+      The engine turns YAML into SQL.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12: PIPELINE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Pipeline</div>
+    <h2 class="fade-in">From YAML to findings</h2>
+    <div class="vflow fade-in">
+      <div class="flow-box" style="min-width: 300px;"><strong>SMEbit YAML</strong> + <strong>Probe YAML/SQL</strong><br><small>human-authored artifacts</small></div>
+      <div class="vflow-arrow">&#8595;</div>
+      <div class="flow-box" style="min-width: 300px;"><strong>smebitcheck + probecheck</strong><br><small>validate against contracts</small></div>
+      <div class="vflow-arrow">&#8595;</div>
+      <div class="flow-box" style="min-width: 300px;"><strong>proberegistry + probecompile + smebitcompile</strong><br><small>generate dbt SQL</small></div>
+      <div class="vflow-arrow">&#8595;</div>
+      <div class="flow-box teal-filled" style="min-width: 300px;"><strong>rebuild.sh --skip-gen</strong><br><small>5 tenants, 175 tests each, ~3 minutes</small></div>
+    </div>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: STEP 4 -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Step 4</div>
+    <h2 class="fade-in">Rebuild &amp; Review</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Run the numbers. Does reality match<br>
+      the expert&rsquo;s expectation?
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 14: RESULTS — COUNTS PRESERVED -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Results</div>
+    <h2 class="fade-in">Enrichment, not filtering</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num">1,368</div>
+        <div class="stat-label">active + date expired<br>findings (unchanged)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">1,413</div>
+        <div class="stat-label">inactive + date valid<br>findings (unchanged)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">81</div>
+        <div class="stat-label">escalated to <strong>high</strong><br>real spend &gt; CHF 1K</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      Same population, richer evidence. Every finding now says<br>
+      <em>which field is wrong</em> and <em>how much money is involved</em>.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 15: RESULTS — CLASSIFICATION BREAKDOWN -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Classification Breakdown</div>
+    <h2 class="fade-in">hospital_zeta: activity tells the story</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Probe</th>
+          <th>Likely Wrong</th>
+          <th>Has Purchases</th>
+          <th style="text-align: right;">Findings</th>
+          <th style="text-align: right;">CHF at Risk</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Active + expired</td>
+          <td><span class="badge badge-amber">date</span></td>
+          <td><span class="badge badge-green">yes</span></td>
+          <td style="text-align: right;">610</td>
+          <td style="text-align: right;">18,984</td>
+        </tr>
+        <tr>
+          <td>Active + expired</td>
+          <td><span class="badge badge-amber">flag</span></td>
+          <td><span class="badge badge-red">no</span></td>
+          <td style="text-align: right;">758</td>
+          <td style="text-align: right;">92,706</td>
+        </tr>
+        <tr>
+          <td>Inactive + valid</td>
+          <td><span class="badge badge-amber">date</span></td>
+          <td><span class="badge badge-red">no</span></td>
+          <td style="text-align: right;">1,197</td>
+          <td style="text-align: right;">109,345</td>
+        </tr>
+        <tr>
+          <td>Inactive + valid</td>
+          <td><span class="badge badge-amber">flag</span></td>
+          <td><span class="badge badge-green">yes</span></td>
+          <td style="text-align: right;">216</td>
+          <td style="text-align: right;">14,860</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      826 materials with purchases &mdash; activity confirms they&rsquo;re real.<br>
+      1,955 without &mdash; catalog entries that could safely be cleaned up.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: ACCUMULATION -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Bigger Picture</div>
+    <h2 class="fade-in">Knowledge Accumulates</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Individual SMEbits are atoms.<br>
+      BitBundles are the stories they tell together.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 17: ACCUMULATION EXAMPLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Accumulation</div>
+    <h2 class="fade-in">From atoms to narrative</h2>
+    <div class="vflow fade-in">
+      <div class="flow-box" style="min-width: 400px;">
+        <span class="badge badge-teal">SMEbit</span> Sentinel date convention (9999-12-31)
+      </div>
+      <div class="flow-box" style="min-width: 400px;">
+        <span class="badge badge-teal">SMEbit</span> Activity-based validity classification
+      </div>
+      <div class="flow-box" style="min-width: 400px;">
+        <span class="badge badge-teal">SMEbit</span> Material 638876A wrong description
+      </div>
+      <div class="vflow-arrow">&#8595;</div>
+      <div class="flow-box indigo-filled" style="min-width: 400px;">
+        <strong>BitBundle:</strong> Catalog Data Quality at SZO
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      Three separate conversations, three separate experts, one coherent story:<br>
+      <em>&ldquo;The material master data at SZO has systemic quality issues.&rdquo;</em>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 18: DESIGN PRINCIPLES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Design Principles</div>
+    <h2 class="fade-in">Why this workflow works</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Principle</th>
+          <th>How It Manifests</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>P10</strong> Human-in-the-loop</td>
+          <td>The SME is the source, not the system</td>
+        </tr>
+        <tr>
+          <td><strong>P11</strong> AI as SME</td>
+          <td>AI formalizes, connects, compiles &mdash; doesn&rsquo;t invent knowledge</td>
+        </tr>
+        <tr>
+          <td><strong>P12</strong> AI as colleague</td>
+          <td>Consequence analysis is a conversation, not an instruction</td>
+        </tr>
+        <tr>
+          <td><strong>P13</strong> No AI in data path</td>
+          <td>SMEbit content is human-authored; checks are SQL, not LLM</td>
+        </tr>
+        <tr>
+          <td><strong>P16</strong> Pragmatic generalization</td>
+          <td>Wait for the second probe before abstracting a new DSL type</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 19: CLOSING -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">nuMetrix</div>
+    <h2 class="fade-in">The difference between data and knowledge<br>is the <em>why</em>.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Capture &rarr; Analyze &rarr; Implement &rarr; Review<br><br>
+      Every cycle makes the engine smarter &mdash;<br>
+      not by adding AI, but by adding human insight.
+    </p>
+  </div>
+
+  </div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) {
+    return !s.classList.contains('breathing');
+  }).length;
+
+  // ── Build thumbnail sidebar ──
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = 'nuMetrix';
+    } else {
+      var title = slide.querySelector('h1, h2');
+      var logo = slide.querySelector('.logo');
+      if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var num = 0;
+    for (var i = 0; i <= index; i++) {
+      if (!slides[i].classList.contains('breathing')) num++;
+    }
+    counter.textContent = num + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>
