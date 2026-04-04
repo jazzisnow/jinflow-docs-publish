@@ -1,0 +1,523 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Pipeline Overview | docs</title><link rel="canonical" href="https://docs.jinflow.io/architecture/pipeline_overview/"/><link rel="alternate" hreflang="en" href="https://docs.jinflow.io/architecture/pipeline_overview/"/><link rel="alternate" hreflang="de" href="https://docs.jinflow.io/de/architecture/pipeline_overview/"/><link rel="alternate" hreflang="fr" href="https://docs.jinflow.io/fr/architecture/pipeline_overview/"/><link rel="sitemap" href="/sitemap-index.xml"/><script type="module">
+						// Mermaid diagram lightbox — click to zoom, scroll to scale, drag to pan
+						document.addEventListener('click', e => {
+							const img = e.target.closest('img[id^="mermaid"]');
+							if (!img) return;
+
+							let scale = 1, tx = 0, ty = 0, dragging = false, sx, sy;
+
+							const overlay = document.createElement('div');
+							overlay.className = 'mermaid-lightbox';
+							const clone = img.cloneNode();
+							clone.removeAttribute('width');
+							clone.removeAttribute('height');
+							clone.style.cssText = 'max-width:90vw; max-height:90vh; cursor:grab;';
+							overlay.appendChild(clone);
+							document.body.appendChild(overlay);
+
+							const apply = () => { clone.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')'; };
+
+							overlay.addEventListener('wheel', e => {
+								e.preventDefault();
+								scale = Math.max(0.2, Math.min(10, scale * (e.deltaY < 0 ? 1.15 : 0.87)));
+								apply();
+							}, { passive: false });
+
+							clone.addEventListener('pointerdown', e => {
+								dragging = true; sx = e.clientX - tx; sy = e.clientY - ty;
+								clone.style.cursor = 'grabbing'; clone.setPointerCapture(e.pointerId);
+							});
+							clone.addEventListener('pointermove', e => {
+								if (!dragging) return; tx = e.clientX - sx; ty = e.clientY - sy; apply();
+							});
+							clone.addEventListener('pointerup', () => { dragging = false; clone.style.cursor = 'grab'; });
+
+							overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+							document.addEventListener('keydown', function esc(e) {
+								if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', esc); }
+							});
+						});
+					</script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.0.8"/><meta name="generator" content="Starlight v0.38.2"/><meta property="og:title" content="Pipeline Overview"/><meta property="og:type" content="article"/><meta property="og:url" content="https://docs.jinflow.io/architecture/pipeline_overview/"/><meta property="og:locale" content="en"/><meta property="og:site_name" content="docs"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.BKHC7tD8.css">
+<link rel="stylesheet" href="/_astro/Code.BcHZMqfA.css"><script type="module" src="/_astro/page.BIhdncjw.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <div class="page sl-flex astro-vrdttmbt"> <header class="header astro-vrdttmbt"><div class="header astro-kmkmnagf"> <div class="title-wrapper sl-flex astro-kmkmnagf"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <img class="astro-m46x6ez3" alt src="/_astro/jinflow-logo-dark.OMnKQOD-.svg" width="1024" height="1024">  <span class="astro-m46x6ez3" translate="no"> docs </span> </a> </div> <div class="sl-flex print:hidden astro-kmkmnagf"> <site-search class="astro-kmkmnagf astro-v37mnknz" data-translations="{&#34;placeholder&#34;:&#34;Search&#34;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.BdDgbKxW.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-kmkmnagf"> <div class="sl-flex social-icons astro-kmkmnagf"> <a href="https://jinflow.io" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">jinflow.io</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M19.33 10.18a1 1 0 0 1-.77 0 1 1 0 0 1-.62-.93l.01-1.83-8.2 8.2a1 1 0 0 1-1.41-1.42l8.2-8.2H14.7a1 1 0 0 1 0-2h4.25a1 1 0 0 1 1 1v4.25a1 1 0 0 1-.62.93Z"/><path d="M11 4a1 1 0 1 1 0 2H7a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-4a1 1 0 1 1 2 0v4a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h4Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select language</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/architecture/pipeline_overview/" class="astro-4yphtoen">English</option><option value="/de/architecture/pipeline_overview/" class="astro-4yphtoen">Deutsch</option><option value="/fr/architecture/pipeline_overview/" class="astro-4yphtoen">Français</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select><script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-vrdttmbt" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-vrdttmbt"> <div class="sidebar-content sl-flex astro-vrdttmbt"> <sl-sidebar-state-persist data-hash="07lg8xr" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/whats-new/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">What&#39;s New</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/big-picture/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">The Big Picture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/glossary/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Glossary</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/diagrams/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Diagrams</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Getting Started</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/operations/quick-start/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Quick Start</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/first-build/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Your First Build</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/finding-to-diagnosis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Finding to Diagnosis</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/expert-knowledge/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Expert Knowledge</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/onboarding/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Onboarding a Tenant</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/publishing-a-pack/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Publishing a Pack</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/showcase-millesime/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Vine to Verdict</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/showcase-interlogic/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Shipment to Savings</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/setup/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Setup</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Guides</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/guide/make/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Make (Build)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/explorer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Explorer</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/tenants/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tenants</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/instruments/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Instruments</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/collaboration/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Collaboration</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/deploy/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Deploy</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/ai/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">AI</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/sme/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Expert Knowledge Capture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/notes/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Notes</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/finding-explainer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Finding Explainer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Reference</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/reference/cli/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CLI</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/contracts/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Contracts</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/explorer-api/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Explorer API</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">YAML Formats</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/reference/yaml-probe/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Probe</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-hypothesis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Hypothesis</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-diagnosis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Diagnosis</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-smebit/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">SMEbit</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-bitbundle/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">BitBundle</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-report/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Report</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-entity/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Entity</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-lineage/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lineage</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Cheatsheets</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/cheatsheets/commands/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CLI Commands</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/analyst/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Analysts</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/data-engineer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Data Engineers</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/instrument-author/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Instrument Authors</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/operator/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Operators</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/presentations/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Presentations</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/advanced/domain-packs/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Domain Packs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/releases/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Release Notes</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Architecture</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/architecture/design_principles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Design Principles</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/terminology/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Terminology</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/probe_system/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Probe System</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/entity_registry/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Entity Registry</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/pipeline_overview/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Pipeline Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/ecosystem/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Ecosystem</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/documentation_process/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Documentation Process</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://jinflow.io" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">jinflow.io</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M19.33 10.18a1 1 0 0 1-.77 0 1 1 0 0 1-.62-.93l.01-1.83-8.2 8.2a1 1 0 0 1-1.41-1.42l8.2-8.2H14.7a1 1 0 0 1 0-2h4.25a1 1 0 0 1 1 1v4.25a1 1 0 0 1-.62.93Z"/><path d="M11 4a1 1 0 1 1 0 2H7a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-4a1 1 0 1 1 2 0v4a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h4Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>  <starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select language</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/architecture/pipeline_overview/" class="astro-4yphtoen">English</option><option value="/de/architecture/pipeline_overview/" class="astro-4yphtoen">Deutsch</option><option value="/fr/architecture/pipeline_overview/" class="astro-4yphtoen">Français</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select> </div> </div> </div> </div> </nav> <div class="main-frame astro-vrdttmbt">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script><div class="lg:sl-hidden astro-pb3aqygn"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#1-starting-point-the-source-system-export" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">1. Starting Point: The Source System Export</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#2-conversion-from-vendor-format-to-canonical-csvs" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">2. Conversion: From Vendor Format to Canonical CSVs</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#dimension-tables-what-things-are" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Dimension tables (what things are)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#fact-tables-what-happened" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Fact tables (what happened)</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#3-the-medallion-architecture-bronze--silver--gold" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3. The Medallion Architecture: Bronze → Silver → Gold</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#31-bronze-structural-ingestion" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">3.1 Bronze: Structural Ingestion</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#32-silver-validation-and-domain-logic" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">3.2 Silver: Validation and Domain Logic</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#33-gold-the-certified-product" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">3.3 Gold: The Certified Product</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#4-quality-as-a-first-class-citizen" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">4. Quality as a First-Class Citizen</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#silver-quality-metrics" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Silver Quality Metrics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#gold-quality-metrics" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Gold Quality Metrics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#reconciliation" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Reconciliation</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#5-multi-tenant-and-cross-organization-analytics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">5. Multi-Tenant and Cross-Organization Analytics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#6-diagnosis-the-probe-framework" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">6. Diagnosis: The Probe Framework</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#how-probes-work" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">How Probes Work</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-findings-contract" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The Findings Contract</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#current-probes" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Current Probes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#probe-types" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Probe Types</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#platform-findings" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Platform Findings</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#7-outlook-what-comes-next" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">7. Outlook: What Comes Next</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#automated-intake" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Automated Intake</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#incremental-loads" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Incremental Loads</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#temporal-validity-of-reference-data" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Temporal Validity of Reference Data</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#additional-probe-types" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Additional Probe Types</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#cost-centrelevel-io-analysis" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Cost Centre–Level I/O Analysis</span> </a>  </li> </ul> </li> </ul></div></details></nav></mobile-starlight-toc></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-pb3aqygn"><div class="sl-container astro-pb3aqygn"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#1-starting-point-the-source-system-export" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">1. Starting Point: The Source System Export</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#2-conversion-from-vendor-format-to-canonical-csvs" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">2. Conversion: From Vendor Format to Canonical CSVs</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#dimension-tables-what-things-are" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Dimension tables (what things are)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#fact-tables-what-happened" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Fact tables (what happened)</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#3-the-medallion-architecture-bronze--silver--gold" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">3. The Medallion Architecture: Bronze → Silver → Gold</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#31-bronze-structural-ingestion" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">3.1 Bronze: Structural Ingestion</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#32-silver-validation-and-domain-logic" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">3.2 Silver: Validation and Domain Logic</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#33-gold-the-certified-product" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">3.3 Gold: The Certified Product</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#4-quality-as-a-first-class-citizen" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">4. Quality as a First-Class Citizen</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#silver-quality-metrics" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Silver Quality Metrics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#gold-quality-metrics" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Gold Quality Metrics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#reconciliation" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Reconciliation</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#5-multi-tenant-and-cross-organization-analytics" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">5. Multi-Tenant and Cross-Organization Analytics</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#6-diagnosis-the-probe-framework" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">6. Diagnosis: The Probe Framework</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#how-probes-work" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">How Probes Work</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-findings-contract" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The Findings Contract</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#current-probes" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Current Probes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#probe-types" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Probe Types</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#platform-findings" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Platform Findings</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#7-outlook-what-comes-next" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">7. Outlook: What Comes Next</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#automated-intake" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Automated Intake</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#incremental-loads" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Incremental Loads</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#temporal-validity-of-reference-data" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Temporal Validity of Reference Data</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#additional-probe-types" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Additional Probe Types</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#cost-centrelevel-io-analysis" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Cost Centre–Level I/O Analysis</span> </a>  </li> </ul> </li> </ul></nav></starlight-toc></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Pipeline Overview</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <div class="sl-markdown-content"> <p>How source-system data is transformed from raw exports into a diagnosed, vendor-agnostic analytical dataset.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="1-starting-point-the-source-system-export">1. Starting Point: The Source System Export</h2><a class="sl-anchor-link" href="#1-starting-point-the-source-system-export"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. Starting Point: The Source System Export”</span></a></div>
+<p>Every organization manages its operational data through one or more source systems — ERP platforms, industry-specific software, or custom tools. Each system has its own data model, its own column names, its own conventions. Source systems supported by domain packs include Skidata, CargoWise, SAP MM, Navision, and many more.</p>
+<p>The organization exports its data as a set of files — typically Excel workbooks or CSV files. These files are the raw truth. They contain everything — but they are messy, vendor-specific, and not ready for analysis.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="2-conversion-from-vendor-format-to-canonical-csvs">2. Conversion: From Vendor Format to Canonical CSVs</h2><a class="sl-anchor-link" href="#2-conversion-from-vendor-format-to-canonical-csvs"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Conversion: From Vendor Format to Canonical CSVs”</span></a></div>
+<p>The first step is to bring the source-system export into a standardised CSV format that the rest of the pipeline expects. This is where vendor-specific knowledge lives.</p>
+<p>A dedicated extraction script reads the export files and produces <strong>canonical CSV files</strong>. The following tables illustrate a typical pack’s entity model (each pack defines its own entities):</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="dimension-tables-what-things-are">Dimension tables (what things are)</h3><a class="sl-anchor-link" href="#dimension-tables-what-things-are"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Dimension tables (what things are)”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>CSV file</th><th>What it describes</th><th>Key fields</th></tr></thead><tbody><tr><td><code dir="auto">cost_centers.csv</code></td><td>Organisational units (departments, wards, operational areas)</td><td>ID, name, type</td></tr><tr><td><code dir="auto">materials.csv</code></td><td>Every article tracked in the inventory system — consumables, instruments, supplies</td><td>ID, description, group, standard price, unit, billable flag</td></tr><tr><td><code dir="auto">material_classifications.csv</code></td><td>A 3-level hierarchy classifying materials (e.g. 9 → 90 → 90.01: Pharma → Internal pharmacy → Internal preparations)</td><td>Code, French name, German name</td></tr><tr><td><code dir="auto">packaging_types.csv</code></td><td>How materials are packaged (piece, box, bottle, etc.)</td><td>Code, French name, German name</td></tr><tr><td><code dir="auto">suppliers.csv</code></td><td>Companies that deliver materials</td><td>Code, name</td></tr><tr><td><code dir="auto">article_suppliers.csv</code></td><td>Which supplier delivers which material, with their own reference number</td><td>Material ID, supplier code, supplier reference, creation date</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="fact-tables-what-happened">Fact tables (what happened)</h3><a class="sl-anchor-link" href="#fact-tables-what-happened"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Fact tables (what happened)”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>CSV file</th><th>What it records</th><th>Key fields</th></tr></thead><tbody><tr><td><code dir="auto">cases.csv</code></td><td>Operational cases or transactions</td><td>Case token, start/end time, cost center, type</td></tr><tr><td><code dir="auto">procedures.csv</code></td><td>Procedures performed during cases</td><td>Procedure ID, type, case token, timestamp, duration</td></tr><tr><td><code dir="auto">case_material_usage.csv</code></td><td>What items were consumed for each case</td><td>Usage ID, case token, material ID, quantity, timestamp, unit price</td></tr><tr><td><code dir="auto">billing_events.csv</code></td><td>What was invoiced for each case</td><td>Billing ID, case token, material ID, quantity, billed amount, cost center, status</td></tr><tr><td><code dir="auto">material_movements.csv</code></td><td>Physical movement of goods between locations</td><td>Movement ID, material ID, quantity, from/to location, timestamp, type (RECEIVE/TRANSFER/ISSUE/RETURN)</td></tr></tbody></table>
+<p>The conversion handles real-world messiness:</p>
+<ul>
+<li>Source workbooks may have multiple sheets with different column layouts</li>
+<li>IDs are mixed alphanumeric (e.g. “638876A” alongside “5299613”)</li>
+<li>Cost center names may carry site prefixes</li>
+<li>Sentinel dates like <code dir="auto">9999-12-31</code> are stripped</li>
+<li>Entities discovered in usage/billing but absent from master data are backfilled</li>
+</ul>
+<p>For synthetic tenants (used for development and testing), a data generator produces the same CSV files with deterministic, seeded random data — different organizational profiles, different defect patterns, same structure.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="3-the-medallion-architecture-bronze--silver--gold">3. The Medallion Architecture: Bronze → Silver → Gold</h2><a class="sl-anchor-link" href="#3-the-medallion-architecture-bronze--silver--gold"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. The Medallion Architecture: Bronze → Silver → Gold”</span></a></div>
+<p>Once CSV files are in place, the data flows through three layers of transformation. Each layer has a clear responsibility. Nothing is lost; everything is traceable.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="31-bronze-structural-ingestion">3.1 Bronze: Structural Ingestion</h3><a class="sl-anchor-link" href="#31-bronze-structural-ingestion"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.1 Bronze: Structural Ingestion”</span></a></div>
+<p><strong>What it does:</strong> Reads each CSV file exactly as-is into the database. No transformation, no filtering, no judgment.</p>
+<p><strong>What it adds:</strong></p>
+<ul>
+<li><code dir="auto">source_file</code> — which CSV file this row came from (for traceability)</li>
+<li><code dir="auto">row_number</code> — the row’s position in the file (for debugging)</li>
+</ul>
+<p><strong>Why it matters:</strong> Bronze is the faithful record. If something goes wrong downstream, you can always trace back to the exact row in the exact file.</p>
+<p>There are <strong>13 Bronze models</strong> — one per CSV file:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Bronze model</th><th>Source CSV</th></tr></thead><tbody><tr><td><code dir="auto">bronze_cases</code></td><td>cases.csv</td></tr><tr><td><code dir="auto">bronze_procedures</code></td><td>procedures.csv</td></tr><tr><td><code dir="auto">bronze_materials</code></td><td>materials.csv</td></tr><tr><td><code dir="auto">bronze_cost_centers</code></td><td>cost_centers.csv</td></tr><tr><td><code dir="auto">bronze_case_material_usage</code></td><td>case_material_usage.csv</td></tr><tr><td><code dir="auto">bronze_billing_events</code></td><td>billing_events.csv</td></tr><tr><td><code dir="auto">bronze_material_movements</code></td><td>material_movements.csv</td></tr><tr><td><code dir="auto">bronze_material_classifications</code></td><td>material_classifications.csv</td></tr><tr><td><code dir="auto">bronze_suppliers</code></td><td>suppliers.csv</td></tr><tr><td><code dir="auto">bronze_article_suppliers</code></td><td>article_suppliers.csv</td></tr><tr><td><code dir="auto">bronze_packaging_types</code></td><td>packaging_types.csv</td></tr><tr><td><code dir="auto">bronze_taxonomy_nodes</code></td><td>taxonomy_nodes.csv</td></tr><tr><td><code dir="auto">bronze_taxonomy_member_mappings</code></td><td>taxonomy_member_mappings.csv</td></tr></tbody></table>
+<p><strong>Source-system dispatch:</strong> This is the only place where vendor-specific column names appear. A dispatch mechanism translates vendor columns to canonical names. For example, one source system’s <code dir="auto">case_token</code> stays <code dir="auto">case_token</code>, while another’s <code dir="auto">AUFNR</code> or <code dir="auto">No_</code> becomes <code dir="auto">case_token</code>.</p>
+<p>From Bronze onward, the data model is completely source-system-agnostic.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="32-silver-validation-and-domain-logic">3.2 Silver: Validation and Domain Logic</h3><a class="sl-anchor-link" href="#32-silver-validation-and-domain-logic"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.2 Silver: Validation and Domain Logic”</span></a></div>
+<p><strong>What it does:</strong> Takes each Bronze table and applies domain knowledge — cleaning, type casting, validation, and referential integrity checks.</p>
+<p><strong>Key operations:</strong></p>
+<ul>
+<li><strong>Trimming and normalisation:</strong> Remove leading/trailing whitespace, normalise case (<code dir="auto">inpatient</code> not <code dir="auto">Inpatient</code>)</li>
+<li><strong>Type casting:</strong> Convert strings to proper types — timestamps, decimals, booleans (handling multilingual values like <code dir="auto">oui</code>/<code dir="auto">yes</code>/<code dir="auto">true</code>/<code dir="auto">1</code>)</li>
+<li><strong>Surrogate key generation:</strong> Each row gets a stable, unique key derived from its source file and row number</li>
+<li><strong>Validation:</strong> Every row is checked against business rules and gets two columns:
+<ul>
+<li><code dir="auto">is_valid</code> — true or false</li>
+<li><code dir="auto">invalid_reason</code> — a human-readable explanation when false (e.g. “missing case_token”, “orphan material_id”, “invalid billing_status”)</li>
+</ul>
+</li>
+</ul>
+<p><strong>What gets validated per entity:</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Entity</th><th>Validation rules</th></tr></thead><tbody><tr><td><strong>Cases</strong></td><td>Must have a case token; start_time must parse as a timestamp; case_type must be one of inpatient/outpatient/day-case</td></tr><tr><td><strong>Materials</strong></td><td>Must have a material ID; standard_price must be a positive number; material_group must be IMPLANT, CONSUMABLE, KIT, INSTRUMENT, or MEDICATION_MAT</td></tr><tr><td><strong>Billing events</strong></td><td>Must have billing_id, case_token, material_id; case_token must reference a valid case; material_id must reference a valid material; billed_amount must parse as a number; billing_status must be POSTED, PENDING, or REVERSED</td></tr><tr><td><strong>Material usage</strong></td><td>Must have usage_id, case_token, material_id; foreign keys checked against valid cases and materials; quantity and unit_price must be numeric</td></tr><tr><td><strong>Material movements</strong></td><td>Must have movement_id, material_id; movement_type must be RECEIVE, TRANSFER, ISSUE, RETURN, or ADJUST; quantity must be numeric</td></tr><tr><td><strong>Procedures</strong></td><td>Must have procedure_id and case_token; case must exist; duration must be numeric if present</td></tr><tr><td><strong>Cost centres</strong></td><td>Must have cost_center_id and name</td></tr><tr><td><strong>Suppliers</strong></td><td>Must have supplier_code and supplier_name</td></tr><tr><td><strong>Article-suppliers</strong></td><td>Must have material_id and supplier_code; both must reference valid master records</td></tr></tbody></table>
+<p><strong>The design principle: no silent filtering.</strong> Silver never drops a row. A billing event that references a non-existent case is marked <code dir="auto">is_valid = false</code> with <code dir="auto">invalid_reason = 'orphan case_token'</code> — it stays in the table, visible and queryable. This is essential: knowing <em>what’s wrong</em> with your data is as valuable as having clean data.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="33-gold-the-certified-product">3.3 Gold: The Certified Product</h3><a class="sl-anchor-link" href="#33-gold-the-certified-product"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3.3 Gold: The Certified Product”</span></a></div>
+<p><strong>What it does:</strong> Filters Silver to only valid rows. This is the final, trusted dataset — the <strong>product contract</strong>.</p>
+<p>Gold models are deliberately simple:</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="sql"><code><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">select</span><span style="--0:#D6DEEB;--1:#403F53"> case_key, case_token, start_time, end_time, cost_center_id, case_type</span></div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">from</span><span style="--0:#D6DEEB;--1:#403F53"> silver_cases</span></div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">where</span><span style="--0:#D6DEEB;--1:#403F53"> is_valid </span><span style="--0:#C792EA;--1:#8844AE">=</span><span style="--0:#D6DEEB;--1:#403F53"> true</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="select case_key, case_token, start_time, end_time, cost_center_id, case_typefrom silver_caseswhere is_valid = true"><div></div></button></div></figure></div>
+<p><strong>Gold produces 13 entities</strong> that form the canonical data model:</p>
+<p><strong>Core dimensions (what things are):</strong></p>
+<ul>
+<li><strong>Cases</strong> — Operational cases, each with a start/end time, cost centre, and type</li>
+<li><strong>Materials</strong> — Every article with its price, group, description, and classification codes</li>
+<li><strong>Cost centres</strong> — Organisational units (departments, operational areas)</li>
+<li><strong>Procedures</strong> — Procedures linked to cases</li>
+<li><strong>Material classifications</strong> — 3-level product hierarchy (L1 → L2 → L3)</li>
+<li><strong>Suppliers</strong> — Material vendors</li>
+<li><strong>Article-suppliers</strong> — Which supplier delivers which material</li>
+<li><strong>Packaging types</strong> — How materials are packaged</li>
+</ul>
+<p><strong>Core facts (what happened):</strong></p>
+<ul>
+<li><strong>Case material usage</strong> — What was consumed, when, for which case, at what price</li>
+<li><strong>Billing events</strong> — What was invoiced, when, for which case, at what amount</li>
+<li><strong>Material movements</strong> — How goods moved physically between locations</li>
+</ul>
+<p><strong>Taxonomies (how things are organised):</strong></p>
+<ul>
+<li><strong>Taxonomy nodes</strong> — Hierarchical trees (e.g. organisational units, cost centre groupings) with computed depth, materialised path, and leaf-node flags</li>
+<li><strong>Taxonomy member mappings</strong> — Links between tree nodes and dimension members (e.g. “cost centre X belongs to node Y in the OU-structure taxonomy”)</li>
+<li><strong>Taxonomy closure</strong> — A pre-computed table of all ancestor-descendant relationships, enabling efficient hierarchical queries (“show me all cost centres under the Surgery department, at any depth”)</li>
+</ul>
+<p>The Gold layer is <strong>formally versioned</strong> through a contract (<code dir="auto">gold_contract.v1.json</code>) that defines every entity, its primary key, and its fields with types. Probes and downstream applications code against this contract, not against implementation details.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="4-quality-as-a-first-class-citizen">4. Quality as a First-Class Citizen</h2><a class="sl-anchor-link" href="#4-quality-as-a-first-class-citizen"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “4. Quality as a First-Class Citizen”</span></a></div>
+<p>The pipeline doesn’t just transform data — it measures its own quality at every stage.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="silver-quality-metrics">Silver Quality Metrics</h3><a class="sl-anchor-link" href="#silver-quality-metrics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Silver Quality Metrics”</span></a></div>
+<p>For each of the 9 transactional entities, the pipeline reports:</p>
+<ul>
+<li>Total rows ingested</li>
+<li>How many are valid vs. invalid</li>
+<li>The invalidity rate as a percentage</li>
+</ul>
+<p>This answers: “How clean is the data we received?”</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="gold-quality-metrics">Gold Quality Metrics</h3><a class="sl-anchor-link" href="#gold-quality-metrics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Gold Quality Metrics”</span></a></div>
+<p>Compares Silver to Gold row counts for each entity:</p>
+<ul>
+<li>How many rows were in Silver</li>
+<li>How many made it to Gold</li>
+<li>How many were lost (and what percentage)</li>
+</ul>
+<p>This answers: “How much data did we have to exclude, and is that expected?”</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="reconciliation">Reconciliation</h3><a class="sl-anchor-link" href="#reconciliation"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Reconciliation”</span></a></div>
+<p>Cross-checks financial totals:</p>
+<ul>
+<li>Total usage value (quantity × unit price) vs. total billed amount</li>
+<li>Highlights discrepancies per cost centre and time period</li>
+</ul>
+<p>This answers: “Do the numbers add up?“</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="5-multi-tenant-and-cross-organization-analytics">5. Multi-Tenant and Cross-Organization Analytics</h2><a class="sl-anchor-link" href="#5-multi-tenant-and-cross-organization-analytics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “5. Multi-Tenant and Cross-Organization Analytics”</span></a></div>
+<p>Each tenant gets its own isolated schema in the database. Tenant A’s data is in <code dir="auto">tenant_a.*</code>, Tenant B’s is in <code dir="auto">tenant_b.*</code>. They never mix at the Bronze, Silver, or Gold level.</p>
+<p>The <strong>Platform layer</strong> sits above all tenants. It creates union views across organizations:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">platform.platform_gold_cases =</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">tenant_a.gold_cases (with tenant_id = 'tenant_a')</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">UNION ALL</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">tenant_b.gold_cases (with tenant_id = 'tenant_b')</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">UNION ALL</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#d6deeb;--1:#403f53">    </span></span><span style="--0:#d6deeb;--1:#403f53">...</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="platform.platform_gold_cases =    tenant_a.gold_cases (with tenant_id = &#x27;tenant_a&#x27;)    UNION ALL    tenant_b.gold_cases (with tenant_id = &#x27;tenant_b&#x27;)    UNION ALL    ..."><div></div></button></div></figure></div>
+<p>This enables cross-tenant analytics — comparing costs, billing patterns, quality metrics, and probe findings across organizations — while preserving tenant isolation at the data layer.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="6-diagnosis-the-probe-framework">6. Diagnosis: The Probe Framework</h2><a class="sl-anchor-link" href="#6-diagnosis-the-probe-framework"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “6. Diagnosis: The Probe Framework”</span></a></div>
+<p>Once the data is certified and unified in Gold, the real analytical work begins. <strong>Probes</strong> are automated diagnostic queries that scan the dataset for anomalies, inefficiencies, and potential financial risks.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="how-probes-work">How Probes Work</h3><a class="sl-anchor-link" href="#how-probes-work"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “How Probes Work”</span></a></div>
+<p>Each probe:</p>
+<ol>
+<li>Operates exclusively on Gold entities (never touches Bronze or Silver)</li>
+<li>Scans for a specific pattern or anomaly</li>
+<li>Produces standardised <strong>findings</strong> — each finding has a severity, the entity affected, a time bucket, the estimated money at risk, and supporting evidence</li>
+</ol>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-findings-contract">The Findings Contract</h3><a class="sl-anchor-link" href="#the-findings-contract"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The Findings Contract”</span></a></div>
+<p>Every probe emits rows with the same structure:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Field</th><th>Meaning</th></tr></thead><tbody><tr><td><code dir="auto">finding_id</code></td><td>Unique identifier for this finding</td></tr><tr><td><code dir="auto">tenant_id</code></td><td>Which organization</td></tr><tr><td><code dir="auto">probe_id</code></td><td>Which probe detected this</td></tr><tr><td><code dir="auto">severity</code></td><td>high / medium / low</td></tr><tr><td><code dir="auto">entity_type</code></td><td>What kind of entity is affected (Case, Material, etc.)</td></tr><tr><td><code dir="auto">entity_id</code></td><td>Which specific entity</td></tr><tr><td><code dir="auto">time_bucket</code></td><td>When (typically year-month)</td></tr><tr><td><code dir="auto">money_at_risk</code></td><td>Estimated financial impact in CHF</td></tr><tr><td><code dir="auto">evidence</code></td><td>Machine-readable details (JSON)</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="current-probes">Current Probes</h3><a class="sl-anchor-link" href="#current-probes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Current Probes”</span></a></div>
+<p><strong>Revenue Leakage</strong> (balance probe, high severity)
+Compares total usage value against total billed amount per case. When an organization records 5,000 worth of consumption for a case but only bills 3,500, that’s 1,500 of potential revenue leakage. The probe flags cases where usage exceeds billing by more than 2%, with severity tiers at 5% (medium) and 20% (high).</p>
+<p><strong>Missing Mandatory Items</strong> (mandatory-item probe, high severity)
+Checks that qualifying cases actually have the corresponding item usage recorded. A qualifying transaction without documented item consumption signals a documentation or billing gap.</p>
+<p><strong>Cost Centre Billing Mismatch</strong> (balance probe, medium severity)
+Detects cases where billing events are posted to a different cost centre than the case’s assigned cost centre. If a case belongs to Department A but items are billed to Department B, that’s a cost attribution error that distorts departmental P&#x26;L.</p>
+<p><strong>I/O Coefficient</strong> (hand-written probe, medium-high severity)
+Compares warehouse TRANSFER quantities against documented USAGE quantities for each item per month. In a balanced system, the I/O coefficient should be close to 1.0 — what leaves the warehouse should roughly equal what’s documented as consumed. Deviations indicate untracked ward-level consumption (coefficient &#x3C; 1: more goes out than is documented) or over-delivery (coefficient > 1: more is documented than shipped). Filtered to materials priced CHF 1–99 to focus on high-volume consumables where systematic drift has the largest cumulative impact.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="probe-types">Probe Types</h3><a class="sl-anchor-link" href="#probe-types"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Probe Types”</span></a></div>
+<p>The probe framework supports two authoring modes:</p>
+<p><strong>Declarative probes</strong> (for repeatable patterns):</p>
+<ul>
+<li><strong>Balance probes</strong> compare two aggregates per entity and flag when they diverge beyond a tolerance</li>
+<li><strong>Mandatory-item probes</strong> check that qualifying entities have required related items</li>
+<li><strong>Distribution-outlier probes</strong> flag statistical anomalies using z-scores</li>
+</ul>
+<p>These are compiled from YAML definitions into SQL, validated against the Gold contract.</p>
+<p><strong>Hand-written probes</strong> (for unique analytical shapes):
+When a probe needs to join across fact tables at different grains or apply logic that doesn’t fit the YAML templates, it’s written directly as SQL. It still follows the findings output contract and integrates into the same platform union.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="platform-findings">Platform Findings</h3><a class="sl-anchor-link" href="#platform-findings"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Platform Findings”</span></a></div>
+<p>All probe findings from all tenants are unioned into <code dir="auto">platform.platform_probe_findings</code>, enabling cross-tenant comparison of anomaly patterns, severity distributions, and aggregate financial risk.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="7-outlook-what-comes-next">7. Outlook: What Comes Next</h2><a class="sl-anchor-link" href="#7-outlook-what-comes-next"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “7. Outlook: What Comes Next”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="automated-intake">Automated Intake</h3><a class="sl-anchor-link" href="#automated-intake"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Automated Intake”</span></a></div>
+<p>Today, the organization delivers Excel files which are manually placed in the intake directory. The next step is to automate this — an SFTP drop folder or upload endpoint that triggers the pipeline automatically when new files arrive.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="incremental-loads">Incremental Loads</h3><a class="sl-anchor-link" href="#incremental-loads"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Incremental Loads”</span></a></div>
+<p>The current pipeline does full rebuilds: every run processes all data from scratch. For tenants with growing datasets, this will need to evolve into <strong>incremental processing</strong> — only ingesting new or changed rows since the last run. This affects every layer:</p>
+<ul>
+<li>Bronze must detect and append only new rows</li>
+<li>Silver must re-validate only affected entities</li>
+<li>Gold and probes must refresh only the time periods that changed</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="temporal-validity-of-reference-data">Temporal Validity of Reference Data</h3><a class="sl-anchor-link" href="#temporal-validity-of-reference-data"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Temporal Validity of Reference Data”</span></a></div>
+<p>Reference data — materials, cost centres, suppliers, classifications — changes over time. A material’s price today is not what it was six months ago. A cost centre might be renamed, split, or decommissioned. Currently, the pipeline treats reference data as a snapshot: whatever the export says <em>now</em> is the truth.</p>
+<p>The next evolution is <strong>temporal reference data management</strong>: tracking <em>when</em> each reference record was valid. This means:</p>
+<ul>
+<li>Every dimension record gets a <code dir="auto">valid_from</code> and <code dir="auto">valid_to</code> date</li>
+<li>Fact records (usage, billing, movements) are joined to the reference data version that was active at the time of the event</li>
+<li>Probes can detect pricing anomalies by comparing the price <em>at the time of billing</em> against the <em>current</em> standard price</li>
+<li>Historical analysis becomes accurate: a report for Q3 2024 uses Q3 2024 prices, not today’s prices</li>
+</ul>
+<p>This is essential for longitudinal analysis across multi-year datasets.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="additional-probe-types">Additional Probe Types</h3><a class="sl-anchor-link" href="#additional-probe-types"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Additional Probe Types”</span></a></div>
+<p>The framework is designed to grow. Planned probe directions include:</p>
+<ul>
+<li><strong>Duplicate detection</strong> — finding billing events that appear to be entered twice</li>
+<li><strong>Timing anomalies</strong> — billing events that occur before the associated usage</li>
+<li><strong>Stale pricing</strong> — materials where the billed unit price deviates significantly from the current standard price</li>
+<li><strong>Phantom references</strong> — usage records pointing to materials that don’t exist in the master</li>
+<li><strong>Partial billing</strong> — cases where billed quantity is systematically less than used quantity</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="cost-centrelevel-io-analysis">Cost Centre–Level I/O Analysis</h3><a class="sl-anchor-link" href="#cost-centrelevel-io-analysis"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Cost Centre–Level I/O Analysis”</span></a></div>
+<p>The current I/O coefficient probe works at the material level. Extending it to the cost centre level requires resolving the mapping between warehouse location codes (used in movements) and cost centre codes (used in cases). Once this mapping exists, the organization can see which departments are over- or under-consuming relative to what’s delivered — a key insight for inventory management.</p> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n">   </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/architecture/entity_registry/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Entity Registry</span> </span> </a> <a href="/architecture/ecosystem/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Ecosystem</span> </span> </a> </div>  </footer> <div style="text-align: center; padding: 1.5rem 0 0.5rem; opacity: 0.5; font-size: 0.8rem; border-top: 1px solid var(--sl-color-gray-6);"> <a href="https://jazzisnow.com" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.4rem;"> <img src="/jazzisnow-logo.svg" alt="jazzisnow" style="height: 1.4em;">
+jinflow is a jazzisnow product
+</a> <div style="margin-top: 0.3rem; font-family: monospace; font-size: 0.7rem; opacity: 0.7;">
+v0.31.31 · built 2026-04-04 21:09 UTC </div> </div> </div> </div>  </main> </div> </div> </div> </div> </body></html>

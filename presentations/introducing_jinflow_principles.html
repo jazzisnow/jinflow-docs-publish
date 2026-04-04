@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>jinflow — Principles, Technology, Roots</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+    --rose: #e11d48;
+    --rose-soft: #fff1f2;
+    --cyan: #0891b2;
+    --cyan-soft: #ecfeff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .layout { display: flex; width: 100%; height: 100%; }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+  .thumb.jin-thumb { background: linear-gradient(135deg, #1a3a4a 0%, #0f2938 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label,
+  .thumb.jin-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area { flex: 1; position: relative; height: 100%; overflow: hidden; }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 7vh 10vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 2vh;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2.5vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 2.8vw, 2.3rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.95rem, 1.6vw, 1.3rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+  .indigo { color: var(--indigo); font-weight: 500; }
+  .purple { color: var(--purple); }
+  .amber { color: var(--amber); }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 2vh 0;
+  }
+
+  .section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+  }
+  .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .section-slide .logo { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  .jin-slide {
+    background: linear-gradient(135deg, #1a3a4a 0%, #0f2938 100%);
+  }
+  .jin-slide h1, .jin-slide h2 { color: var(--white); }
+  .jin-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .jin-slide .logo { color: var(--teal-light); }
+  .jin-slide .divider { background: var(--teal-light); }
+
+  .quote {
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+  .jin-slide .quote { color: var(--white); }
+
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.5vw; margin-top: 2vh;
+  }
+
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.5vh 2vw;
+    font-weight: 600; font-size: clamp(0.82rem, 1.1vw, 1rem);
+    color: var(--navy); text-align: center; min-width: 100px;
+  }
+  .flow-box.filled { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .flow-box.teal-filled { background: var(--teal); border-color: var(--teal); color: var(--white); }
+  .flow-box.indigo-filled { background: var(--indigo); border-color: var(--indigo); color: var(--white); }
+  .flow-box.purple-filled { background: var(--purple); border-color: var(--purple); color: var(--white); }
+
+  .flow-arrow {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  .impacts {
+    list-style: none; max-width: 750px; width: 100%; margin-top: 1.5vh;
+  }
+  .impacts li {
+    font-size: clamp(0.9rem, 1.4vw, 1.15rem);
+    line-height: 1.7; color: var(--navy);
+    padding: 0.7vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.1);
+    display: flex; align-items: baseline; gap: 0.8rem;
+  }
+  .impacts li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block; width: 8px; height: 8px; min-width: 8px;
+    border-radius: 50%; margin-top: 0.5em;
+  }
+  .bullet.teal { background: var(--teal); }
+  .bullet.indigo { background: var(--indigo); }
+  .bullet.purple { background: var(--purple); }
+  .bullet.amber { background: var(--amber); }
+  .bullet.green { background: var(--green); }
+
+  .compare {
+    display: flex; gap: 2.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .compare-card {
+    flex: 1; border-radius: 12px; padding: 2.5vh 2vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+  .compare-card.engine { background: var(--indigo-soft); border: 1px solid #c7d2fe; }
+  .compare-card.domain { background: var(--amber-soft); border: 1px solid #fde68a; }
+  .compare-card.ai { background: var(--purple-soft); border: 1px solid #c4b5fd; }
+  .compare-card.good { background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .compare-card.cyan { background: var(--cyan-soft); border: 1px solid #a5f3fc; }
+  .compare-card.rose { background: var(--rose-soft); border: 1px solid #fecdd3; }
+
+  .compare-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; margin-bottom: 0.8vh;
+  }
+  .compare-card.engine .compare-title { color: #3730a3; }
+  .compare-card.domain .compare-title { color: #92400e; }
+  .compare-card.ai .compare-title { color: #5b21b6; }
+  .compare-card.good .compare-title { color: #166534; }
+  .compare-card.cyan .compare-title { color: #155e75; }
+  .compare-card.rose .compare-title { color: #9f1239; }
+
+  .compare-text {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--slate); line-height: 1.5;
+  }
+  .compare-text strong { color: var(--navy); }
+  .compare-text code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9em; background: rgba(0,0,0,0.06);
+    padding: 0.1em 0.4em; border-radius: 3px;
+  }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2vw; max-width: 960px; width: 100%; margin-top: 2vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-icon {
+    font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+    margin-bottom: 0.8vh;
+  }
+  .card-title {
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+  .card-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Virtue cards (3-col, taller) ── */
+  .virtue-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5vw; max-width: 900px; width: 100%; margin-top: 3vh;
+  }
+
+  .virtue-card {
+    border-radius: 16px; padding: 3.5vh 2vw; text-align: center;
+    box-shadow: 0 4px 20px rgba(26, 39, 68, 0.06);
+    display: flex; flex-direction: column; align-items: center;
+  }
+
+  .virtue-card.benevolence { background: var(--green-soft); border: 2px solid #86efac; }
+  .virtue-card.clarity { background: var(--indigo-soft); border: 2px solid #a5b4fc; }
+  .virtue-card.flow-card { background: var(--cyan-soft); border: 2px solid #67e8f9; }
+
+  .virtue-symbol {
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 700; margin-bottom: 1vh;
+  }
+  .virtue-card.benevolence .virtue-symbol { color: #166534; }
+  .virtue-card.clarity .virtue-symbol { color: #3730a3; }
+  .virtue-card.flow-card .virtue-symbol { color: #155e75; }
+
+  .virtue-name {
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.8vh;
+  }
+
+  .virtue-desc {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--slate); line-height: 1.6;
+  }
+
+  /* ── Principle numbers ── */
+  .principle-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; min-width: 28px;
+    border-radius: 50%; font-size: 0.75rem; font-weight: 700;
+    color: var(--white); margin-top: 0.3em;
+  }
+  .principle-num.teal { background: var(--teal); }
+  .principle-num.indigo { background: var(--indigo); }
+  .principle-num.purple { background: var(--purple); }
+  .principle-num.amber { background: var(--amber); }
+  .principle-num.green { background: var(--green); }
+  .principle-num.cyan { background: var(--cyan); }
+
+  /* ── Stats ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2.5vh 1.5vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.6vh;
+  }
+
+  .stat-label {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 5vh 5vw; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .compare { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+    .virtue-grid { grid-template-columns: 1fr; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<div class="sidebar" id="sidebar"></div>
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- TITLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide active jin-slide">
+    <div class="logo fade-in">jinflow.io</div>
+    <h1 class="fade-in">Build systems that<br>respect their users.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Principles. Technology. Roots.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE VIRTUE OF JIN -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Name</div>
+    <div class="quote fade-in">
+      jinflow is inspired by the virtue of <em>jin</em> &mdash;<br>
+      benevolence, clarity, and flow.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Not a marketing exercise. A design constraint.<br>
+      Every architectural decision is tested against these three qualities.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THREE VIRTUES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Three Virtues</div>
+    <h2 class="fade-in">The qualities that shape every decision</h2>
+    <div class="virtue-grid fade-in">
+      <div class="virtue-card benevolence">
+        <div class="virtue-symbol">Benevolence</div>
+        <div class="virtue-desc">
+          The system serves its users, not itself.<br><br>
+          Human-in-the-loop by default. The system diagnoses; humans decide and act. Automation is additive, never mandatory.<br><br>
+          <strong>Respect for the person at the other end.</strong>
+        </div>
+      </div>
+      <div class="virtue-card clarity">
+        <div class="virtue-symbol">Clarity</div>
+        <div class="virtue-desc">
+          Nothing is hidden. Everything is traceable.<br><br>
+          No silent filtering. Contracts at every boundary. Quality is visible, queryable, first-class.<br><br>
+          <strong>The system earns trust by showing its work.</strong>
+        </div>
+      </div>
+      <div class="virtue-card flow-card">
+        <div class="virtue-symbol">Flow</div>
+        <div class="virtue-desc">
+          Data flows through layers. Knowledge flows from people into artifacts. Understanding flows back.<br><br>
+          Make &rarr; Explore &rarr; Evolve. The cycle never ends.<br><br>
+          <strong>The system gets better because the artifacts get better.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: PRINCIPLES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Principles</div>
+    <h2 class="fade-in">Seventeen Commitments</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Not aspirational. They describe what is built, not what's planned.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE THREE THAT DEFINE EVERYTHING -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Character</div>
+    <h2 class="fade-in">Three principles define<br>the character of the system</h2>
+    <div class="compare fade-in">
+      <div class="compare-card good">
+        <div class="compare-title">No Silent Filtering</div>
+        <div class="compare-text">
+          Invalid rows are flagged, never dropped.<br>
+          Every row gets <code>is_valid</code> and <code>invalid_reason</code>.<br><br>
+          Only at the Gold layer do invalid rows disappear from views &mdash; and they remain queryable in Silver.<br><br>
+          <strong>Data quality is not a prerequisite for analysis. It <em>is</em> analysis.</strong>
+        </div>
+      </div>
+      <div class="compare-card engine">
+        <div class="compare-title">Contract-First</div>
+        <div class="compare-text">
+          Versioned JSON schemas define every boundary.<br>
+          The Gold layer is not &ldquo;clean data.&rdquo; It&rsquo;s a published API.<br><br>
+          Change it, and consumers break <strong>loudly</strong>.<br>
+          Not silently, not next Monday, not in a dashboard nobody checks.<br><br>
+          <strong>Schema changes are a deliberate, versioned act.</strong>
+        </div>
+      </div>
+      <div class="compare-card ai">
+        <div class="compare-title">Human-in-the-Loop</div>
+        <div class="compare-text">
+          The system is the diagnostic lab, not the surgeon.<br><br>
+          It identifies what&rsquo;s wrong. It scores severity.<br>
+          It explains root causes. It recommends.<br><br>
+          But the treatment requires floor knowledge that lives in people&rsquo;s heads.<br><br>
+          <strong>Automation is additive, never mandatory.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ARCHITECTURE PRINCIPLES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Architecture</div>
+    <h2 class="fade-in">How the system is structured</h2>
+    <ul class="impacts fade-in">
+      <li><span class="principle-num teal">1</span><span><strong>Layered architecture.</strong> Bronze is structure. Silver is domain truth. Gold is consumption. Layer responsibilities must not leak.</span></li>
+      <li><span class="principle-num teal">2</span><span><strong>Source-system agnosticism.</strong> Dispatch once, at Bronze. Then forget where the data came from.</span></li>
+      <li><span class="principle-num teal">5</span><span><strong>Tenant isolation.</strong> Schema-per-tenant. Data never mingles. Structural isolation, not just a WHERE clause.</span></li>
+      <li><span class="principle-num teal">6</span><span><strong>Rebuildable by default.</strong> The analytical database is ephemeral. Delete it and rebuild &mdash; same result.</span></li>
+      <li><span class="principle-num teal">7</span><span><strong>Processing and exploration are independent.</strong> They share a contract, not a runtime. No lock contention, no shared state.</span></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- COMPILATION PRINCIPLES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The YAML Philosophy</div>
+    <h2 class="fade-in">Declare once. Compile forever.</h2>
+    <ul class="impacts fade-in">
+      <li><span class="principle-num indigo">8</span><span><strong>Metadata-driven, not hardcoded.</strong> The system knows <em>how</em> to render a dimension. It doesn&rsquo;t know <em>what</em> a &ldquo;cost center&rdquo; is until the data tells it.</span></li>
+      <li><span class="principle-num indigo">9</span><span><strong>YAML-to-SQL compilation.</strong> Define in YAML, validate against a contract, compile to SQL, build with dbt. The YAML is the source of truth. The SQL is a build artifact.</span></li>
+    </ul>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      A materials manager can read the YAML and understand what a diagnostic checks<br>
+      without knowing SQL. An engineer can read the SQL without knowing logistics.<br><br>
+      <span class="highlight">Don&rsquo;t extend the language until a second instance validates the pattern.</span><br>
+      Premature abstraction is worse than duplication.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- AI PRINCIPLES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">AI Philosophy</div>
+    <h2 class="fade-in">Three roles for AI. One absolute boundary.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card ai">
+        <div class="compare-title">P11: AI as Subject Matter Expert</div>
+        <div class="compare-text">
+          AI captures domain knowledge &mdash;<br>
+          translates expertise into structured,<br>
+          validated, version-controlled artifacts.<br><br>
+          <strong>The knowledge encoder.</strong>
+        </div>
+      </div>
+      <div class="compare-card engine">
+        <div class="compare-title">P12: AI as Programming Colleague</div>
+        <div class="compare-text">
+          The codebase is AI-native, not AI-assisted.<br>
+          <code>CLAUDE.md</code> is simultaneously a<br>
+          human-readable spec and an AI-executable<br>
+          instruction set.<br><br>
+          <strong>Specification engineering.</strong>
+        </div>
+      </div>
+      <div class="compare-card rose">
+        <div class="compare-title">P13: No AI in the Data Path</div>
+        <div class="compare-text">
+          <strong>Zero LLM calls in production.</strong><br><br>
+          Every query is deterministic SQL.<br>
+          Reproducible. Auditable. Explainable.<br>
+          No probabilistic inference in the pipeline.<br><br>
+          <strong>The absolute boundary.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE DEEPER POINT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Deeper Point</div>
+    <div class="quote fade-in">
+      AI is brilliant at encoding knowledge.<br>
+      But once knowledge is encoded,<br>
+      you don&rsquo;t need AI to execute it.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      You need deterministic, reproducible, auditable computation.<br>
+      SQL does that. Language models don&rsquo;t.<br><br>
+      <span class="highlight">AI writes the YAML. The pipeline runs the SQL. Forever.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: TECHNOLOGY -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Technology</div>
+    <h2 class="fade-in">Boring Where It Matters.<br>Sharp Where It Counts.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Every technology choice serves a principle.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- TECH CHOICES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Stack</div>
+    <h2 class="fade-in">Each choice earns its place</h2>
+    <div class="card-grid fade-in">
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--teal);">DuckDB</div>
+        <div class="card-title">The Knowledge Store</div>
+        <div class="card-desc">Embedded. No server. No credentials. A single file you can hand to someone. The universal contract between make, explore, and evolve.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--indigo);">dbt</div>
+        <div class="card-title">The Transformation Layer</div>
+        <div class="card-desc">SQL models, tests, lineage. The medallion pipeline is dbt models. Compilers generate dbt-compatible SQL. The ecosystem does the heavy lifting.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--amber);">YAML</div>
+        <div class="card-title">The Knowledge Format</div>
+        <div class="card-desc">Human-readable. Version-controllable. Diffable. A domain expert can review a probe definition. A compiler validates it. Both work from the same file.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--purple);">Python</div>
+        <div class="card-title">The Engine</div>
+        <div class="card-desc">CLI, compilers, validators. Same library locally and in Lambda. Nothing exotic &mdash; argparse, pathlib, json, yaml. The boring parts are boring on purpose.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--cyan);">SvelteKit</div>
+        <div class="card-title">The Explorer</div>
+        <div class="card-desc">Fast, light, server-rendered. Opens DuckDB read-only. No framework overhead in the way of the data. Desktop and web from the same codebase.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: #3730a3;">Claude</div>
+        <div class="card-title">The AI Backbone</div>
+        <div class="card-desc">Domain expertise on demand. Writes YAML, writes code, never runs in production. The knowledge encoder that never enters the data path.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- DuckDB DEEPER -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Why DuckDB</div>
+    <h2 class="fade-in">The file <em>is</em> the database.<br>The database <em>is</em> the contract.</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><strong>Portable.</strong> A single file. Copy it, email it, put it on S3, hand it to an auditor. No server, no connection string, no credentials.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Ephemeral.</strong> Delete it and rebuild from source &mdash; same result. The database is a deterministic function of artifacts + data.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Snapshottable.</strong> Freeze the working copy as an immutable file. Self-describing: git commit, build timestamp, tenant metadata stamped inside.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Swappable.</strong> DuckDB today. Snowflake or BigQuery tomorrow. The Explorer queries through an adapter. The Gold schema is standard SQL.</span></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- YAML DEEPER -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Why YAML &rarr; SQL</div>
+    <h2 class="fade-in">Three things that matter enormously</h2>
+    <div class="compare fade-in">
+      <div class="compare-card good">
+        <div class="compare-title">Compile-Time Validation</div>
+        <div class="compare-text">
+          Reference a field that doesn&rsquo;t exist?<br>
+          The compile fails.<br><br>
+          Not the dashboard. Not the query at 2 AM.<br>
+          Not the report the CFO reads on Monday.<br><br>
+          <strong>Fail loud. Fail early. Fail here.</strong>
+        </div>
+      </div>
+      <div class="compare-card engine">
+        <div class="compare-title">Uniformity</div>
+        <div class="compare-text">
+          Six compilers, same pattern.<br>
+          ID matches filename. Version. Scope.<br>
+          Multilingual text. Registry table.<br>
+          <code>--check</code> for dry-run.<br><br>
+          <strong>Understand one layer, understand all.</strong>
+        </div>
+      </div>
+      <div class="compare-card cyan">
+        <div class="compare-title">Knowledge / Execution Split</div>
+        <div class="compare-text">
+          YAML captures the &ldquo;what&rdquo; and &ldquo;why.&rdquo;<br>
+          SQL captures the &ldquo;how.&rdquo;<br><br>
+          A domain expert reads the YAML.<br>
+          An engineer reads the SQL.<br>
+          Neither needs the other&rsquo;s domain.<br><br>
+          <strong>Two audiences, one source of truth.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: ROOTS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Roots</div>
+    <h2 class="fade-in">Where the Ideas Come From</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">The metaphors and convictions behind the architecture.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE DIAGNOSTIC METAPHOR -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Diagnostic Metaphor</div>
+    <h2 class="fade-in">The system is a diagnostic lab.<br>Not a surgeon.</h2>
+    <div class="flow fade-in">
+      <div class="flow-box"><strong>Probes</strong><br><small>diagnostic tests</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>Assessments</strong><br><small>health scores</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>Hypotheses</strong><br><small>medical questions</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>Diagnoses</strong><br><small>root causes</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box" style="border-style: dashed;"><strong>Treatment</strong><br><small>human decision</small></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Just as a doctor doesn&rsquo;t start with a diagnosis,<br>
+      jinflow doesn&rsquo;t start with dashboards and hope the data is good enough.<br><br>
+      It starts from the opposite end: <span class="highlight">build a rigorous, validated dataset first.<br>Only then diagnose.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- AGAINST SILENT LOSS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Against Silent Loss</div>
+    <div class="quote fade-in">
+      Most analytics projects start with a dashboard<br>
+      and work backwards.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      They connect to a data source, build some charts, and hope the data is good enough.<br>
+      When it isn&rsquo;t &mdash; when numbers don&rsquo;t add up, when a filter produces unexpected results,<br>
+      when year-over-year breaks because someone renamed a cost centre &mdash;<br>
+      they patch. Another filter. Another workaround.<br>
+      Another dashboard that nobody trusts.<br><br>
+      <span class="highlight">jinflow starts from the opposite end.</span><br>
+      Build the data right. Validate every row. Flag every problem.<br>
+      Make quality visible. Only then diagnose.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- CALIBRATED NOT JUST TESTED -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Calibrated, Not Just Tested</div>
+    <h2 class="fade-in">Tests check that code runs.<br>Calibration checks that code finds.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">The Method</div>
+        <div class="compare-text">
+          Synthetic tenants carry <strong>deliberately injected defects</strong> at known rates.<br><br>
+          Revenue leakage at 10%. Missing mandatory items at 15%. Duplicates at 2%. Timing anomalies. Orphan records.<br><br>
+          These aren&rsquo;t bugs. They&rsquo;re the signal the system is designed to detect.
+        </div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">The Measurement</div>
+        <div class="compare-text">
+          A calibration harness computes <strong>precision and recall</strong> against the answer key.<br><br>
+          &ldquo;The probe catches 87% of planted cases.&rdquo;<br><br>
+          That&rsquo;s a testable, reproducible number. Not a marketing claim. You can re-run it. You can challenge it. You can watch it improve.
+        </div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      <span class="highlight">The gap between synthetic and real is itself a finding.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE WHY FIELD -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The &ldquo;Why&rdquo; Field</div>
+    <h2 class="fade-in">The difference between data<br>and knowledge is the <em>why</em>.</h2>
+    <p class="subtitle fade-in">
+      jinflow has a concept called <strong>SMEbits</strong> &mdash; atomic pieces of expert knowledge.<br>
+      Not derived from data. Contributed by people.<br><br>
+      A process workaround that only the floor manager knows.<br>
+      A system behavior that only the IT admin remembers.<br>
+      A historical event that explains why this year&rsquo;s numbers look different.<br><br>
+      Each SMEbit carries <strong>attribution</strong> (who said it),<br>
+      <strong>scope</strong> (where it applies), and <strong>lifecycle</strong> (is it still true?).<br><br>
+      The validator warns when the &ldquo;why&rdquo; field is empty &mdash;<br>
+      some things genuinely don&rsquo;t have a known reason.<br>
+      <span class="highlight">But the nudge ensures the question is always asked.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SPECIFICATION ENGINEERING -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Specification Engineering</div>
+    <h2 class="fade-in">The spec is the product.</h2>
+    <p class="subtitle fade-in">
+      The project specification &mdash; <code>CLAUDE.md</code> &mdash;<br>
+      is simultaneously a human-readable architectural document<br>
+      and an AI-executable instruction set.<br><br>
+      When Claude reads it, it understands the architecture,<br>
+      the naming conventions, the layer responsibilities, the compilation patterns.<br>
+      It can write a new diagnostic, add an entity, or build an Explorer page<br>
+      that follows all conventions &mdash; because the conventions are documented<br>
+      in a form both humans and AI can parse.<br><br>
+      <span class="highlight">This is not prompt engineering. It&rsquo;s specification engineering.</span><br>
+      Precise enough that either a human or an AI produces correct,<br>
+      convention-following code from the same document.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: WHY IT MATTERS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Why It Matters</div>
+    <h2 class="fade-in">Design Choices That Compound</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">These aren&rsquo;t compromises. They&rsquo;re compounding investments.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE COMPOUNDING -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Compounding</div>
+    <h2 class="fade-in">A system that earns trust</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span>Every <strong>finding is traceable</strong> &mdash; from the probe, through Gold, through Silver validation, all the way to the raw source row. No black box in the chain.</span></li>
+      <li><span class="bullet teal"></span><span>Every <strong>quality metric is visible</strong> &mdash; not hidden in log files. Data quality is a dbt model, not a footnote.</span></li>
+      <li><span class="bullet teal"></span><span>Every <strong>expert insight is attributed and versioned</strong> &mdash; who said it, when, for what scope, and is it still true?</span></li>
+      <li><span class="bullet teal"></span><span>Every <strong>diagnostic is calibrated</strong> against known defects &mdash; precision and recall, not marketing claims.</span></li>
+      <li><span class="bullet teal"></span><span>Every <strong>domain deployment enriches the engine</strong> &mdash; new patterns, better DSL, cross-domain learning.</span></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE REMAINING PRINCIPLES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Full Set</div>
+    <h2 class="fade-in">All seventeen principles</h2>
+    <div class="compare fade-in" style="max-width: 1000px;">
+      <div class="compare-card engine" style="flex: 1.2;">
+        <div class="compare-title">Architecture &amp; Pipeline</div>
+        <div class="compare-text">
+          <strong>1.</strong> Layered architecture<br>
+          <strong>2.</strong> Source-system agnosticism<br>
+          <strong>3.</strong> Contract-first<br>
+          <strong>4.</strong> No silent filtering<br>
+          <strong>5.</strong> Tenant isolation<br>
+          <strong>6.</strong> Rebuildable by default<br>
+          <strong>7.</strong> Processing &ne; exploration
+        </div>
+      </div>
+      <div class="compare-card cyan" style="flex: 1.2;">
+        <div class="compare-title">Compilation &amp; Knowledge</div>
+        <div class="compare-text">
+          <strong>8.</strong> Metadata-driven<br>
+          <strong>9.</strong> YAML-to-SQL compilation<br>
+          <strong>10.</strong> Human-in-the-loop<br>
+          <strong>11.</strong> AI as subject matter expert<br>
+          <strong>12.</strong> AI as programming colleague<br>
+          <strong>13.</strong> No AI in the data path
+        </div>
+      </div>
+      <div class="compare-card domain" style="flex: 1;">
+        <div class="compare-title">Product &amp; Quality</div>
+        <div class="compare-text">
+          <strong>14.</strong> Privacy by design<br>
+          <strong>15.</strong> Tri-lingual from day one<br>
+          <strong>16.</strong> Pragmatic generalisation<br>
+          <strong>17.</strong> Calibrated, not just tested
+        </div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      <span class="highlight">80% generic engine. 20% domain-specific. Keep it that way.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- CLOSING -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide jin-slide">
+    <div class="logo fade-in">jinflow.io</div>
+    <h1 class="fade-in" style="line-height: 1.3;">Benevolence.<br>Clarity.<br>Flow.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      The engine doesn&rsquo;t know what your domain is. That&rsquo;s the point.<br>
+      It knows how to diagnose. What it diagnoses is a matter<br>
+      of configuration, not architecture.<br><br>
+      <span style="color: var(--teal-light); font-weight: 500;">The architecture is settled. The domains are open.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+</div>
+
+<div class="brand">jinflow.io</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    var isJin = slide.classList.contains('jin-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (isJin) thumb.classList.add('jin-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = 'jinflow';
+    } else {
+      var title = slide.querySelector('h1, h2');
+      var logo = slide.querySelector('.logo');
+      if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var n = 0;
+    for (var j = 0; j <= index; j++) {
+      if (!slides[j].classList.contains('breathing')) n++;
+    }
+    counter.textContent = n + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

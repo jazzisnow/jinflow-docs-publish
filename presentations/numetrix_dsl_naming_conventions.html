@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix DSL Naming Conventions</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+    --rose: #e11d48;
+    --rose-soft: #fff1f2;
+    --cyan: #0891b2;
+    --cyan-soft: #ecfeff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .layout { display: flex; width: 100%; height: 100%; }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area { flex: 1; position: relative; height: 100%; overflow: hidden; }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 5vh 6vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(0.85rem, 1.4vw, 1.15rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 1.5vh;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.2rem, 2.4vw, 2rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 1.5vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.82rem, 1.3vw, 1.1rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 1.5vh 0;
+  }
+
+  .section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+  }
+  .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .section-slide .logo { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.5vw; max-width: 1000px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2vh 1.2vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.5rem, 2.5vw, 2.4rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.5vh;
+  }
+  .stat-num.red { color: var(--red); }
+  .stat-num.amber { color: var(--amber); }
+  .stat-num.green { color: var(--green); }
+  .stat-num.navy { color: var(--navy); }
+  .stat-num.purple { color: var(--purple); }
+  .stat-num.indigo { color: var(--indigo); }
+
+  .stat-label {
+    font-size: clamp(0.68rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.2em 0.6em;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
+  }
+  .badge-financial { background: #dbeafe; color: #1e40af; }
+  .badge-data { background: #fef3c7; color: #92400e; }
+  .badge-teal { background: #ccfbf1; color: #0f766e; }
+  .badge-purple { background: var(--purple-soft); color: var(--purple); }
+
+  .impacts {
+    list-style: none; max-width: 800px; width: 100%; margin-top: 1vh;
+  }
+  .impacts li {
+    font-size: clamp(0.78rem, 1.15vw, 0.98rem);
+    line-height: 1.6; color: var(--navy);
+    padding: 0.5vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.08);
+    display: flex; align-items: baseline; gap: 0.7rem;
+  }
+  .impacts li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block; width: 7px; height: 7px; min-width: 7px;
+    border-radius: 50%; margin-top: 0.45em;
+  }
+  .bullet.teal { background: var(--teal); }
+  .bullet.red { background: var(--red); }
+  .bullet.amber { background: var(--amber); }
+  .bullet.green { background: var(--green); }
+  .bullet.purple { background: var(--purple); }
+  .bullet.indigo { background: var(--indigo); }
+
+  .compare {
+    display: flex; gap: 2vw; max-width: 960px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .compare-card {
+    flex: 1; border-radius: 12px; padding: 2vh 1.5vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+  .compare-card.brig { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .compare-card.visp { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .compare-card.engine { background: var(--indigo-soft); border: 1px solid #c7d2fe; }
+  .compare-card.domain { background: var(--amber-soft); border: 1px solid #fde68a; }
+  .compare-card.warn { background: var(--red-soft); border: 1px solid #fecaca; }
+  .compare-card.neutral { background: var(--light-gray); border: 1px solid #cbd5e1; }
+  .compare-card.good { background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .compare-card.purple { background: var(--purple-soft); border: 1px solid #c4b5fd; }
+  .compare-card.cyan { background: var(--cyan-soft); border: 1px solid #a5f3fc; }
+
+  .compare-title {
+    font-size: clamp(0.82rem, 1.1vw, 0.98rem);
+    font-weight: 600; margin-bottom: 0.6vh;
+  }
+  .compare-card.brig .compare-title { color: #1e40af; }
+  .compare-card.visp .compare-title { color: #166534; }
+  .compare-card.engine .compare-title { color: #3730a3; }
+  .compare-card.domain .compare-title { color: #92400e; }
+  .compare-card.warn .compare-title { color: #991b1b; }
+  .compare-card.neutral .compare-title { color: var(--navy); }
+  .compare-card.good .compare-title { color: #166534; }
+  .compare-card.purple .compare-title { color: #5b21b6; }
+  .compare-card.cyan .compare-title { color: #155e75; }
+
+  .compare-text {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--slate); line-height: 1.5;
+  }
+  .compare-text strong { color: var(--navy); }
+
+  .data-table {
+    width: 100%; max-width: 960px; margin-top: 1.5vh;
+    border-collapse: collapse;
+    font-size: clamp(0.68rem, 0.92vw, 0.84rem);
+  }
+  .data-table th {
+    background: var(--light-gray);
+    font-weight: 600; text-align: left;
+    padding: 0.8vh 1vw;
+    border-bottom: 2px solid #cbd5e1;
+    color: var(--navy); white-space: nowrap;
+  }
+  .data-table th.right, .data-table td.right { text-align: right; }
+  .data-table td {
+    padding: 0.6vh 1vw;
+    border-bottom: 1px solid var(--light-gray);
+    vertical-align: top;
+  }
+  .data-table td.mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9em;
+  }
+  .data-table tr:nth-child(even) { background: #f8fafc; }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1.5vw; max-width: 960px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2vh 1.5vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-title {
+    font-size: clamp(0.78rem, 1.05vw, 0.92rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.3vh;
+  }
+  .card-desc {
+    font-size: clamp(0.68rem, 0.88vw, 0.8rem);
+    color: var(--warm-gray); line-height: 1.45;
+  }
+
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.2vw; margin-top: 1.5vh;
+  }
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.2vh 1.5vw;
+    font-weight: 600; font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--navy); text-align: center; min-width: 90px;
+  }
+  .flow-box.filled { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .flow-box.teal-filled { background: var(--teal); border-color: var(--teal); color: var(--white); }
+  .flow-box.amber-border { border-color: var(--amber); }
+  .flow-box.purple-border { border-color: var(--purple); }
+  .flow-box.green-border { border-color: var(--green); }
+  .flow-arrow {
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  .callout {
+    max-width: 800px; width: 100%;
+    padding: 1.8vh 2vw;
+    border-radius: 10px; margin-top: 1.5vh;
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    line-height: 1.55;
+  }
+  .callout.info { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af; }
+  .callout.warn { background: var(--amber-soft); border-left: 4px solid var(--amber); color: #92400e; }
+  .callout.danger { background: var(--red-soft); border-left: 4px solid var(--red); color: #991b1b; }
+  .callout.neutral { background: var(--light-gray); border-left: 4px solid #94a3b8; color: var(--slate); }
+  .callout.teal { background: #ccfbf1; border-left: 4px solid var(--teal); color: #0f766e; }
+
+  .two-col {
+    display: flex; gap: 3vw; max-width: 960px; width: 100%; margin-top: 1.5vh;
+    align-items: flex-start;
+  }
+  .two-col .col { flex: 1; }
+
+  .sc-label {
+    font-size: clamp(0.6rem, 0.75vw, 0.7rem);
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--warm-gray); margin-bottom: 0.5vh;
+  }
+
+  .code-block {
+    background: #1e293b; color: #e2e8f0;
+    border-radius: 10px; padding: 2vh 2vw;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: clamp(0.62rem, 0.82vw, 0.76rem);
+    line-height: 1.55; overflow-x: auto;
+    max-width: 960px; width: 100%; margin-top: 1.5vh;
+    white-space: pre; tab-size: 2;
+    text-align: left;
+  }
+  .code-block .kw { color: #c084fc; }
+  .code-block .fn { color: #67e8f9; }
+  .code-block .str { color: #86efac; }
+  .code-block .cm { color: #64748b; }
+  .code-block .num { color: #fbbf24; }
+  .code-block .op { color: #94a3b8; }
+  .code-block .jinja { color: #f472b6; }
+  .code-block .yaml-key { color: #67e8f9; }
+  .code-block .yaml-val { color: #e2e8f0; }
+  .code-block .file-label {
+    display: block; color: #64748b; font-size: 0.9em;
+    margin-bottom: 0.8vh; font-style: italic;
+  }
+
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 4vh 4vw; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .compare { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+    .two-col { flex-direction: column; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<div class="sidebar" id="sidebar"></div>
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- PROLOGUE                                                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S1 — Title -->
+  <div class="slide active">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">DSL Naming<br>Conventions</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      How we name YAML definitions, compiled SQL models, contracts,<br>and everything in between
+    </p>
+    <p class="subtitle fade-in" style="margin-top: 2vh; opacity: 0.5; font-size: clamp(0.75rem, 1vw, 0.9rem);">
+      March 2026
+    </p>
+  </div>
+
+  <!-- S2 — Why Naming Matters -->
+  <div class="slide">
+    <div class="logo fade-in">Motivation</div>
+    <h2 class="fade-in">Why Naming Matters</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><strong>Predictability</strong> &mdash; Given a YAML filename, you can guess the compiled SQL model name without looking it up</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Globbing</strong> &mdash; <code>dbt build --select probe_findings__*</code> does what you&rsquo;d expect</span></li>
+      <li><span class="bullet purple"></span><span><strong>DAG readability</strong> &mdash; In dbt&rsquo;s DAG, you can see at a glance what layer and family a model belongs to</span></li>
+      <li><span class="bullet amber"></span><span><strong>Union coherence</strong> &mdash; The union view&rsquo;s name hints at what its children are called</span></li>
+      <li><span class="bullet green"></span><span><strong>Mechanical renaming</strong> &mdash; One convention means one search-and-replace when things change</span></li>
+    </ul>
+    <div class="callout teal fade-in">
+      The most important property of a naming convention is <strong>consistency</strong>. The second most important is that it fails loudly when violated.
+    </div>
+  </div>
+
+  <!-- S3 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT I: THE THREE ARTEFACT FAMILIES                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S4 — Section -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act I</div>
+    <h2 class="fade-in">The Three Artefact Families</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Probes, hypotheses, diagnoses &mdash; and how each one is named.</p>
+  </div>
+
+  <!-- S5 — Identity Prefixes -->
+  <div class="slide">
+    <div class="logo fade-in">Prefixes</div>
+    <h2 class="fade-in">Identity Prefixes</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Family</th>
+          <th>Prefix</th>
+          <th>YAML Example</th>
+          <th>ID Field</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Probe</td>
+          <td class="mono">probe_</td>
+          <td class="mono">probe_revenue_leakage.yaml</td>
+          <td class="mono">probe_id: probe_revenue_leakage</td>
+        </tr>
+        <tr>
+          <td>Assessment</td>
+          <td class="mono">assessment_</td>
+          <td class="mono">assessment_material_health.yaml</td>
+          <td class="mono">probe_id: assessment_material_health</td>
+        </tr>
+        <tr>
+          <td>Hypothesis</td>
+          <td class="mono">hyp_</td>
+          <td class="mono">hyp_revenue_leakage_unbilled.yaml</td>
+          <td class="mono">hypothesis_id: hyp_revenue_leakage_unbilled</td>
+        </tr>
+        <tr>
+          <td>Diagnosis</td>
+          <td class="mono">diag_</td>
+          <td class="mono">diag_billing_workflow_gap.yaml</td>
+          <td class="mono">diagnosis_id: diag_billing_workflow_gap</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout info fade-in">
+      Rule: the <strong>ID field must match the filename</strong> (without <code>.yaml</code>). Enforced by <code>hypothesischeck.py</code> and <code>diagnosischeck.py</code> at compile time. Probes follow the same convention by practice.
+    </div>
+  </div>
+
+  <!-- S6 — Assessments Are Probes -->
+  <div class="slide">
+    <div class="logo fade-in">Assessments</div>
+    <h2 class="fade-in">Assessments Are a Subtype of Probe</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span>Assessments use <code>probe_id</code> as their identifier field &mdash; not <code>assessment_id</code></span></li>
+      <li><span class="bullet indigo"></span><span>Compiled output follows the <code>probe_findings__</code> pattern, just like regular probes</span></li>
+      <li><span class="bullet purple"></span><span>The <code>assessment_</code> prefix on the <code>probe_id</code> value is what distinguishes them</span></li>
+    </ul>
+    <div class="code-block fade-in"><span class="file-label">Compiled model names</span>
+probe_findings__<span class="str">probe_revenue_leakage</span>          <span class="cm"># regular probe</span>
+probe_findings__<span class="str">probe_duplicate_billing</span>         <span class="cm"># regular probe</span>
+probe_findings__<span class="str">assessment_material_health</span>      <span class="cm"># assessment</span>
+probe_findings__<span class="str">assessment_billing_quality</span>      <span class="cm"># assessment</span></div>
+    <div class="callout neutral fade-in">
+      From the dbt DAG&rsquo;s perspective, assessments are probes. The prefix is the only signal &mdash; and it&rsquo;s enough for <code>--select probe_findings__assessment_*</code>.
+    </div>
+  </div>
+
+  <!-- S7 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT II: THE DOUBLE-UNDERSCORE CONVENTION                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S8 — Section -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act II</div>
+    <h2 class="fade-in">The Double-Underscore Convention</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">How compiled SQL model names are built from YAML identifiers.</p>
+  </div>
+
+  <!-- S9 — The __ Pattern -->
+  <div class="slide">
+    <div class="logo fade-in">Pattern</div>
+    <h2 class="fade-in">The <code>__</code> Pattern</h2>
+    <div class="code-block fade-in"><span class="file-label">Anatomy of a compiled model name</span>
+probe_findings__probe_revenue_leakage
+<span class="fn">^^^^^^^^^^^^^^</span>  <span class="str">^^^^^^^^^^^^^^^^^^^^^</span>
+<span class="fn">output type</span>     <span class="str">artefact identity (= probe_id from YAML)</span></div>
+    <ul class="impacts fade-in" style="margin-top: 2vh;">
+      <li><span class="bullet teal"></span><span><strong>Left of <code>__</code></strong> &mdash; what kind of table it is: <code>probe_findings</code>, conforming to the findings contract</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Right of <code>__</code></strong> &mdash; the literal ID from the YAML definition, including its prefix</span></li>
+      <li><span class="bullet amber"></span><span><strong>Formula</strong> &mdash; <code>f"probe_findings__{probe['probe_id']}"</code> in <code>probecompile.py</code></span></li>
+    </ul>
+    <div class="callout teal fade-in">
+      The double underscore is a <strong>namespace separator</strong>. Single underscores appear within names (<code>revenue_leakage</code>). Double underscores separate the output type from the instance identity. No ambiguity.
+    </div>
+  </div>
+
+  <!-- S10 — Probes: One File Per Artefact -->
+  <div class="slide">
+    <div class="logo fade-in">Probes</div>
+    <h2 class="fade-in">Probes: One File Per Artefact</h2>
+    <div class="flow fade-in">
+      <div class="flow-box"><strong>probe_*.yaml</strong><br><small>18 files</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>probecompile.py</strong></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box filled"><strong>probe_findings__*.sql</strong><br><small>18 files (1:1)</small></div>
+    </div>
+    <div class="code-block fade-in"><span class="file-label">dbt/numetrix/models/probes/</span>
+probe_findings__probe_revenue_leakage.sql
+probe_findings__probe_duplicate_billing.sql
+probe_findings__probe_orphan_billing.sql
+probe_findings__probe_stale_article.sql
+probe_findings__assessment_material_health.sql
+probe_findings__assessment_billing_quality.sql
+<span class="cm">... (18 models total)</span></div>
+    <div class="callout info fade-in">
+      Each probe compiles to its own dbt model. The union view <code>platform_probe_findings</code> aggregates them via <code>UNION ALL BY NAME</code>. Naming invariant: <strong>the union view&rsquo;s prefix matches its children</strong>.
+    </div>
+  </div>
+
+  <!-- S11 — Hypotheses & Diagnoses: Monolithic -->
+  <div class="slide">
+    <div class="logo fade-in">Verdicts</div>
+    <h2 class="fade-in">Hypotheses &amp; Diagnoses: Monolithic Files</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">Hypotheses</div>
+        <div class="compare-text" style="font-family: monospace; font-size: 0.85em; line-height: 1.8;">
+          hyp_revenue_leakage.yaml<br>
+          hyp_stale_catalogue.yaml<br>
+          hyp_duplicate_billing.yaml<br>
+          <span style="color: var(--teal); font-weight: 600;">&darr; hypothesiscompile.py</span><br>
+          <strong>hypothesis_verdicts.sql</strong> (one file)<br>
+          <strong>hypothesis_registry.sql</strong> (one file)
+        </div>
+      </div>
+      <div class="compare-card purple">
+        <div class="compare-title">Diagnoses</div>
+        <div class="compare-text" style="font-family: monospace; font-size: 0.85em; line-height: 1.8;">
+          diag_billing_workflow_gap.yaml<br>
+          diag_catalogue_maintenance_lag.yaml<br>
+          diag_duplicate_interface_error.yaml<br>
+          <span style="color: var(--teal); font-weight: 600;">&darr; diagnosiscompile.py</span><br>
+          <strong>diagnosis_verdicts.sql</strong> (one file)<br>
+          <strong>diagnosis_registry.sql</strong> (one file)
+        </div>
+      </div>
+    </div>
+    <div class="callout warn fade-in">
+      Unlike probes, hypotheses and diagnoses compile N YAML files into <strong>one monolithic SQL file</strong>. All hypothesis CTEs are UNION ALL&rsquo;d inside a single <code>hypothesis_verdicts.sql</code>. No <code>__</code> separator because there are no per-artefact files.
+    </div>
+  </div>
+
+  <!-- S12 — Why the Asymmetry? -->
+  <div class="slide">
+    <div class="logo fade-in">Design</div>
+    <h2 class="fade-in">Why the Asymmetry?</h2>
+    <div class="compare fade-in">
+      <div class="compare-card good">
+        <div class="compare-title">Probes &rarr; One File Each</div>
+        <div class="compare-text">
+          Probes are <strong>independent</strong>. Each queries Gold entities directly. No inter-probe dependencies (except assessments). Adding a probe = adding a file. <code>dbt build --select probe_findings__probe_X</code> rebuilds just one.
+        </div>
+      </div>
+      <div class="compare-card domain">
+        <div class="compare-title">Verdicts &rarr; Monolithic</div>
+        <div class="compare-text">
+          Hypotheses reference <strong>multiple probe findings</strong> tables. Diagnoses reference <strong>hypothesis_verdicts + probe findings</strong>. A single model with all CTEs lets dbt resolve the full dependency graph in one pass.
+        </div>
+      </div>
+    </div>
+    <div class="callout neutral fade-in">
+      The trade-off: monolithic files are harder to selectively rebuild, but they avoid a combinatorial explosion of dbt <code>ref()</code> cross-dependencies. The naming convention adapts to the compilation strategy, not the other way around.
+    </div>
+  </div>
+
+  <!-- S13 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT III: LAYER PREFIXES & CONTRACTS                        -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S14 — Section -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act III</div>
+    <h2 class="fade-in">Layer Prefixes &amp; Contracts</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Medallion layer naming and the contract versioning scheme.</p>
+  </div>
+
+  <!-- S15 — Layer Prefixes -->
+  <div class="slide">
+    <div class="logo fade-in">Layers</div>
+    <h2 class="fade-in">Layer Prefixes</h2>
+    <div class="code-block fade-in"><span class="file-label">A material row flows through the pipeline</span>
+<span class="fn">bronze_</span>materials  &rarr;  <span class="fn">silver_</span>materials  &rarr;  <span class="fn">gold_</span>materials  &rarr;  <span class="fn">platform_gold_</span>materials</div>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Prefix</th>
+          <th>Layer</th>
+          <th>Materialization</th>
+          <th>Example</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">bronze_</td>
+          <td>Bronze</td>
+          <td>TABLE</td>
+          <td class="mono">bronze_cases, bronze_billing_events</td>
+        </tr>
+        <tr>
+          <td class="mono">silver_</td>
+          <td>Silver</td>
+          <td>TABLE</td>
+          <td class="mono">silver_cases, silver_billing_events</td>
+        </tr>
+        <tr>
+          <td class="mono">gold_</td>
+          <td>Gold</td>
+          <td>VIEW</td>
+          <td class="mono">gold_cases, gold_taxonomy_closure</td>
+        </tr>
+        <tr>
+          <td class="mono">platform_gold_</td>
+          <td>Platform</td>
+          <td>VIEW</td>
+          <td class="mono">platform_gold_cases</td>
+        </tr>
+        <tr>
+          <td class="mono">platform_</td>
+          <td>Platform (DSL)</td>
+          <td>VIEW</td>
+          <td class="mono">platform_probe_findings, platform_hypothesis_verdicts</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout teal fade-in">
+      The entity name (<code>cases</code>, <code>billing_events</code>, <code>materials</code>) is <strong>invariant across all layers</strong>. Change the prefix, keep the noun.
+    </div>
+  </div>
+
+  <!-- S16 — Contract Naming -->
+  <div class="slide">
+    <div class="logo fade-in">Contracts</div>
+    <h2 class="fade-in">Contract Naming</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Version Key</th>
+          <th>YAML Reference</th>
+          <th>Who Uses It</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">gold_contract.v1.json</td>
+          <td class="mono">gold.v1</td>
+          <td class="mono">contract: "gold.v1"</td>
+          <td>Most probes</td>
+        </tr>
+        <tr>
+          <td class="mono">silver_contract.v1.json</td>
+          <td class="mono">silver.v1</td>
+          <td class="mono">contract: "silver.v1"</td>
+          <td>Silver audit probes</td>
+        </tr>
+        <tr>
+          <td class="mono">findings_contract.v1.json</td>
+          <td class="mono">findings.v1</td>
+          <td class="mono">contract: "findings.v1"</td>
+          <td>Assessments</td>
+        </tr>
+        <tr>
+          <td class="mono">diagnosis_contract.v1.json</td>
+          <td class="mono">diagnosis.v1</td>
+          <td class="mono">contract: "diagnosis.v1"</td>
+          <td>Diagnosis compiler</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout info fade-in">
+      Pattern: <code>{layer}_contract.v{N}.json</code>. The version key inside the JSON uses the short form (<code>gold.v1</code>). YAML definitions reference this short key. Bumping to <code>v2</code> = new file, old probes still compile against <code>v1</code>.
+    </div>
+  </div>
+
+  <!-- S17 — Entity Names in Contracts -->
+  <div class="slide">
+    <div class="logo fade-in">Entities</div>
+    <h2 class="fade-in">Entity Names in Contracts</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">Contract Entity (PascalCase)</div>
+        <div class="compare-text" style="font-family: monospace; font-size: 0.85em; line-height: 1.8;">
+          BillingEvent<br>
+          CaseMaterialUsage<br>
+          Case<br>
+          Material<br>
+          Procedure
+        </div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">dbt Model (snake_case)</div>
+        <div class="compare-text" style="font-family: monospace; font-size: 0.85em; line-height: 1.8;">
+          gold_billing_events<br>
+          gold_case_material_usage<br>
+          gold_cases<br>
+          gold_materials<br>
+          gold_procedures
+        </div>
+      </div>
+    </div>
+    <div class="callout neutral fade-in">
+      Probes reference <code>BillingEvent</code> (PascalCase, domain language). The contract maps it to <code>gold_billing_events</code> (snake_case, dbt convention). <code>resolve_ref()</code> bridges the gap. If a dbt model renames, update one JSON field &mdash; all probes recompile correctly.
+    </div>
+  </div>
+
+  <!-- S18 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT IV: THE FULL NAMING PIPELINE                           -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S19 — Section -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act IV</div>
+    <h2 class="fade-in">The Full Naming Pipeline</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">From YAML file to platform union view &mdash; following one name through the system.</p>
+  </div>
+
+  <!-- S20 — Probe Naming Pipeline -->
+  <div class="slide">
+    <div class="logo fade-in">Probe</div>
+    <h2 class="fade-in">Probe: End-to-End</h2>
+    <div class="code-block fade-in"><span class="file-label">Following a probe through the naming system</span>
+<span class="cm">1. YAML definition</span>
+   probes/<span class="str">probe_revenue_leakage</span>.yaml
+   <span class="yaml-key">probe_id</span>: <span class="str">probe_revenue_leakage</span>         <span class="cm"># must match filename</span>
+   <span class="yaml-key">contract</span>: <span class="str">"gold.v1"</span>                       <span class="cm"># references gold_contract.v1.json</span>
+
+<span class="cm">2. Compiled dbt model</span>
+   models/probes/<span class="fn">probe_findings__</span><span class="str">probe_revenue_leakage</span>.sql   <span class="cm"># one file per probe</span>
+
+<span class="cm">3. Per-tenant table (via generate_schema_name)</span>
+   hospital_alpha.<span class="fn">probe_findings__</span><span class="str">probe_revenue_leakage</span>
+
+<span class="cm">4. Platform union view</span>
+   platform.<span class="fn">platform_probe_findings</span>           <span class="cm"># UNION ALL BY NAME across tenants</span>
+
+<span class="cm">5. Registry entry</span>
+   platform.<span class="fn">platform_probe_registry</span>           <span class="cm"># tri-lingual display text</span></div>
+  </div>
+
+  <!-- S21 — Hypothesis Naming Pipeline -->
+  <div class="slide">
+    <div class="logo fade-in">Hypothesis</div>
+    <h2 class="fade-in">Hypothesis: End-to-End</h2>
+    <div class="code-block fade-in"><span class="file-label">Following a hypothesis through the naming system</span>
+<span class="cm">1. YAML definition</span>
+   hypotheses/<span class="str">hyp_revenue_leakage_unbilled</span>.yaml
+   <span class="yaml-key">hypothesis_id</span>: <span class="str">hyp_revenue_leakage_unbilled</span>  <span class="cm"># must match filename (enforced)</span>
+
+<span class="cm">2. Compiled dbt model (monolithic &mdash; no __ separator)</span>
+   models/probes/<span class="fn">hypothesis_verdicts</span>.sql       <span class="cm"># all hypotheses in one file</span>
+   <span class="cm"># Inside: CTEs named hyp_revenue_leakage_unbilled__evidence,</span>
+   <span class="cm">#         hyp_revenue_leakage_unbilled__scored,</span>
+   <span class="cm">#         hyp_revenue_leakage_unbilled__verdict</span>
+
+<span class="cm">3. Per-tenant table</span>
+   hospital_alpha.<span class="fn">hypothesis_verdicts</span>          <span class="cm"># one row per hypothesis</span>
+
+<span class="cm">4. Platform union view</span>
+   platform.<span class="fn">platform_hypothesis_verdicts</span>       <span class="cm"># UNION ALL across tenants</span></div>
+  </div>
+
+  <!-- S22 — Diagnosis Naming Pipeline -->
+  <div class="slide">
+    <div class="logo fade-in">Diagnosis</div>
+    <h2 class="fade-in">Diagnosis: End-to-End</h2>
+    <div class="code-block fade-in"><span class="file-label">Following a diagnosis through the naming system</span>
+<span class="cm">1. YAML definition</span>
+   diagnoses/<span class="str">diag_billing_workflow_gap</span>.yaml
+   <span class="yaml-key">diagnosis_id</span>: <span class="str">diag_billing_workflow_gap</span>     <span class="cm"># must match filename (enforced)</span>
+   <span class="yaml-key">hypothesis_id</span>: <span class="str">hyp_revenue_leakage_unbilled</span> <span class="cm"># must reference existing hypothesis</span>
+
+<span class="cm">2. Compiled dbt model (monolithic &mdash; no __ separator)</span>
+   models/probes/<span class="fn">diagnosis_verdicts</span>.sql        <span class="cm"># all diagnoses in one file</span>
+
+<span class="cm">3. Per-tenant table</span>
+   hospital_alpha.<span class="fn">diagnosis_verdicts</span>           <span class="cm"># rows only for confirmed hypotheses</span>
+
+<span class="cm">4. Platform union view</span>
+   platform.<span class="fn">platform_diagnosis_verdicts</span>        <span class="cm"># UNION ALL across tenants</span></div>
+    <div class="callout neutral fade-in">
+      Note the cross-family reference: <code>diagnosis_id: diag_billing_workflow_gap</code> points to <code>hypothesis_id: hyp_revenue_leakage_unbilled</code>. Prefixes (<code>diag_</code>, <code>hyp_</code>) make the reference direction unambiguous.
+    </div>
+  </div>
+
+  <!-- S23 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT V: DESIGN DECISIONS                                    -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S24 — Section -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act V</div>
+    <h2 class="fade-in">Design Decisions</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">The trade-offs we considered and why we chose this way.</p>
+  </div>
+
+  <!-- S25 — Why {family}__{instance}? -->
+  <div class="slide">
+    <div class="logo fade-in">Trade-off</div>
+    <h2 class="fade-in">Why <code>{family}__{instance}</code>?</h2>
+    <p class="subtitle fade-in" style="margin-bottom: 1.5vh;">We considered three alternatives for verdict model names:</p>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Option</th>
+          <th>Example</th>
+          <th>Trade-off</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Main noun prefix</strong></td>
+          <td class="mono">verdict__hyp_X</td>
+          <td>Both families share <code>verdict__*</code>. Union view name diverges from children.</td>
+        </tr>
+        <tr>
+          <td><strong>Family prefix</strong></td>
+          <td class="mono">hypothesis_verdicts__hyp_X</td>
+          <td>Consistent with probes. Union view matches children. Verbose but predictable.</td>
+        </tr>
+        <tr>
+          <td><strong>Bare ID</strong></td>
+          <td class="mono">hyp_X</td>
+          <td>Cleanest, but loses the &ldquo;this is a verdict&rdquo; signal in the DAG.</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout teal fade-in">
+      We chose <strong>family prefix</strong> because the union view&rsquo;s name (<code>hypothesis_verdicts</code>) naturally matches its children (<code>hypothesis_verdicts__hyp_*</code>). <code>--select hypothesis_verdicts__*</code> does what you&rsquo;d expect. Same pattern as probes.
+    </div>
+  </div>
+
+  <!-- S26 — Registry Naming -->
+  <div class="slide">
+    <div class="logo fade-in">Registries</div>
+    <h2 class="fade-in">Registry Naming</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">Per-Tenant (in models/probes/)</div>
+        <div class="compare-text" style="font-family: monospace; font-size: 0.85em; line-height: 1.8;">
+          probe_registry.sql<br>
+          hypothesis_registry.sql<br>
+          diagnosis_registry.sql
+        </div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">Platform (in models/platform/)</div>
+        <div class="compare-text" style="font-family: monospace; font-size: 0.85em; line-height: 1.8;">
+          platform_probe_registry.sql<br>
+          platform_hypothesis_registry.sql<br>
+          platform_diagnosis_registry.sql
+        </div>
+      </div>
+    </div>
+    <div class="callout info fade-in">
+      Registries contain tri-lingual display text (DE/EN/FR). Content is <strong>tenant-independent</strong> &mdash; identical across all tenants. Platform views read from the first tenant only, unlike findings/verdicts which union across all.
+    </div>
+  </div>
+
+  <!-- S27 — Summary Table -->
+  <div class="slide">
+    <div class="logo fade-in">Summary</div>
+    <h2 class="fade-in">The Complete Naming Map</h2>
+    <table class="data-table fade-in" style="font-size: clamp(0.62rem, 0.85vw, 0.78rem);">
+      <thead>
+        <tr>
+          <th>Family</th>
+          <th>YAML Dir</th>
+          <th>Prefix</th>
+          <th>Compiled SQL</th>
+          <th>Strategy</th>
+          <th>Platform View</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Probe</td>
+          <td class="mono">probes/</td>
+          <td class="mono">probe_</td>
+          <td class="mono">probe_findings__probe_*</td>
+          <td>1 file each</td>
+          <td class="mono">platform_probe_findings</td>
+        </tr>
+        <tr>
+          <td>Assessment</td>
+          <td class="mono">probes/</td>
+          <td class="mono">assessment_</td>
+          <td class="mono">probe_findings__assessment_*</td>
+          <td>1 file each</td>
+          <td class="mono">(same union)</td>
+        </tr>
+        <tr>
+          <td>Hypothesis</td>
+          <td class="mono">hypotheses/</td>
+          <td class="mono">hyp_</td>
+          <td class="mono">hypothesis_verdicts</td>
+          <td>monolithic</td>
+          <td class="mono">platform_hypothesis_verdicts</td>
+        </tr>
+        <tr>
+          <td>Diagnosis</td>
+          <td class="mono">diagnoses/</td>
+          <td class="mono">diag_</td>
+          <td class="mono">diagnosis_verdicts</td>
+          <td>monolithic</td>
+          <td class="mono">platform_diagnosis_verdicts</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout teal fade-in">
+      <strong>One convention, one search-and-replace.</strong> Given any YAML file, you can derive every downstream name mechanically. That&rsquo;s the whole point.
+    </div>
+  </div>
+
+  <!-- S28 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+</div>
+
+<div class="brand">nuMetrix</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = '\u00b7\u00b7\u00b7';
+    } else {
+      var title = slide.querySelector('h2');
+      var h1 = slide.querySelector('h1');
+      var logo = slide.querySelector('.logo');
+      if (h1) {
+        label.textContent = h1.textContent.trim();
+      } else if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var n = 0;
+    for (var j = 0; j <= index; j++) {
+      if (!slides[j].classList.contains('breathing')) n++;
+    }
+    counter.textContent = n + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

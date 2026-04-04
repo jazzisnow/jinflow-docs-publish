@@ -1,0 +1,708 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Domain Packs | docs</title><link rel="canonical" href="https://docs.jinflow.io/advanced/domain-packs/"/><link rel="alternate" hreflang="en" href="https://docs.jinflow.io/advanced/domain-packs/"/><link rel="alternate" hreflang="de" href="https://docs.jinflow.io/de/advanced/domain-packs/"/><link rel="alternate" hreflang="fr" href="https://docs.jinflow.io/fr/advanced/domain-packs/"/><link rel="sitemap" href="/sitemap-index.xml"/><script type="module">
+						// Mermaid diagram lightbox — click to zoom, scroll to scale, drag to pan
+						document.addEventListener('click', e => {
+							const img = e.target.closest('img[id^="mermaid"]');
+							if (!img) return;
+
+							let scale = 1, tx = 0, ty = 0, dragging = false, sx, sy;
+
+							const overlay = document.createElement('div');
+							overlay.className = 'mermaid-lightbox';
+							const clone = img.cloneNode();
+							clone.removeAttribute('width');
+							clone.removeAttribute('height');
+							clone.style.cssText = 'max-width:90vw; max-height:90vh; cursor:grab;';
+							overlay.appendChild(clone);
+							document.body.appendChild(overlay);
+
+							const apply = () => { clone.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')'; };
+
+							overlay.addEventListener('wheel', e => {
+								e.preventDefault();
+								scale = Math.max(0.2, Math.min(10, scale * (e.deltaY < 0 ? 1.15 : 0.87)));
+								apply();
+							}, { passive: false });
+
+							clone.addEventListener('pointerdown', e => {
+								dragging = true; sx = e.clientX - tx; sy = e.clientY - ty;
+								clone.style.cursor = 'grabbing'; clone.setPointerCapture(e.pointerId);
+							});
+							clone.addEventListener('pointermove', e => {
+								if (!dragging) return; tx = e.clientX - sx; ty = e.clientY - sy; apply();
+							});
+							clone.addEventListener('pointerup', () => { dragging = false; clone.style.cursor = 'grab'; });
+
+							overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+							document.addEventListener('keydown', function esc(e) {
+								if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', esc); }
+							});
+						});
+					</script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.0.8"/><meta name="generator" content="Starlight v0.38.2"/><meta property="og:title" content="Domain Packs"/><meta property="og:type" content="article"/><meta property="og:url" content="https://docs.jinflow.io/advanced/domain-packs/"/><meta property="og:locale" content="en"/><meta property="og:site_name" content="docs"/><meta name="twitter:card" content="summary_large_image"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.BKHC7tD8.css">
+<link rel="stylesheet" href="/_astro/Code.BcHZMqfA.css"><script type="module" src="/_astro/page.BIhdncjw.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <div class="page sl-flex astro-vrdttmbt"> <header class="header astro-vrdttmbt"><div class="header astro-kmkmnagf"> <div class="title-wrapper sl-flex astro-kmkmnagf"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <img class="astro-m46x6ez3" alt src="/_astro/jinflow-logo-dark.OMnKQOD-.svg" width="1024" height="1024">  <span class="astro-m46x6ez3" translate="no"> docs </span> </a> </div> <div class="sl-flex print:hidden astro-kmkmnagf"> <site-search class="astro-kmkmnagf astro-v37mnknz" data-translations="{&#34;placeholder&#34;:&#34;Search&#34;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.BdDgbKxW.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-kmkmnagf"> <div class="sl-flex social-icons astro-kmkmnagf"> <a href="https://jinflow.io" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">jinflow.io</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M19.33 10.18a1 1 0 0 1-.77 0 1 1 0 0 1-.62-.93l.01-1.83-8.2 8.2a1 1 0 0 1-1.41-1.42l8.2-8.2H14.7a1 1 0 0 1 0-2h4.25a1 1 0 0 1 1 1v4.25a1 1 0 0 1-.62.93Z"/><path d="M11 4a1 1 0 1 1 0 2H7a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-4a1 1 0 1 1 2 0v4a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h4Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select language</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/advanced/domain-packs/" class="astro-4yphtoen">English</option><option value="/de/advanced/domain-packs/" class="astro-4yphtoen">Deutsch</option><option value="/fr/advanced/domain-packs/" class="astro-4yphtoen">Français</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select><script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-vrdttmbt" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-vrdttmbt"> <div class="sidebar-content sl-flex astro-vrdttmbt"> <sl-sidebar-state-persist data-hash="07lg8xr" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/whats-new/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">What&#39;s New</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/big-picture/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">The Big Picture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/glossary/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Glossary</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/diagrams/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Diagrams</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Getting Started</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/operations/quick-start/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Quick Start</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/first-build/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Your First Build</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/finding-to-diagnosis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Finding to Diagnosis</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/expert-knowledge/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Expert Knowledge</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/onboarding/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Onboarding a Tenant</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/publishing-a-pack/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Publishing a Pack</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/showcase-millesime/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Vine to Verdict</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/showcase-interlogic/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Shipment to Savings</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/setup/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Setup</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Guides</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/guide/make/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Make (Build)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/explorer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Explorer</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/tenants/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tenants</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/instruments/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Instruments</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/collaboration/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Collaboration</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/deploy/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Deploy</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/ai/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">AI</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/sme/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Expert Knowledge Capture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/notes/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Notes</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/finding-explainer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Finding Explainer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Reference</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/reference/cli/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CLI</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/contracts/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Contracts</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/explorer-api/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Explorer API</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">YAML Formats</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/reference/yaml-probe/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Probe</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-hypothesis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Hypothesis</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-diagnosis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Diagnosis</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-smebit/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">SMEbit</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-bitbundle/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">BitBundle</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-report/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Report</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-entity/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Entity</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-lineage/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lineage</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Cheatsheets</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/cheatsheets/commands/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CLI Commands</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/analyst/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Analysts</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/data-engineer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Data Engineers</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/instrument-author/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Instrument Authors</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/operator/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Operators</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/presentations/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Presentations</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/advanced/domain-packs/" aria-current="page" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Domain Packs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/releases/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Release Notes</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Architecture</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/architecture/design_principles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Design Principles</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/terminology/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Terminology</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/probe_system/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Probe System</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/entity_registry/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Entity Registry</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/pipeline_overview/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Pipeline Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/ecosystem/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Ecosystem</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/documentation_process/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Documentation Process</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://jinflow.io" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">jinflow.io</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M19.33 10.18a1 1 0 0 1-.77 0 1 1 0 0 1-.62-.93l.01-1.83-8.2 8.2a1 1 0 0 1-1.41-1.42l8.2-8.2H14.7a1 1 0 0 1 0-2h4.25a1 1 0 0 1 1 1v4.25a1 1 0 0 1-.62.93Z"/><path d="M11 4a1 1 0 1 1 0 2H7a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-4a1 1 0 1 1 2 0v4a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h4Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>  <starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select language</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/advanced/domain-packs/" class="astro-4yphtoen">English</option><option value="/de/advanced/domain-packs/" class="astro-4yphtoen">Deutsch</option><option value="/fr/advanced/domain-packs/" class="astro-4yphtoen">Français</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select> </div> </div> </div> </div> </nav> <div class="main-frame astro-vrdttmbt">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script><div class="lg:sl-hidden astro-pb3aqygn"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#millesime" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Millesime</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#entities-10" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Entities (10)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#analytical-focus" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Analytical Focus</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#probes-12--hypotheses-3--diagnoses-3--smebits-5" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Probes: 12 | Hypotheses: 3 | Diagnoses: 3 | SMEbits: 5</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#alptrack" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Alptrack</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#entities-10-1" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Entities (10)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#analytical-focus-1" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Analytical Focus</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#key-probes" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Key Probes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#probes-12--assessments-2--hypotheses-3--diagnoses-3--smebits-5--reports-5" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Probes: 12 | Assessments: 2 | Hypotheses: 3 | Diagnoses: 3 | SMEbits: 5 | Reports: 5</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#interlogic" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">InterLogic</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#entities-12" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Entities (12)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#analytical-focus-2" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Analytical Focus</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#key-probes-1" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Key Probes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#key-hypotheses" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Key Hypotheses</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#probes-12--hypotheses-4--diagnoses-4--smebits-5--bitbundles-1--reports-5" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Probes: 12 | Hypotheses: 4 | Diagnoses: 4 | SMEbits: 5 | BitBundles: 1 | Reports: 5</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lexflow" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lexflow</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#entities-9" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Entities (9)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#analytical-focus-3" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Analytical Focus</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#key-probes-2" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Key Probes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#probes-15--diagnoses-4--smebits-5--reports-3" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Probes: 15 | Diagnoses: 4 | SMEbits: 5 | Reports: 3</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#cross-pack-comparison" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Cross-Pack Comparison</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#creating-your-own-pack" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Creating Your Own Pack</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-pb3aqygn"><div class="sl-container astro-pb3aqygn"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#millesime" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Millesime</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#entities-10" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Entities (10)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#analytical-focus" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Analytical Focus</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#probes-12--hypotheses-3--diagnoses-3--smebits-5" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Probes: 12 | Hypotheses: 3 | Diagnoses: 3 | SMEbits: 5</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#alptrack" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Alptrack</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#entities-10-1" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Entities (10)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#analytical-focus-1" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Analytical Focus</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#key-probes" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Key Probes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#probes-12--assessments-2--hypotheses-3--diagnoses-3--smebits-5--reports-5" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Probes: 12 | Assessments: 2 | Hypotheses: 3 | Diagnoses: 3 | SMEbits: 5 | Reports: 5</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#interlogic" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">InterLogic</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#entities-12" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Entities (12)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#analytical-focus-2" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Analytical Focus</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#key-probes-1" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Key Probes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#key-hypotheses" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Key Hypotheses</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#probes-12--hypotheses-4--diagnoses-4--smebits-5--bitbundles-1--reports-5" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Probes: 12 | Hypotheses: 4 | Diagnoses: 4 | SMEbits: 5 | BitBundles: 1 | Reports: 5</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#lexflow" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Lexflow</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#entities-9" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Entities (9)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#analytical-focus-3" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Analytical Focus</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#key-probes-2" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Key Probes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#probes-15--diagnoses-4--smebits-5--reports-3" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Probes: 15 | Diagnoses: 4 | SMEbits: 5 | Reports: 3</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#cross-pack-comparison" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Cross-Pack Comparison</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#creating-your-own-pack" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Creating Your Own Pack</span> </a>  </li> </ul></nav></starlight-toc></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Domain Packs</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <div class="sl-markdown-content"> <p>Domain packs are <strong>optional</strong>. jinflow works without them — you can build a complete analytical pipeline from an empty tenant AFS. Packs are for teams that want to replicate a proven analytical framework across multiple clients.</p>
+<p>A domain pack is a starter kit: entity models, contracts, source-system adapters, probes, hypotheses, diagnoses, SMEbits, and reports — all tailored to a specific industry. Run <code dir="auto">jinflow init --pack</code> to copy the framework into a new tenant instance. From there, the tenant is independent.</p>
+<p>jinflow currently ships with four domain packs, each proving the engine across a different industry with different data shapes, source systems, and analytical questions.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="millesime">Millesime</h2><a class="sl-anchor-link" href="#millesime"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Millesime”</span></a></div>
+<p><strong>Vineyard-to-bottle traceability for Valais winemaking.</strong></p>
+<p>Millesime tracks every parcel, harvest, fermentation, and bottling across multiple domaines. It detects yield anomalies, classification mismatches, and traceability gaps from vine to finished wine.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>Domain</strong></td><td>Winemaking (Valais, Switzerland)</td></tr><tr><td><strong>Source systems</strong></td><td>Custom CSV exports from winery ERP</td></tr><tr><td><strong>Tenants</strong></td><td>domaine_zufferey, domaine_clavien, domaine_betrisey</td></tr><tr><td><strong>Tagline</strong></td><td><em>Every bottle has a story</em></td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="entities-10">Entities (10)</h3><a class="sl-anchor-link" href="#entities-10"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Entities (10)”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Entity</th><th>What it represents</th></tr></thead><tbody><tr><td>Parcels</td><td>Vineyard plots with cépage, altitude, exposure</td></tr><tr><td>Harvests</td><td>Harvest events per parcel per year (yield, sugar, acidity)</td></tr><tr><td>Harvest Trends</td><td>Year-over-year metrics per parcel</td></tr><tr><td>Wines</td><td>Produced wines (cuvée, millésime, classification)</td></tr><tr><td>Cellar Operations</td><td>Fermentation, racking, sulfiting, blending steps</td></tr><tr><td>Lab Analyses</td><td>Chemical analysis (pH, alcohol, SO2, volatile acidity)</td></tr><tr><td>Barrels</td><td>Oak and steel vessels with capacity and age</td></tr><tr><td>Bottle Movements</td><td>Bottling, labeling, storage, dispatch events</td></tr><tr><td>Sales Orders</td><td>Customer orders with quantities and pricing</td></tr><tr><td>Customers</td><td>Restaurants, retailers, private buyers</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="analytical-focus">Analytical Focus</h3><a class="sl-anchor-link" href="#analytical-focus"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Analytical Focus”</span></a></div>
+<ul>
+<li><strong>Yield anomalies</strong> — parcels producing significantly above or below historical norms</li>
+<li><strong>Traceability gaps</strong> — wine without complete parcel-to-bottle chain</li>
+<li><strong>Lab compliance</strong> — analyses outside AOC/DOC thresholds</li>
+<li><strong>Cellar timing</strong> — operations happening outside expected windows</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="probes-12--hypotheses-3--diagnoses-3--smebits-5">Probes: 12 | Hypotheses: 3 | Diagnoses: 3 | SMEbits: 5</h3><a class="sl-anchor-link" href="#probes-12--hypotheses-3--diagnoses-3--smebits-5"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Probes: 12 | Hypotheses: 3 | Diagnoses: 3 | SMEbits: 5”</span></a></div>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="alptrack">Alptrack</h2><a class="sl-anchor-link" href="#alptrack"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Alptrack”</span></a></div>
+<p><strong>Lift-to-ledger reconciliation for ski resort operations.</strong></p>
+<p>Alptrack matches ticket sales, lift rides, snowmaking costs, and equipment rental across resorts. It detects revenue leakage from unpaid passages, equipment utilization gaps, and operational waste.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>Domain</strong></td><td>Ski resort operations</td></tr><tr><td><strong>Source systems</strong></td><td>SkiData, Axess</td></tr><tr><td><strong>Tenants</strong></td><td>resort_alpine, resort_family, resort_glacier</td></tr><tr><td><strong>Tagline</strong></td><td><em>Every passage counts</em></td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="entities-10-1">Entities (10)</h3><a class="sl-anchor-link" href="#entities-10-1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Entities (10)”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Entity</th><th>What it represents</th></tr></thead><tbody><tr><td>Gate Passages</td><td>Turnstile events (lift, entry, parking)</td></tr><tr><td>Guests</td><td>Visitor profiles with pass type</td></tr><tr><td>Lifts</td><td>Chairlifts, gondolas, drag lifts with capacity</td></tr><tr><td>Passes</td><td>Ski passes (day, season, multi-day) with validity</td></tr><tr><td>Slopes</td><td>Pistes with difficulty, length, snowmaking coverage</td></tr><tr><td>Snowmaking Ops</td><td>Snow cannon operations (hours, water, energy)</td></tr><tr><td>Weather Obs</td><td>Temperature, precipitation, wind at station level</td></tr><tr><td>Revenue Events</td><td>Ticket sales, rental charges, F&#x26;B transactions</td></tr><tr><td>Rental Equipment</td><td>Skis, boots, helmets with condition and location</td></tr><tr><td>Rental Transactions</td><td>Equipment checkouts and returns</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="analytical-focus-1">Analytical Focus</h3><a class="sl-anchor-link" href="#analytical-focus-1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Analytical Focus”</span></a></div>
+<ul>
+<li><strong>Access revenue leakage</strong> — passages without valid passes (fare evasion, system errors)</li>
+<li><strong>Equipment utilization</strong> — rental fleet sitting idle vs overbooked</li>
+<li><strong>Snowmaking efficiency</strong> — energy and water cost per skiable hour produced</li>
+<li><strong>Capacity planning</strong> — lift utilization vs queue times vs weather</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="key-probes">Key Probes</h3><a class="sl-anchor-link" href="#key-probes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Probes”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Probe</th><th>Type</th><th>What it detects</th></tr></thead><tbody><tr><td><code dir="auto">probe_passage_without_valid_pass</code></td><td>balance</td><td>Gate passages with no matching valid pass</td></tr><tr><td><code dir="auto">probe_lift_capacity_utilization</code></td><td>distribution_outlier</td><td>Lifts running far above or below capacity</td></tr><tr><td><code dir="auto">probe_revenue_reconciliation</code></td><td>balance</td><td>Ticket sales vs gate passage counts</td></tr><tr><td><code dir="auto">probe_snowmaking_efficiency</code></td><td>ratio</td><td>Energy cost per hour of produced snow</td></tr><tr><td><code dir="auto">probe_rental_return_overdue</code></td><td>hand_written</td><td>Equipment not returned within expected window</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="probes-12--assessments-2--hypotheses-3--diagnoses-3--smebits-5--reports-5">Probes: 12 | Assessments: 2 | Hypotheses: 3 | Diagnoses: 3 | SMEbits: 5 | Reports: 5</h3><a class="sl-anchor-link" href="#probes-12--assessments-2--hypotheses-3--diagnoses-3--smebits-5--reports-5"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Probes: 12 | Assessments: 2 | Hypotheses: 3 | Diagnoses: 3 | SMEbits: 5 | Reports: 5”</span></a></div>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="interlogic">InterLogic</h2><a class="sl-anchor-link" href="#interlogic"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “InterLogic”</span></a></div>
+<p><strong>Shipment-to-checkpoint accountability for global freight forwarding.</strong></p>
+<p>InterLogic tracks every checkpoint, customs declaration, and carrier handoff across 3 continents and 3 source systems. It detects visibility gaps, duty overpayments, and carrier SLA erosion.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>Domain</strong></td><td>Global logistics and freight forwarding</td></tr><tr><td><strong>Source systems</strong></td><td>CargoWise, SAP TM, WMS Manhattan</td></tr><tr><td><strong>Tenants</strong></td><td>express_europe, global_freight, pacific_trade</td></tr><tr><td><strong>Tagline</strong></td><td><em>Every shipment tells a story</em></td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="entities-12">Entities (12)</h3><a class="sl-anchor-link" href="#entities-12"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Entities (12)”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Entity</th><th>What it represents</th></tr></thead><tbody><tr><td>Shipments</td><td>Freight shipments with origin, destination, carrier, mode</td></tr><tr><td>Shipment Items</td><td>Line items with HS codes, quantities, values</td></tr><tr><td>Checkpoints</td><td>Tracking events (pickup, customs, transit, delivery)</td></tr><tr><td>Routes</td><td>Planned routes with legs and transit times</td></tr><tr><td>Route Legs</td><td>Individual legs (sea, air, road, rail) with carriers</td></tr><tr><td>Carriers</td><td>Freight carriers with SLA tiers and regions</td></tr><tr><td>Customers</td><td>Shippers, consignees, brokers</td></tr><tr><td>Containers</td><td>TEU/FEU/reefer containers with capacity</td></tr><tr><td>Customs Declarations</td><td>Import/export filings with duty rates</td></tr><tr><td>Warehouses</td><td>Distribution centers, port terminals, bonded stores</td></tr><tr><td>Inventory Snapshots</td><td>Warehouse stock levels at point-in-time</td></tr><tr><td>Incidents</td><td>Delays, damage, loss, customs holds</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="analytical-focus-2">Analytical Focus</h3><a class="sl-anchor-link" href="#analytical-focus-2"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Analytical Focus”</span></a></div>
+<ul>
+<li><strong>Checkpoint visibility</strong> — shipments with gaps in the tracking chain</li>
+<li><strong>Customs duty reconciliation</strong> — declared values vs actual duty paid</li>
+<li><strong>HS classification consistency</strong> — same product classified differently across declarations</li>
+<li><strong>Carrier SLA compliance</strong> — actual transit times vs contracted SLAs</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="key-probes-1">Key Probes</h3><a class="sl-anchor-link" href="#key-probes-1"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Probes”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Probe</th><th>Type</th><th>What it detects</th></tr></thead><tbody><tr><td><code dir="auto">probe_checkpoint_gap</code></td><td>temporal_sequence</td><td>Missing checkpoints in the journey chain</td></tr><tr><td><code dir="auto">probe_customs_duty_reconciliation</code></td><td>balance</td><td>Duty paid vs duty expected from declared values</td></tr><tr><td><code dir="auto">probe_hs_classification_mismatch</code></td><td>duplicate</td><td>Same product with different HS codes</td></tr><tr><td><code dir="auto">probe_carrier_performance</code></td><td>ratio</td><td>Actual vs contracted transit times</td></tr><tr><td><code dir="auto">probe_container_utilization</code></td><td>distribution_outlier</td><td>Under/over-filled containers</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="key-hypotheses">Key Hypotheses</h3><a class="sl-anchor-link" href="#key-hypotheses"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Hypotheses”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Hypothesis</th><th>Question</th></tr></thead><tbody><tr><td><code dir="auto">hyp_customs_overpayment</code></td><td>Is inconsistent HS classification causing systematic duty overpayment?</td></tr><tr><td><code dir="auto">hyp_carrier_sla_erosion</code></td><td>Are carriers systematically underperforming their SLA commitments?</td></tr><tr><td><code dir="auto">hyp_shipment_visibility_gap</code></td><td>Are tracking blind spots causing operational and financial risk?</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="probes-12--hypotheses-4--diagnoses-4--smebits-5--bitbundles-1--reports-5">Probes: 12 | Hypotheses: 4 | Diagnoses: 4 | SMEbits: 5 | BitBundles: 1 | Reports: 5</h3><a class="sl-anchor-link" href="#probes-12--hypotheses-4--diagnoses-4--smebits-5--bitbundles-1--reports-5"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Probes: 12 | Hypotheses: 4 | Diagnoses: 4 | SMEbits: 5 | BitBundles: 1 | Reports: 5”</span></a></div>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="lexflow">Lexflow</h2><a class="sl-anchor-link" href="#lexflow"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Lexflow”</span></a></div>
+<p><strong>Matter-to-invoice integrity for multilingual Swiss legal practices.</strong></p>
+<p>Lexflow tracks billable hours, expenses, disbursements, and compliance obligations across law firms operating in German, French, and Italian Switzerland. It detects billing anomalies, compliance gaps, and conflict-of-interest risks.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td><strong>Domain</strong></td><td>Legal office operations</td></tr><tr><td><strong>Source systems</strong></td><td>Abacus Legal, Kleos, WinJur</td></tr><tr><td><strong>Tenants</strong></td><td>cabinet_geneve, kanzlei_bern, studio_lugano</td></tr><tr><td><strong>Tagline</strong></td><td><em>Every hour is accountable</em></td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="entities-9">Entities (9)</h3><a class="sl-anchor-link" href="#entities-9"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Entities (9)”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Entity</th><th>What it represents</th></tr></thead><tbody><tr><td>Matters</td><td>Legal cases/mandates with practice area, status</td></tr><tr><td>Clients</td><td>Clients with KYC/AML status</td></tr><tr><td>Counterparties</td><td>Opposing parties in matters</td></tr><tr><td>Lawyer Profiles</td><td>Attorneys with hourly rates, specializations</td></tr><tr><td>Time Entries</td><td>Billable and non-billable time records</td></tr><tr><td>Invoices</td><td>Client invoices with line items</td></tr><tr><td>Payments</td><td>Payment receipts against invoices</td></tr><tr><td>Documents</td><td>Case documents with classification</td></tr><tr><td>Deadlines</td><td>Court and regulatory deadlines</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="analytical-focus-3">Analytical Focus</h3><a class="sl-anchor-link" href="#analytical-focus-3"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Analytical Focus”</span></a></div>
+<ul>
+<li><strong>Billing integrity</strong> — time entries without invoices, invoices without matching time</li>
+<li><strong>AML/KYC compliance</strong> — clients with incomplete know-your-customer documentation</li>
+<li><strong>Conflict of interest</strong> — matters where the firm represents both sides</li>
+<li><strong>Revenue concentration</strong> — over-dependence on a single client</li>
+<li><strong>Deadline risk</strong> — approaching court deadlines without activity</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="key-probes-2">Key Probes</h3><a class="sl-anchor-link" href="#key-probes-2"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Key Probes”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Probe</th><th>Type</th><th>What it detects</th></tr></thead><tbody><tr><td><code dir="auto">probe_aml_missing_kyc</code></td><td>mandatory_item</td><td>Clients with high-value invoices but incomplete KYC</td></tr><tr><td><code dir="auto">probe_client_revenue_concentration</code></td><td>distribution_outlier</td><td>Clients representing disproportionate revenue share</td></tr><tr><td><code dir="auto">probe_unbilled_time</code></td><td>balance</td><td>Time entries without corresponding invoice lines</td></tr><tr><td><code dir="auto">probe_deadline_at_risk</code></td><td>temporal_sequence</td><td>Deadlines approaching without recent activity</td></tr><tr><td><code dir="auto">probe_conflict_of_interest</code></td><td>duplicate</td><td>Matters where firm acts for both parties</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="probes-15--diagnoses-4--smebits-5--reports-3">Probes: 15 | Diagnoses: 4 | SMEbits: 5 | Reports: 3</h3><a class="sl-anchor-link" href="#probes-15--diagnoses-4--smebits-5--reports-3"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Probes: 15 | Diagnoses: 4 | SMEbits: 5 | Reports: 3”</span></a></div>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="cross-pack-comparison">Cross-Pack Comparison</h2><a class="sl-anchor-link" href="#cross-pack-comparison"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Cross-Pack Comparison”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th align="center">Millesime</th><th align="center">Alptrack</th><th align="center">InterLogic</th><th align="center">Lexflow</th></tr></thead><tbody><tr><td><strong>Industry</strong></td><td align="center">Winemaking</td><td align="center">Ski Resorts</td><td align="center">Logistics</td><td align="center">Legal</td></tr><tr><td><strong>Entities</strong></td><td align="center">10</td><td align="center">10</td><td align="center">12</td><td align="center">9</td></tr><tr><td><strong>Source systems</strong></td><td align="center">1</td><td align="center">2</td><td align="center">3</td><td align="center">3</td></tr><tr><td><strong>Probes</strong></td><td align="center">12</td><td align="center">12</td><td align="center">12</td><td align="center">15</td></tr><tr><td><strong>Hypotheses</strong></td><td align="center">3</td><td align="center">3</td><td align="center">4</td><td align="center">—</td></tr><tr><td><strong>Diagnoses</strong></td><td align="center">3</td><td align="center">3</td><td align="center">4</td><td align="center">4</td></tr><tr><td><strong>SMEbits</strong></td><td align="center">5</td><td align="center">5</td><td align="center">5</td><td align="center">5</td></tr><tr><td><strong>Reports</strong></td><td align="center">—</td><td align="center">5</td><td align="center">5</td><td align="center">3</td></tr><tr><td><strong>Tenants</strong></td><td align="center">3</td><td align="center">3</td><td align="center">3</td><td align="center">3</td></tr></tbody></table>
+<p>Each pack proves a different aspect of the jinflow engine:</p>
+<ul>
+<li><strong>Millesime</strong> proves agricultural traceability (parcel → bottle)</li>
+<li><strong>Alptrack</strong> proves real-time operations (passage → revenue)</li>
+<li><strong>InterLogic</strong> proves multi-system logistics (3 ERPs → 1 checkpoint chain)</li>
+<li><strong>Lexflow</strong> proves compliance-first analytics (KYC, conflicts, deadlines)</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="creating-your-own-pack">Creating Your Own Pack</h2><a class="sl-anchor-link" href="#creating-your-own-pack"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Creating Your Own Pack”</span></a></div>
+<p>You don’t need a domain pack to use jinflow. But if you want to package your analytical framework for reuse:</p>
+<ol>
+<li>Build your instruments in a tenant AFS (probes, hypotheses, diagnoses, SMEbits)</li>
+<li>Validate that they work across at least 2 tenants</li>
+<li>Extract the AFS into a pack repository</li>
+<li>New tenants start from your pack: <code dir="auto">jinflow init --pack mypack --tenant new_client</code></li>
+</ol>
+<p>See <a href="/tutorials/">Tutorial: Publishing a Domain Pack</a> <em>(coming soon)</em> for the full walkthrough.</p> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n">   </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/presentations/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Presentations</span> </span> </a> <a href="/releases/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Release Notes</span> </span> </a> </div>  </footer> <div style="text-align: center; padding: 1.5rem 0 0.5rem; opacity: 0.5; font-size: 0.8rem; border-top: 1px solid var(--sl-color-gray-6);"> <a href="https://jazzisnow.com" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.4rem;"> <img src="/jazzisnow-logo.svg" alt="jazzisnow" style="height: 1.4em;">
+jinflow is a jazzisnow product
+</a> <div style="margin-top: 0.3rem; font-family: monospace; font-size: 0.7rem; opacity: 0.7;">
+v0.31.31 · built 2026-04-04 21:09 UTC </div> </div> </div> </div>  </main> </div> </div> </div> </div> </body></html>

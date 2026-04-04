@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Introducing jinflow — 5-Minute Pitch</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+    --rose: #e11d48;
+    --rose-soft: #fff1f2;
+    --cyan: #0891b2;
+    --cyan-soft: #ecfeff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout { display: flex; width: 100%; height: 100%; }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+  .thumb.jin-thumb { background: linear-gradient(135deg, #1a3a4a 0%, #0f2938 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label,
+  .thumb.jin-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area { flex: 1; position: relative; height: 100%; overflow: hidden; }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 7vh 10vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 2vh;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2.5vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 2.8vw, 2.3rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.95rem, 1.6vw, 1.3rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+  .indigo { color: var(--indigo); font-weight: 500; }
+  .purple { color: var(--purple); }
+  .amber { color: var(--amber); }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 2vh 0;
+  }
+
+  /* ── Section slides ── */
+  .section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+  }
+  .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .section-slide .logo { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  .jin-slide {
+    background: linear-gradient(135deg, #1a3a4a 0%, #0f2938 100%);
+  }
+  .jin-slide h1, .jin-slide h2 { color: var(--white); }
+  .jin-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .jin-slide .logo { color: var(--teal-light); }
+  .jin-slide .divider { background: var(--teal-light); }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.5vw; margin-top: 2vh;
+  }
+
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.5vh 2vw;
+    font-weight: 600; font-size: clamp(0.82rem, 1.1vw, 1rem);
+    color: var(--navy); text-align: center; min-width: 100px;
+  }
+  .flow-box.filled { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .flow-box.teal-filled { background: var(--teal); border-color: var(--teal); color: var(--white); }
+  .flow-box.indigo-filled { background: var(--indigo); border-color: var(--indigo); color: var(--white); }
+  .flow-box.purple-filled { background: var(--purple); border-color: var(--purple); color: var(--white); }
+
+  .flow-arrow {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Stat cards ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2.5vh 1.5vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.6vh;
+  }
+
+  .stat-label {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Impact list ── */
+  .impacts {
+    list-style: none; max-width: 750px; width: 100%; margin-top: 1.5vh;
+  }
+  .impacts li {
+    font-size: clamp(0.9rem, 1.4vw, 1.15rem);
+    line-height: 1.7; color: var(--navy);
+    padding: 0.7vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.1);
+    display: flex; align-items: baseline; gap: 0.8rem;
+  }
+  .impacts li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block; width: 8px; height: 8px; min-width: 8px;
+    border-radius: 50%; margin-top: 0.5em;
+  }
+  .bullet.teal { background: var(--teal); }
+  .bullet.indigo { background: var(--indigo); }
+  .bullet.purple { background: var(--purple); }
+  .bullet.amber { background: var(--amber); }
+  .bullet.green { background: var(--green); }
+
+  /* ── Comparison cards ── */
+  .compare {
+    display: flex; gap: 2.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .compare-card {
+    flex: 1; border-radius: 12px; padding: 2.5vh 2vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+  .compare-card.engine { background: var(--indigo-soft); border: 1px solid #c7d2fe; }
+  .compare-card.domain { background: var(--amber-soft); border: 1px solid #fde68a; }
+  .compare-card.ai { background: var(--purple-soft); border: 1px solid #c4b5fd; }
+  .compare-card.good { background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .compare-card.cyan { background: var(--cyan-soft); border: 1px solid #a5f3fc; }
+
+  .compare-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; margin-bottom: 0.8vh;
+  }
+  .compare-card.engine .compare-title { color: #3730a3; }
+  .compare-card.domain .compare-title { color: #92400e; }
+  .compare-card.ai .compare-title { color: #5b21b6; }
+  .compare-card.good .compare-title { color: #166534; }
+  .compare-card.cyan .compare-title { color: #155e75; }
+
+  .compare-text {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--slate); line-height: 1.5;
+  }
+  .compare-text strong { color: var(--navy); }
+  .compare-text code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9em; background: rgba(0,0,0,0.06);
+    padding: 0.1em 0.4em; border-radius: 3px;
+  }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2vw; max-width: 960px; width: 100%; margin-top: 2vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-icon {
+    font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+    margin-bottom: 0.8vh;
+  }
+  .card-title {
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+  .card-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Cycle diagram ── */
+  .cycle {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; margin-top: 3vh; max-width: 900px;
+  }
+
+  .cycle-phase {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2.5vh 3vw;
+    border-radius: 16px; min-width: 180px;
+    position: relative;
+  }
+
+  .cycle-phase.make { background: var(--indigo-soft); border: 2px solid #c7d2fe; }
+  .cycle-phase.explore { background: var(--cyan-soft); border: 2px solid #a5f3fc; }
+  .cycle-phase.evolve { background: var(--purple-soft); border: 2px solid #c4b5fd; }
+
+  .cycle-verb {
+    font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+    font-weight: 700; margin-bottom: 0.5vh;
+  }
+  .cycle-phase.make .cycle-verb { color: #3730a3; }
+  .cycle-phase.explore .cycle-verb { color: #155e75; }
+  .cycle-phase.evolve .cycle-verb { color: #5b21b6; }
+
+  .cycle-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--slate); text-align: center; line-height: 1.5;
+  }
+
+  .cycle-arrow {
+    font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+    color: var(--teal); font-weight: 300;
+    padding: 0 1vw;
+  }
+
+  /* ── Domain cards (2-col) ── */
+  .domain-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .domain-card {
+    background: var(--white); border-radius: 10px;
+    padding: 2vh 1.5vw; text-align: left;
+    border: 1px solid rgba(42, 143, 143, 0.12);
+    box-shadow: 0 1px 8px rgba(26, 39, 68, 0.03);
+  }
+
+  .domain-name {
+    font-size: clamp(0.85rem, 1.1vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.3vh;
+  }
+
+  .domain-entities {
+    font-size: clamp(0.7rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.4; margin-bottom: 0.5vh;
+  }
+
+  .domain-probes {
+    font-size: clamp(0.68rem, 0.85vw, 0.78rem);
+    color: var(--teal); font-style: italic; line-height: 1.4;
+  }
+
+  /* ── Branding + counter ── */
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 5vh 5vw; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .compare { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+    .domain-grid { grid-template-columns: 1fr; }
+    .cycle { flex-direction: column; }
+    .cycle-arrow { transform: rotate(90deg); }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<div class="sidebar" id="sidebar"></div>
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- TITLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide active jin-slide">
+    <div class="logo fade-in">jinflow.io</div>
+    <h1 class="fade-in">Pluggable.<br>Philosophical.<br>Powerful.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      A diagnostic analytics platform<br>
+      that learns every domain it enters.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE PROBLEM -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Problem</div>
+    <h2 class="fade-in">Every organisation has the same shape of pain.</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><strong>Multiple source systems</strong> &mdash; different ERPs, different column names, different export formats. No canonical truth.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Reconciliation is manual</strong> &mdash; spreadsheets, ad-hoc queries, tribal knowledge. Findings don't accumulate.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Domain expertise is scarce</strong> &mdash; the person who knows what &ldquo;normal&rdquo; looks like retires, changes roles, or was never hired.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Every new domain starts from zero</strong> &mdash; new industry, new consultants, new six-month discovery phase.</span></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE SOLUTION -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Solution</div>
+    <h2 class="fade-in">One engine. Pluggable domain packs.<br>AI as the subject matter expert.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">The Engine</div>
+        <div class="compare-text">
+          Medallion pipeline. YAML-to-SQL compilers.<br>
+          Multi-tenant isolation. Taxonomy engine.<br>
+          Explorer. AI-powered REPL.<br><br>
+          <strong>How</strong> to ingest, validate, diagnose, and present.<br>
+          Domain-agnostic. Ships once.
+        </div>
+      </div>
+      <div class="compare-card domain">
+        <div class="compare-title">The Domain Pack</div>
+        <div class="compare-text">
+          Entity schemas. Source-system mappings.<br>
+          Diagnostic rules. Interpretation logic.<br>
+          Tri-lingual display text.<br><br>
+          <strong>What</strong> to look for and <strong>why</strong> it matters.<br>
+          All YAML. All swappable.
+        </div>
+      </div>
+      <div class="compare-card ai">
+        <div class="compare-title">The AI</div>
+        <div class="compare-text">
+          Subject matter expertise on demand.<br>
+          ERP data formats. Business logic.<br>
+          Regulatory context. Thresholds.<br><br>
+          <strong>Who</strong> brings the knowledge &mdash; at scale.<br>
+          New domain = new conversation.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE CYCLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Workflow</div>
+    <h2 class="fade-in">Make. Explore. Evolve.</h2>
+    <div class="cycle fade-in">
+      <div class="cycle-phase make">
+        <div class="cycle-verb">Make</div>
+        <div class="cycle-desc">Compile artifacts.<br>Build the database.<br>Validate everything.</div>
+      </div>
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-phase explore">
+        <div class="cycle-verb">Explore</div>
+        <div class="cycle-desc">See the findings.<br>Understand patterns.<br>Ask new questions.</div>
+      </div>
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-phase evolve">
+        <div class="cycle-verb">Evolve</div>
+        <div class="cycle-desc">AI-assisted refinement.<br>Author new diagnostics.<br>Capture knowledge.</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Evolve feeds back into Make. The cycle never ends.<br>
+      <span class="highlight">Each turn produces a richer, more accurate analytical system.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- WHAT TRANSFERS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Universal Patterns</div>
+    <h2 class="fade-in">The diagnostic shapes are the same everywhere</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet indigo"></span><span><strong>Balance probes</strong> &mdash; compare two aggregates. Usage vs billing. Received vs sold. Ordered vs delivered.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Duplicate detection</strong> &mdash; same shape everywhere. Duplicate invoices, shipments, purchase orders.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Trend analysis</strong> &mdash; rolling average drift. Costs, lead times, defect rates. The math is identical.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Taxonomy hierarchies</strong> &mdash; cost centres, product categories, regional structures. Same closure table, different labels.</span></li>
+    </ul>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      <span class="highlight">The entity names change. The architecture doesn't.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SIX DOMAINS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Where It Fits</div>
+    <h2 class="fade-in">Anywhere with material/resource flows<br>and financial reconciliation</h2>
+    <div class="domain-grid fade-in">
+      <div class="domain-card">
+        <div class="domain-name">Healthcare</div>
+        <div class="domain-entities">Cases, procedures, materials, billing</div>
+        <div class="domain-probes">Revenue leakage, compliance gaps, cost outliers</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Manufacturing</div>
+        <div class="domain-entities">Work orders, BOMs, inventory, shipments</div>
+        <div class="domain-probes">Phantom consumption, BOM variance, scrap anomalies</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Pharma &amp; Life Sciences</div>
+        <div class="domain-entities">Batches, formulations, QC results, distribution</div>
+        <div class="domain-probes">Yield deviation, expiry risk, recall traceability</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Retail &amp; Warehouse</div>
+        <div class="domain-entities">Purchase orders, stock movements, sales, returns</div>
+        <div class="domain-probes">Shrinkage detection, dead stock, delivery anomalies</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Public Sector Procurement</div>
+        <div class="domain-entities">Tenders, contracts, invoices, deliveries</div>
+        <div class="domain-probes">Duplicate invoicing, contract compliance, budget overruns</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Construction</div>
+        <div class="domain-entities">Projects, material requisitions, deliveries, invoices</div>
+        <div class="domain-probes">Material waste, subcontractor billing anomalies</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE BUSINESS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Business</div>
+    <h2 class="fade-in">Open engine. Expert domain packs.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">jinflow Engine</div>
+        <div class="compare-text">
+          Pipeline, compilers, Explorer.<br>
+          Open or source-available.<br>
+          Drives adoption and trust.<br><br>
+          <strong>The platform. Free to evaluate.</strong>
+        </div>
+      </div>
+      <div class="compare-card domain">
+        <div class="compare-title">Domain Packs</div>
+        <div class="compare-text">
+          Diagnostic rules, interpretation,<br>
+          regulatory context, calibrated thresholds.<br>
+          Subscription per tenant.<br><br>
+          <strong>The expertise. The revenue.</strong>
+        </div>
+      </div>
+      <div class="compare-card cyan">
+        <div class="compare-title">Custom Domains</div>
+        <div class="compare-text">
+          Consulting engagement to build<br>
+          a domain pack for a new industry.<br>
+          AI-accelerated. Weeks, not months.<br><br>
+          <strong>The growth engine.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE COMPOUND EFFECT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Moat</div>
+    <h2 class="fade-in">Each domain pack makes<br>the platform smarter for the next one.</h2>
+    <div class="flow fade-in">
+      <div class="flow-box indigo-filled"><strong>Domain A</strong><br><small>new probe types</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box indigo-filled"><strong>Domain B</strong><br><small>better thresholds</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box indigo-filled"><strong>Domain C</strong><br><small>richer DSL</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>Compound<br>Expertise</strong></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Calibrated thresholds. Interpretation rules. Regulatory knowledge.<br>
+      Source-system expertise. All encoded in domain packs.<br><br>
+      <span class="highlight">The framework gets better at every domain because it's been to others.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- CLOSING -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide jin-slide">
+    <div class="logo fade-in">jinflow.io</div>
+    <h1 class="fade-in" style="line-height: 1.3;">The framework<br>that learns every domain<br>it enters.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Highly automated. Deeply interactive.<br>
+      AI brings the expertise. The engine makes it actionable.<br>
+      Each deployment makes the next one faster.<br><br>
+      <span style="color: var(--teal-light); font-weight: 500;">One framework. Many domains. Infinite expertise.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+</div>
+
+<div class="brand">jinflow.io</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    var isJin = slide.classList.contains('jin-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (isJin) thumb.classList.add('jin-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = 'jinflow';
+    } else {
+      var title = slide.querySelector('h1, h2');
+      var logo = slide.querySelector('.logo');
+      if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var n = 0;
+    for (var j = 0; j <= index; j++) {
+      if (!slides[j].classList.contains('breathing')) n++;
+    }
+    counter.textContent = n + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

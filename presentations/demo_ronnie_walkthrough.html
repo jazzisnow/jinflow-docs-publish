@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix — Demo Walkthrough: SZO Material Analytics</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout {
+    display: flex; width: 100%; height: 100%;
+  }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+  }
+
+  .thumb-number {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 7px; color: #94a3b8; font-weight: 500;
+  }
+
+  .main {
+    flex: 1; height: 100%; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+
+  /* ── Slides ── */
+  .slide {
+    display: none; width: 100%; height: 100%;
+    padding: 48px 64px;
+    border-radius: 8px;
+    background: var(--white);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    overflow-y: auto;
+  }
+  .slide.active { display: flex; flex-direction: column; }
+
+  .slide.section-slide {
+    background: linear-gradient(135deg, #0f172a 0%, var(--navy) 50%, #2d3f5e 100%);
+    color: var(--white);
+    justify-content: center; align-items: center; text-align: center;
+  }
+  .slide.section-slide h1 { font-size: 2.2em; font-weight: 700; color: var(--white); }
+  .slide.section-slide p { font-size: 1.1em; color: #cbd5e1; margin-top: 12px; }
+
+  .slide.breathing {
+    background: var(--bg);
+    justify-content: center; align-items: center;
+  }
+
+  h1 { font-size: 1.6em; font-weight: 700; color: var(--navy); line-height: 1.3; }
+  h2 { font-size: 1.15em; font-weight: 600; color: var(--slate); margin-top: 24px; }
+  p, li { font-size: 0.95em; line-height: 1.7; color: var(--slate); }
+  ul { margin-top: 8px; padding-left: 20px; }
+  li { margin-top: 4px; }
+
+  .subtitle { font-size: 0.95em; color: var(--warm-gray); margin-top: 4px; }
+
+  .stat-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px; margin-top: 20px;
+  }
+  .stat-card {
+    background: var(--light-gray); border-radius: 10px; padding: 20px;
+    text-align: center;
+  }
+  .stat-card .number { font-size: 1.8em; font-weight: 700; color: var(--navy); }
+  .stat-card .label { font-size: 0.8em; color: var(--warm-gray); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-card.highlight { background: linear-gradient(135deg, var(--teal), var(--teal-light)); color: white; }
+  .stat-card.highlight .number { color: white; }
+  .stat-card.highlight .label { color: rgba(255,255,255,0.8); }
+  .stat-card.red { background: var(--red-soft); }
+  .stat-card.red .number { color: var(--red); }
+  .stat-card.green { background: var(--green-soft); }
+  .stat-card.green .number { color: var(--green); }
+  .stat-card.amber { background: var(--amber-soft); }
+  .stat-card.amber .number { color: var(--amber); }
+  .stat-card.purple { background: var(--purple-soft); }
+  .stat-card.purple .number { color: var(--purple); }
+
+  .action-box {
+    margin-top: 24px; padding: 20px 24px;
+    border-radius: 10px; border-left: 4px solid var(--teal);
+    background: #f0fdfa;
+  }
+  .action-box h3 {
+    font-size: 0.75em; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--teal); margin-bottom: 8px;
+  }
+  .action-box p, .action-box li { font-size: 0.88em; color: var(--slate); }
+
+  table {
+    width: 100%; border-collapse: collapse; margin-top: 16px;
+    font-size: 0.88em;
+  }
+  th {
+    text-align: left; padding: 10px 12px;
+    background: var(--light-gray); font-weight: 600; color: var(--navy);
+    border-bottom: 2px solid #e2e8f0;
+  }
+  td {
+    padding: 10px 12px; border-bottom: 1px solid #f1f5f9;
+    color: var(--slate);
+  }
+  tr:hover td { background: #f8fafc; }
+  .mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.9em; }
+  .right { text-align: right; }
+  .badge {
+    display: inline-block; padding: 2px 10px; border-radius: 999px;
+    font-size: 0.78em; font-weight: 600;
+  }
+  .badge-green { background: var(--green-soft); color: var(--green); }
+  .badge-red { background: var(--red-soft); color: var(--red); }
+  .badge-amber { background: var(--amber-soft); color: var(--amber); }
+  .badge-purple { background: var(--purple-soft); color: var(--purple); }
+  .badge-teal { background: #f0fdfa; color: var(--teal); }
+
+  .quote {
+    margin-top: 20px; padding: 20px 24px;
+    border-left: 4px solid var(--amber);
+    background: var(--amber-soft); border-radius: 0 10px 10px 0;
+    font-style: italic; color: var(--slate);
+  }
+  .quote .attribution {
+    margin-top: 8px; font-style: normal; font-weight: 600;
+    font-size: 0.85em; color: var(--amber);
+  }
+
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px;
+  }
+
+  .classification-table {
+    margin-top: 16px;
+  }
+  .classification-table td:first-child { font-weight: 600; }
+  .classification-table .yes { color: var(--green); font-weight: 600; }
+  .classification-table .no { color: var(--warm-gray); }
+
+  .flow-step {
+    display: flex; align-items: flex-start; gap: 16px;
+    margin-top: 16px; padding: 16px;
+    background: var(--light-gray); border-radius: 10px;
+  }
+  .flow-step .step-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--teal); color: white; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-size: 0.9em;
+  }
+  .flow-step h3 { font-size: 0.95em; font-weight: 600; color: var(--navy); }
+  .flow-step p { font-size: 0.85em; color: var(--slate); margin-top: 4px; }
+
+  .presenter-note {
+    margin-top: auto; padding-top: 16px;
+    border-top: 1px dashed #e2e8f0;
+    font-size: 0.78em; color: #94a3b8; font-style: italic;
+  }
+  .presenter-note strong { color: var(--teal); font-style: normal; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.78em; background: var(--light-gray); color: var(--slate); margin-right: 4px; }
+
+  @media print {
+    .sidebar { display: none; }
+    .main { padding: 0; }
+    .slide { page-break-after: always; display: flex !important; box-shadow: none; border-radius: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="main" id="main">
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 1: Title -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide section-slide" id="s1">
+      <h1>nuMetrix: SZO Material Analytics</h1>
+      <p>Demo Walkthrough &mdash; March 2026</p>
+      <p style="margin-top: 32px; font-size: 0.85em; color: #94a3b8;">
+        48,382 materials &middot; 68,441 cases &middot; 2.27M billing events<br>
+        Real data from Spitalzentrum Oberwallis (Brig/Visp)
+      </p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 2: What we're looking at -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s2">
+      <h1>What you're about to see</h1>
+      <p class="subtitle">The system analyzes SZO's real data through multiple diagnostic lenses.</p>
+
+      <div class="stat-grid">
+        <div class="stat-card highlight">
+          <div class="number">38</div>
+          <div class="label">Diagnostic Probes</div>
+        </div>
+        <div class="stat-card red">
+          <div class="number">106K</div>
+          <div class="label">High-Severity Findings</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="number">10</div>
+          <div class="label">Root Causes Identified</div>
+        </div>
+        <div class="stat-card green">
+          <div class="number">10 / 11</div>
+          <div class="label">Hypotheses Confirmed</div>
+        </div>
+      </div>
+
+      <p style="margin-top: 12px; font-size: 0.85em; color: var(--warm-gray);">
+        Every hypothesis with a confirmed verdict also has a <strong>diagnosis</strong> — a structured root cause with confidence score and recommendation. The system doesn't just count anomalies; it explains them.
+      </p>
+
+      <div class="action-box">
+        <h3>Live demo step</h3>
+        <p>Open the Explorer at <strong>localhost:4000</strong>. With only zeta built, it <strong>auto-redirects</strong> to hospital_zeta. Show the overview page with its summary cards.</p>
+      </div>
+
+      <div class="presenter-note">
+        <strong>Presenter:</strong> The overview page shows all this at a glance. Let the numbers sink in before moving on.
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 3: breathing -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide breathing" id="s3">
+      <p style="font-size: 1.4em; font-weight: 300; color: var(--warm-gray);">
+        Let's zoom into one specific story.
+      </p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 4: The Catalog Problem -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s4">
+      <h1>The Catalog Maintenance Gap</h1>
+      <p class="subtitle">Hypothesis: is_active flags and validity dates are drifting apart</p>
+
+      <div class="stat-grid">
+        <div class="stat-card green">
+          <div class="number"><span class="badge badge-green">Confirmed</span></div>
+          <div class="label">Verdict</div>
+        </div>
+        <div class="stat-card">
+          <div class="number">6,880</div>
+          <div class="label">Findings</div>
+        </div>
+        <div class="stat-card amber">
+          <div class="number">CHF 6.7M</div>
+          <div class="label">Money at Risk</div>
+        </div>
+        <div class="stat-card">
+          <div class="number">100%</div>
+          <div class="label">Evidence Score</div>
+        </div>
+      </div>
+
+      <p style="margin-top: 20px;">Four probes feed into this hypothesis &mdash; all four fired:</p>
+      <table>
+        <tr><th>Probe</th><th>Role</th><th class="right">Findings</th></tr>
+        <tr><td>Active but date expired</td><td><span class="badge badge-red">Primary</span></td><td class="right">1,368</td></tr>
+        <tr><td>Inactive but date valid</td><td><span class="badge badge-red">Primary</span></td><td class="right">1,413</td></tr>
+        <tr><td>Stale articles</td><td><span class="badge badge-amber">Supporting</span></td><td class="right">964</td></tr>
+        <tr><td>Catalog health assessment</td><td><span class="badge badge-purple">Context</span></td><td class="right">3,135</td></tr>
+      </table>
+
+      <div class="action-box">
+        <h3>Live demo step</h3>
+        <p>Navigate to <strong>Hypotheses</strong> &rarr; click <strong>"Catalog Maintenance Gap"</strong>. Show the evidence chain and confirmed verdict.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 5: Ronnie's Question -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s5">
+      <h1>Ronnie's Question</h1>
+      <p class="subtitle">The question that changed the probe.</p>
+
+      <div class="quote">
+        "OK, so we have 1,368 materials marked <em>active</em> with expired dates.
+        But <strong>which field is actually wrong?</strong> The flag or the date?
+        If the article is still being purchased, the date is probably wrong.
+        If nobody's buying it, the flag is wrong."
+        <div class="attribution">&mdash; Ronnie Brunner, nuMetrix Partner, March 2026</div>
+      </div>
+
+      <p style="margin-top: 20px;">This is domain knowledge that no data model can derive. The system knew <em>something was wrong</em>, but Ronnie knew <em>what to do about it</em>.</p>
+
+      <div class="presenter-note">
+        <strong>Presenter:</strong> Pause here. This is the key moment &mdash; the transition from "data anomaly" to "actionable insight." Ronnie's classification logic is what makes the finding useful.
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 6: The Classification -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s6">
+      <h1>Activity-Based Classification</h1>
+      <p class="subtitle">Ronnie's rule: purchasing activity tells you which field is wrong.</p>
+
+      <table class="classification-table" style="margin-top: 24px;">
+        <tr>
+          <th>Probe</th>
+          <th>Has Purchases?</th>
+          <th>Likely Wrong Field</th>
+          <th>Action</th>
+        </tr>
+        <tr>
+          <td>Active + date expired</td>
+          <td class="yes">Yes</td>
+          <td><span class="badge badge-amber">Date</span></td>
+          <td>Extend validity &mdash; article genuinely in use</td>
+        </tr>
+        <tr>
+          <td>Active + date expired</td>
+          <td class="no">No</td>
+          <td><span class="badge badge-red">Flag</span></td>
+          <td>Set inactive &mdash; article genuinely expired</td>
+        </tr>
+        <tr>
+          <td>Inactive + date valid</td>
+          <td class="yes">Yes</td>
+          <td><span class="badge badge-red">Flag</span></td>
+          <td>Re-activate &mdash; article genuinely in use</td>
+        </tr>
+        <tr>
+          <td>Inactive + date valid</td>
+          <td class="no">No</td>
+          <td><span class="badge badge-amber">Date</span></td>
+          <td>Shorten validity &mdash; article genuinely inactive</td>
+        </tr>
+      </table>
+
+      <p style="margin-top: 16px; font-size: 0.9em; color: var(--warm-gray);">
+        Simple rule, massive impact. This logic is now <strong>built into the probes</strong> &mdash; every finding carries the classification automatically.
+      </p>
+
+      <div class="presenter-note">
+        <strong>Presenter:</strong> Walk through the table slowly. The audience should understand the 2x2 matrix before seeing the numbers.
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 7: The Numbers -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s7">
+      <h1>What the data says</h1>
+      <p class="subtitle">Real SZO numbers after applying Ronnie's classification.</p>
+
+      <div class="two-col">
+        <div>
+          <h2 style="margin-top: 0;">Active + Date Expired <span class="mono" style="font-size: 0.8em; color: var(--warm-gray);">(1,368)</span></h2>
+          <table>
+            <tr><th>Activity</th><th>Wrong Field</th><th class="right">Count</th><th class="right">CHF</th></tr>
+            <tr>
+              <td><span class="badge badge-green">Purchases</span></td>
+              <td><span class="badge badge-amber">Date</span></td>
+              <td class="right">610</td>
+              <td class="right mono">18,984</td>
+            </tr>
+            <tr>
+              <td><span class="badge" style="background:#f1f5f9; color:#6b7280;">None</span></td>
+              <td><span class="badge badge-red">Flag</span></td>
+              <td class="right">758</td>
+              <td class="right mono">92,706</td>
+            </tr>
+          </table>
+          <p style="font-size: 0.82em; margin-top: 8px; color: var(--warm-gray);">65 findings escalated to <strong style="color: var(--red);">high severity</strong> (active + purchases + CHF&gt;1K = urgent date fix)</p>
+        </div>
+
+        <div>
+          <h2 style="margin-top: 0;">Inactive + Date Valid <span class="mono" style="font-size: 0.8em; color: var(--warm-gray);">(1,413)</span></h2>
+          <table>
+            <tr><th>Activity</th><th>Wrong Field</th><th class="right">Count</th><th class="right">CHF</th></tr>
+            <tr>
+              <td><span class="badge badge-green">Purchases</span></td>
+              <td><span class="badge badge-red">Flag</span></td>
+              <td class="right">216</td>
+              <td class="right mono">14,860</td>
+            </tr>
+            <tr>
+              <td><span class="badge" style="background:#f1f5f9; color:#6b7280;">None</span></td>
+              <td><span class="badge badge-amber">Date</span></td>
+              <td class="right">1,197</td>
+              <td class="right mono">109,345</td>
+            </tr>
+          </table>
+          <p style="font-size: 0.82em; margin-top: 8px; color: var(--warm-gray);">16 findings escalated to <strong style="color: var(--red);">high severity</strong> (inactive + purchases = being bought under the radar)</p>
+        </div>
+      </div>
+
+      <div class="action-box">
+        <h3>Live demo step</h3>
+        <p>Navigate to <strong>Findings</strong> &rarr; select <strong>probe_active_date_expired</strong>. Expand a finding to show the <code>has_purchases</code>, <code>likely_wrong_field</code>, and <code>purchase_count</code> evidence fields.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 8: breathing -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide breathing" id="s8">
+      <p style="font-size: 1.4em; font-weight: 300; color: var(--warm-gray);">
+        How did we get from conversation to code?
+      </p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 9: The SMEbit -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s9">
+      <h1>Knowledge Capture: The SMEbit</h1>
+      <p class="subtitle">Ronnie's insight &mdash; formalized, attributed, versioned.</p>
+
+      <div style="margin-top: 20px; padding: 24px; background: var(--light-gray); border-radius: 10px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span class="badge badge-purple">business_rule</span>
+          <span class="badge badge-green">active</span>
+          <span class="tag">Level 0 &mdash; Observation</span>
+        </div>
+        <h2 style="margin-top: 12px; color: var(--navy);">Activity-based classification of is_active/date contradictions</h2>
+        <p style="margin-top: 8px; font-size: 0.9em;">
+          When an article's is_active flag contradicts its validity date range, purchasing activity
+          in the observed period reveals which field is likely wrong. Active articles with recent
+          purchases have a wrong date; active articles without purchases have a wrong flag.
+        </p>
+        <div style="margin-top: 12px; display: flex; gap: 24px; font-size: 0.82em; color: var(--warm-gray);">
+          <span><strong>Provider:</strong> Ronnie Brunner</span>
+          <span><strong>Role:</strong> nuMetrix Partner</span>
+          <span><strong>Date:</strong> 2026-03-03</span>
+        </div>
+        <div style="margin-top: 8px; font-size: 0.82em; color: var(--warm-gray);">
+          <strong>Anchored to:</strong>
+          <span class="tag">probe_active_date_expired</span>
+          <span class="tag">probe_inactive_date_valid</span>
+          <span class="tag">hyp_catalog_maintenance_gap</span>
+        </div>
+      </div>
+
+      <div class="action-box">
+        <h3>Live demo step</h3>
+        <p>Navigate to <strong>SMEbits</strong> &rarr; find <strong>"Activity-based classification of is_active/date contradictions"</strong>. Show the provider attribution, anchors, and the "why" field.</p>
+      </div>
+
+      <div class="presenter-note">
+        <strong>Presenter:</strong> Emphasize: this is Ronnie's knowledge, with his name on it. The system attributes everything. No anonymous rules.
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 10: The Workflow -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s10">
+      <h1>The Knowledge-Driven Workflow</h1>
+      <p class="subtitle">How expert knowledge becomes system intelligence &mdash; in one session.</p>
+
+      <div class="flow-step">
+        <div class="step-num">1</div>
+        <div>
+          <h3>Capture</h3>
+          <p>Ronnie shares his classification rule. It becomes an SMEbit &mdash; attributed, scoped, versioned.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-num">2</div>
+        <div>
+          <h3>Consequence Analysis</h3>
+          <p>Which probes need to change? What evidence fields to add? How does severity shift?</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-num">3</div>
+        <div>
+          <h3>Implement</h3>
+          <p>Probes are enriched with billing/usage joins. Activity classification built into every finding.</p>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="step-num">4</div>
+        <div>
+          <h3>Rebuild &amp; Review</h3>
+          <p>Full rebuild across all 5 tenants. Same findings, richer evidence. 81 findings escalated to high severity.</p>
+        </div>
+      </div>
+
+      <p style="margin-top: 16px; font-size: 0.9em; color: var(--warm-gray);">
+        From conversation to production: <strong>under 30 minutes</strong>. The knowledge is permanent &mdash; it survives every rebuild, every new tenant.
+      </p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 11: BitBundle -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s11">
+      <h1>The Bigger Story: BitBundles</h1>
+      <p class="subtitle">SMEbits accumulate. BitBundles weave them into narratives.</p>
+
+      <div style="margin-top: 20px; padding: 24px; background: var(--indigo-soft); border-radius: 10px;">
+        <h2 style="margin-top: 0; color: var(--indigo);">Material Data Quality at SZO</h2>
+        <p style="margin-top: 8px; font-size: 0.9em;">
+          A curated narrative connecting 5 SMEbits about material master data quality at SZO &mdash;
+          from wrong descriptions to validity contradictions to catalog maintenance gaps.
+        </p>
+        <div style="margin-top: 12px; font-size: 0.82em; color: var(--warm-gray);">
+          <strong>Curator:</strong> Ronnie Brunner &middot; <strong>5 SMEbits</strong> &middot; <span class="badge badge-green">active</span>
+        </div>
+      </div>
+
+      <p style="margin-top: 16px;">Each SMEbit is atomic &mdash; one insight, one provider, one scope. BitBundles are the <em>story</em> layer: "Here's what we know about material data quality at this hospital, and here's why it matters."</p>
+
+      <div class="action-box">
+        <h3>Live demo step</h3>
+        <p>Navigate to <strong>BitBundles</strong> &rarr; open <strong>"Material Data Quality at SZO"</strong>. Show the narrative and the linked SMEbits.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 12: breathing -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide breathing" id="s11b">
+      <p style="font-size: 1.4em; font-weight: 300; color: var(--warm-gray);">
+        Ronnie has four more questions.
+      </p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 13: Ronnie's 4 Catalog Inventory Questions -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s11c">
+      <h1>Catalog Inventory KPIs</h1>
+      <p class="subtitle">Ronnie asks four questions. Each one is now a probe &mdash; finding count IS the answer.</p>
+
+      <table style="margin-top: 20px;">
+        <tr><th style="width: 40%;">Ronnie's Question</th><th>Probe</th><th class="right">Answer (SZO)</th></tr>
+        <tr>
+          <td>How many unique active articles?</td>
+          <td><span class="mono" style="font-size: 0.85em;">probe_active_materials</span></td>
+          <td class="right"><strong style="color: var(--navy); font-size: 1.1em;">22,402</strong></td>
+        </tr>
+        <tr>
+          <td>How many unique inactive articles?</td>
+          <td><span class="mono" style="font-size: 0.85em;">probe_inactive_materials</span></td>
+          <td class="right"><strong style="color: var(--navy); font-size: 1.1em;">25,980</strong></td>
+        </tr>
+        <tr>
+          <td>Active articles from a single vendor only?</td>
+          <td><span class="mono" style="font-size: 0.85em;">probe_active_single_source</span></td>
+          <td class="right"><strong style="color: var(--navy); font-size: 1.1em;">487</strong></td>
+        </tr>
+        <tr>
+          <td>Articles delivered by multiple vendors?</td>
+          <td><span class="mono" style="font-size: 0.85em;">probe_multi_source_materials</span></td>
+          <td class="right"><strong style="color: var(--navy); font-size: 1.1em;">717</strong></td>
+        </tr>
+      </table>
+
+      <p style="margin-top: 16px; font-size: 0.9em; color: var(--warm-gray);">
+        All four feed into <strong>assessment_catalog_inventory</strong> (48,382 materials assessed).
+        The same pattern: question &rarr; probe &rarr; instant answer across any tenant.
+      </p>
+
+      <div class="action-box">
+        <h3>Live demo step</h3>
+        <p>Navigate to <strong>Findings</strong> &rarr; select <strong>probe_active_materials</strong>. The finding count in the header is Ronnie's answer: <strong>22,402 active articles</strong>. Switch to <strong>probe_active_single_source</strong> to show the 487 single-vendor materials with supplier names and billing volumes.</p>
+      </div>
+
+      <div class="presenter-note">
+        <strong>Presenter:</strong> The point: Ronnie's questions are not one-off queries. They're probes that run on every rebuild, across every tenant. hospital_alpha shows 202 active, 78 single-source &mdash; same question, different hospital, instant answer.
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 14: Catalog Inventory Report -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s11d">
+      <h1>The Report</h1>
+      <p class="subtitle">Ronnie's questions &mdash; answered, explained, printable.</p>
+
+      <div style="margin-top: 20px; padding: 24px; background: var(--light-gray); border-radius: 10px; border: 1px solid #e2e8f0;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--navy); padding-bottom: 12px; margin-bottom: 16px;">
+          <div>
+            <div style="font-size: 1.1em; font-weight: 700; color: var(--navy);">nuMetrix &mdash; Catalog Inventory Report</div>
+            <div style="font-size: 0.82em; color: var(--warm-gray);">Spitalzentrum Oberwallis</div>
+          </div>
+          <div style="font-size: 0.78em; color: var(--warm-gray);">04.03.2026</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div style="text-align: center; padding: 10px; background: white; border-radius: 8px;">
+            <div style="font-size: 1.2em; font-weight: 700; color: var(--navy);">48,382</div>
+            <div style="font-size: 0.65em; color: var(--warm-gray); text-transform: uppercase;">Total</div>
+          </div>
+          <div style="text-align: center; padding: 10px; background: white; border-radius: 8px;">
+            <div style="font-size: 1.2em; font-weight: 700; color: var(--navy);">22,402</div>
+            <div style="font-size: 0.65em; color: var(--warm-gray); text-transform: uppercase;">Active</div>
+          </div>
+          <div style="text-align: center; padding: 10px; background: white; border-radius: 8px;">
+            <div style="font-size: 1.2em; font-weight: 700; color: var(--navy);">25,980</div>
+            <div style="font-size: 0.65em; color: var(--warm-gray); text-transform: uppercase;">Inactive</div>
+          </div>
+        </div>
+
+        <table style="font-size: 0.78em; margin-top: 0;">
+          <tr><th>Bucket</th><th class="right">Count</th></tr>
+          <tr><td>Active, single supplier</td><td class="right mono">487</td></tr>
+          <tr><td>Active, multiple suppliers</td><td class="right mono">717</td></tr>
+          <tr><td>Active, no supplier data <span style="color: #94a3b8;">(derived)</span></td><td class="right mono">21,198</td></tr>
+          <tr style="border-top: 2px solid #e2e8f0; font-weight: 600;"><td>Total active</td><td class="right mono">22,402</td></tr>
+        </table>
+
+        <div style="margin-top: 12px; font-size: 0.7em; color: #94a3b8;">
+          Lineage: materials.csv &rarr; bronze &rarr; silver &rarr; gold_materials + gold_material_sourcing &rarr; probes
+        </div>
+      </div>
+
+      <p style="margin-top: 16px; font-size: 0.9em; color: var(--warm-gray);">
+        Every number links to its probe. Every probe shows the SQL logic. Print to PDF or share directly.
+      </p>
+
+      <div class="action-box">
+        <h3>Live demo step</h3>
+        <p>Navigate to <strong>Executive Summary</strong> (sidebar) &rarr; click <strong>Catalog Inventory</strong>. Show the business questions table, supplier breakdown, and lineage section. Hit <strong>Ctrl+P</strong> to show the print-ready PDF.</p>
+      </div>
+
+      <div class="presenter-note">
+        <strong>Presenter:</strong> This is the "I can hand this to my boss" moment. The report is generated from live data, not a screenshot. Same report, different tenant, different numbers.
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 15: JumpBar -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s12">
+      <h1>Search for "Ronnie"</h1>
+      <p class="subtitle">The JumpBar finds people, probes, hypotheses, materials &mdash; everything in one search.</p>
+
+      <div style="margin-top: 24px; max-width: 480px; margin-left: auto; margin-right: auto;
+        border: 1px solid #e2e8f0; border-radius: 12px; background: white; box-shadow: 0 4px 24px rgba(0,0,0,0.08); overflow: hidden;">
+        <div style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; display: flex; align-items: center; gap: 8px;">
+          <span style="color: #94a3b8; font-size: 0.9em;">&#x1F50D;</span>
+          <span style="color: var(--navy); font-size: 0.95em;">ronnie</span>
+          <span style="margin-left: auto; font-size: 0.65em; color: #94a3b8; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1px 6px;">esc</span>
+        </div>
+        <div style="padding: 8px 0;">
+          <div style="padding: 4px 16px; font-size: 0.6em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8;">People</div>
+          <div style="padding: 8px 16px; background: #eff6ff; display: flex; align-items: center; gap: 12px;">
+            <span style="color: #94a3b8; font-size: 0.85em;">&odot;</span>
+            <div>
+              <div style="font-size: 0.9em; color: var(--navy);">Ronnie Brunner</div>
+              <div style="font-size: 0.75em; color: #94a3b8;">nuMetrix Partner &middot; 8 SMEbits &middot; 2 BitBundles</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-box" style="margin-top: 32px;">
+        <h3>Live demo step</h3>
+        <p>Press <strong>Cmd+K</strong> (or <strong>J</strong>) to open the JumpBar. Type <strong>"ronnie"</strong>. Show the People result with contribution counts.</p>
+      </div>
+
+      <div class="presenter-note">
+        <strong>Presenter:</strong> This is a nice "aha" moment. Ronnie sees his own name in the system, attributed to his contributions. Also try searching "material", "validity", or "catalog" to show how everything is connected.
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 13: breathing -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide breathing" id="s13">
+      <p style="font-size: 1.4em; font-weight: 300; color: var(--warm-gray);">
+        The big picture.
+      </p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 14: Top Hypotheses -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s14">
+      <h1>Confirmed Hypotheses at SZO</h1>
+      <p class="subtitle">10 out of 11 hypotheses confirmed by evidence.</p>
+
+      <table style="margin-top: 16px; font-size: 0.82em;">
+        <tr><th>Hypothesis</th><th>Diagnosis</th><th class="right">Flagged Volume (CHF)</th></tr>
+        <tr><td>Cost center misallocation</td><td><span class="badge badge-amber">data quality</span></td><td class="right mono">66.7M</td></tr>
+        <tr><td>Cross-site leakage</td><td><span class="badge badge-red">process failure</span></td><td class="right mono">66.5M</td></tr>
+        <tr><td>Stale catalogue</td><td><span class="badge badge-red">process failure</span></td><td class="right mono">39.2M</td></tr>
+        <tr><td>I/O imbalance</td><td><span class="badge badge-red">process failure</span></td><td class="right mono">35.4M</td></tr>
+        <tr><td>Revenue leakage (unbilled)</td><td><span class="badge badge-red">process failure</span></td><td class="right mono">34.8M</td></tr>
+        <tr><td>Duplicate billing</td><td><span class="badge badge-amber">data quality</span></td><td class="right mono">33.3M</td></tr>
+        <tr><td>Supplier concentration risk</td><td><span class="badge badge-purple">structural</span></td><td class="right mono">28.7M</td></tr>
+        <tr><td>Overpriced generics</td><td><span class="badge badge-purple">structural</span></td><td class="right mono">28.4M</td></tr>
+        <tr><td>Catalog maintenance gap</td><td><span class="badge badge-red">process failure</span></td><td class="right mono">6.7M</td></tr>
+        <tr><td style="font-style: italic; color: var(--warm-gray);">Phantom cases</td><td><span class="badge badge-amber">data quality</span></td><td class="right mono">33.3M</td></tr>
+      </table>
+
+      <p style="margin-top: 12px; font-size: 0.85em; color: var(--warm-gray);">
+        Each confirmed hypothesis has a <strong>diagnosis</strong> with root cause category, confidence score, explanation, and recommendation. The system doesn't just flag &mdash; it explains.
+      </p>
+
+      <div class="action-box">
+        <h3>Live demo step</h3>
+        <p>Browse the <strong>Hypotheses</strong> page. Click into one (e.g., "Stale Catalogue") to show the diagnosis section with root cause and recommendation.</p>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 15: The Analytical Pyramid -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s15">
+      <h1>The Analytical Pyramid</h1>
+      <p class="subtitle">From raw data to actionable root causes &mdash; every layer adds meaning.</p>
+
+      <div style="margin-top: 32px; text-align: center;">
+        <div style="display: inline-block; text-align: left;">
+          <div style="margin-left: 120px; padding: 12px 28px; background: var(--red-soft); border-radius: 8px; text-align: center; border: 1px solid #fecaca;">
+            <div style="font-weight: 600; color: var(--red); font-size: 0.9em;">Diagnoses</div>
+            <div style="font-size: 0.75em; color: var(--warm-gray);">10 root causes</div>
+          </div>
+          <div style="margin-left: 80px; margin-top: 8px; padding: 12px 40px; background: var(--amber-soft); border-radius: 8px; text-align: center; border: 1px solid #fde68a;">
+            <div style="font-weight: 600; color: var(--amber); font-size: 0.9em;">Hypotheses</div>
+            <div style="font-size: 0.75em; color: var(--warm-gray);">11 business questions &middot; 10 confirmed</div>
+          </div>
+          <div style="margin-left: 40px; margin-top: 8px; padding: 12px 48px; background: var(--purple-soft); border-radius: 8px; text-align: center; border: 1px solid #c4b5fd;">
+            <div style="font-weight: 600; color: var(--purple); font-size: 0.9em;">Probes &amp; Assessments</div>
+            <div style="font-size: 0.75em; color: var(--warm-gray);">38 diagnostics &middot; 531K findings</div>
+          </div>
+          <div style="margin-top: 8px; padding: 12px 56px; background: var(--light-gray); border-radius: 8px; text-align: center; border: 1px solid #e2e8f0;">
+            <div style="font-weight: 600; color: var(--navy); font-size: 0.9em;">Gold Layer</div>
+            <div style="font-size: 0.75em; color: var(--warm-gray);">48K materials &middot; 68K cases &middot; 2.3M billing events</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 24px; text-align: center;">
+        <span style="font-size: 0.85em; color: var(--teal); font-weight: 600;">+ 55 SMEbits &amp; 15 BitBundles: expert knowledge that enriches every layer</span>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 16: What's next -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide" id="s16">
+      <h1>What happens next?</h1>
+      <p class="subtitle">Every conversation adds knowledge. The system grows smarter with each SMEbit.</p>
+
+      <div class="two-col" style="margin-top: 24px;">
+        <div>
+          <h2 style="margin-top: 0; color: var(--teal);">What Ronnie can do now</h2>
+          <ul>
+            <li>Share domain rules &rarr; they become SMEbits</li>
+            <li>Challenge probe results &rarr; probes get sharper</li>
+            <li>Curate BitBundles &rarr; build the institutional narrative</li>
+            <li>Validate findings &rarr; calibrate confidence</li>
+          </ul>
+        </div>
+        <div>
+          <h2 style="margin-top: 0; color: var(--navy);">What the system does</h2>
+          <ul>
+            <li>Attributes every insight to its provider</li>
+            <li>Versions everything &mdash; knowledge evolves</li>
+            <li>Runs across all tenants &mdash; portable rules</li>
+            <li>Rebuilds in minutes &mdash; instant feedback</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="quote" style="margin-top: 24px; border-left-color: var(--teal); background: #f0fdfa;">
+        "The difference between data and knowledge is the <em>why</em>."
+        <div class="attribution" style="color: var(--teal);">&mdash; nuMetrix design principle</div>
+      </div>
+
+      <div class="presenter-note">
+        <strong>Presenter:</strong> End with this quote. The whole point is that Ronnie's "why" is now in the system, attributed, and working across every rebuild.
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDE 17: End -->
+    <!-- ══════════════════════════════════════════════════════════════════ -->
+    <div class="slide section-slide" id="s17">
+      <h1>Thank you</h1>
+      <p style="margin-top: 16px; color: #94a3b8;">nuMetrix &middot; Hospital Material Flow Analytics</p>
+      <p style="margin-top: 32px; font-size: 0.85em; color: #64748b;">
+        55 SMEbits &middot; 15 BitBundles &middot; 38 Probes &middot; 11 Hypotheses &middot; 10 Diagnoses<br>
+        All knowledge attributed. All results reproducible.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const sidebar = document.getElementById('sidebar');
+  let current = 0;
+
+  // Build sidebar thumbnails
+  slides.forEach((slide, i) => {
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb' +
+      (slide.classList.contains('breathing') ? ' breathing-thumb' : '') +
+      (slide.classList.contains('section-slide') ? ' section-thumb' : '');
+    thumb.onclick = () => goTo(i);
+
+    const inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+    inner.style.transform = 'scale(0.17)';
+    inner.style.width = (100 / 0.17) + '%';
+    inner.style.height = (100 / 0.17) + '%';
+    inner.innerHTML = slide.innerHTML;
+    if (slide.classList.contains('section-slide')) {
+      inner.style.background = 'linear-gradient(135deg, #1a2744 0%, #2d3f5e 100%)';
+      inner.style.color = 'white';
+      inner.style.display = 'flex';
+      inner.style.flexDirection = 'column';
+      inner.style.justifyContent = 'center';
+      inner.style.alignItems = 'center';
+      inner.style.textAlign = 'center';
+      inner.style.padding = '48px 64px';
+    } else if (slide.classList.contains('breathing')) {
+      inner.style.display = 'flex';
+      inner.style.justifyContent = 'center';
+      inner.style.alignItems = 'center';
+      inner.style.padding = '48px 64px';
+    } else {
+      inner.style.padding = '48px 64px';
+    }
+    thumb.appendChild(inner);
+
+    const num = document.createElement('div');
+    num.className = 'thumb-number';
+    num.textContent = i + 1;
+    thumb.appendChild(num);
+
+    sidebar.appendChild(thumb);
+  });
+
+  function goTo(i) {
+    if (i < 0 || i >= slides.length) return;
+    slides[current].classList.remove('active');
+    slides[i].classList.add('active');
+    current = i;
+    document.querySelectorAll('.thumb').forEach((t, j) => {
+      t.classList.toggle('active', j === i);
+    });
+    sidebar.children[i].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+      e.preventDefault(); goTo(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault(); goTo(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault(); goTo(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); goTo(slides.length - 1);
+    }
+  });
+
+  goTo(0);
+</script>
+</body>
+</html>
