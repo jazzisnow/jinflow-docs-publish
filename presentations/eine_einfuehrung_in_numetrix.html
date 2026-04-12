@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eine Einf&uuml;hrung in nuMetrix</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+    --rose: #e11d48;
+    --rose-soft: #fff1f2;
+    --cyan: #0891b2;
+    --cyan-soft: #ecfeff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout { display: flex; width: 100%; height: 100%; }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area { flex: 1; position: relative; height: 100%; overflow: hidden; }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 5vh 6vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(0.85rem, 1.4vw, 1.15rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 1.5vh;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.2rem, 2.4vw, 2rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 1.5vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.82rem, 1.3vw, 1.1rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 1.5vh 0;
+  }
+
+  /* ── Section slides ── */
+  .section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+  }
+  .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .section-slide .logo { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Stat cards ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.5vw; max-width: 1000px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2vh 1.2vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.5rem, 2.5vw, 2.4rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.5vh;
+  }
+  .stat-num.red { color: var(--red); }
+  .stat-num.amber { color: var(--amber); }
+  .stat-num.green { color: var(--green); }
+  .stat-num.navy { color: var(--navy); }
+
+  .stat-label {
+    font-size: clamp(0.68rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-block;
+    padding: 0.2em 0.6em;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
+  }
+  .badge-financial { background: #dbeafe; color: #1e40af; }
+  .badge-data { background: #fef3c7; color: #92400e; }
+  .badge-compliance { background: #fce7f3; color: #9d174d; }
+  .badge-operational { background: #d1fae5; color: #065f46; }
+  .badge-confirmed { background: var(--green-soft); color: var(--green); }
+  .badge-not-observed { background: var(--light-gray); color: var(--warm-gray); }
+  .badge-teal { background: #ccfbf1; color: #0f766e; }
+  .badge-purple { background: var(--purple-soft); color: var(--purple); }
+
+  /* ── Impact list ── */
+  .impacts {
+    list-style: none; max-width: 800px; width: 100%; margin-top: 1vh;
+  }
+  .impacts li {
+    font-size: clamp(0.78rem, 1.15vw, 0.98rem);
+    line-height: 1.6; color: var(--navy);
+    padding: 0.5vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.08);
+    display: flex; align-items: baseline; gap: 0.7rem;
+  }
+  .impacts li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block; width: 7px; height: 7px; min-width: 7px;
+    border-radius: 50%; margin-top: 0.45em;
+  }
+  .bullet.teal { background: var(--teal); }
+  .bullet.red { background: var(--red); }
+  .bullet.amber { background: var(--amber); }
+  .bullet.green { background: var(--green); }
+  .bullet.purple { background: var(--purple); }
+  .bullet.indigo { background: var(--indigo); }
+
+  /* ── Comparison cards ── */
+  .compare {
+    display: flex; gap: 2vw; max-width: 960px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .compare-card {
+    flex: 1; border-radius: 12px; padding: 2vh 1.5vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+  .compare-card.brig { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .compare-card.visp { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .compare-card.engine { background: var(--indigo-soft); border: 1px solid #c7d2fe; }
+  .compare-card.domain { background: var(--amber-soft); border: 1px solid #fde68a; }
+  .compare-card.warn { background: var(--red-soft); border: 1px solid #fecaca; }
+  .compare-card.neutral { background: var(--light-gray); border: 1px solid #cbd5e1; }
+  .compare-card.good { background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .compare-card.purple { background: var(--purple-soft); border: 1px solid #c4b5fd; }
+  .compare-card.cyan { background: var(--cyan-soft); border: 1px solid #a5f3fc; }
+
+  .compare-title {
+    font-size: clamp(0.82rem, 1.1vw, 0.98rem);
+    font-weight: 600; margin-bottom: 0.6vh;
+  }
+  .compare-card.brig .compare-title { color: #1e40af; }
+  .compare-card.visp .compare-title { color: #166534; }
+  .compare-card.engine .compare-title { color: #3730a3; }
+  .compare-card.domain .compare-title { color: #92400e; }
+  .compare-card.warn .compare-title { color: #991b1b; }
+  .compare-card.neutral .compare-title { color: var(--navy); }
+  .compare-card.good .compare-title { color: #166534; }
+  .compare-card.purple .compare-title { color: #5b21b6; }
+  .compare-card.cyan .compare-title { color: #155e75; }
+
+  .compare-text {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--slate); line-height: 1.5;
+  }
+  .compare-text strong { color: var(--navy); }
+
+  /* ── Data table ── */
+  .data-table {
+    width: 100%; max-width: 960px; margin-top: 1.5vh;
+    border-collapse: collapse;
+    font-size: clamp(0.68rem, 0.92vw, 0.84rem);
+  }
+  .data-table th {
+    background: var(--light-gray);
+    font-weight: 600; text-align: left;
+    padding: 0.8vh 1vw;
+    border-bottom: 2px solid #cbd5e1;
+    color: var(--navy); white-space: nowrap;
+  }
+  .data-table th.right, .data-table td.right { text-align: right; }
+  .data-table td {
+    padding: 0.6vh 1vw;
+    border-bottom: 1px solid var(--light-gray);
+    vertical-align: top;
+  }
+  .data-table td.mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9em;
+  }
+  .data-table tr:nth-child(even) { background: #f8fafc; }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1.5vw; max-width: 960px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2vh 1.5vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-title {
+    font-size: clamp(0.78rem, 1.05vw, 0.92rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.3vh;
+  }
+  .card-desc {
+    font-size: clamp(0.68rem, 0.88vw, 0.8rem);
+    color: var(--warm-gray); line-height: 1.45;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.2vw; margin-top: 1.5vh;
+  }
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.2vh 1.5vw;
+    font-weight: 600; font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--navy); text-align: center; min-width: 90px;
+  }
+  .flow-box.filled { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .flow-box.teal-filled { background: var(--teal); border-color: var(--teal); color: var(--white); }
+  .flow-box.amber-border { border-color: var(--amber); }
+  .flow-box.red-border { border-color: var(--red); }
+  .flow-box.purple-border { border-color: var(--purple); }
+  .flow-box.green-border { border-color: var(--green); }
+  .flow-arrow {
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    color: var(--teal); font-weight: 300;
+  }
+  .flow-arrow-up {
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Horizontal bar chart ── */
+  .h-bar-chart {
+    width: 100%; max-width: 800px; margin-top: 1.5vh;
+  }
+  .h-bar-row {
+    display: flex; align-items: center; gap: 1vw;
+    margin-bottom: 0.8vh;
+  }
+  .h-bar-label {
+    font-size: clamp(0.68rem, 0.88vw, 0.8rem);
+    font-weight: 500; color: var(--navy);
+    min-width: 100px; text-align: right;
+  }
+  .h-bar-track {
+    flex: 1; height: 22px; background: var(--light-gray);
+    border-radius: 4px; overflow: hidden; position: relative;
+  }
+  .h-bar-fill {
+    height: 100%; border-radius: 4px;
+    transition: width 1.5s ease;
+  }
+  .h-bar-fill.teal { background: var(--teal); }
+  .h-bar-fill.navy { background: var(--navy); }
+  .h-bar-fill.amber { background: var(--amber); }
+  .h-bar-fill.red { background: var(--red); }
+  .h-bar-fill.green { background: var(--green); }
+  .h-bar-fill.slate { background: #94a3b8; }
+  .h-bar-fill.purple { background: var(--purple); }
+  .h-bar-value {
+    font-size: clamp(0.65rem, 0.82vw, 0.75rem);
+    color: var(--warm-gray); min-width: 90px;
+  }
+
+  /* ── Callout box ── */
+  .callout {
+    max-width: 800px; width: 100%;
+    padding: 1.8vh 2vw;
+    border-radius: 10px; margin-top: 1.5vh;
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    line-height: 1.55;
+  }
+  .callout.info { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af; }
+  .callout.warn { background: var(--amber-soft); border-left: 4px solid var(--amber); color: #92400e; }
+  .callout.danger { background: var(--red-soft); border-left: 4px solid var(--red); color: #991b1b; }
+  .callout.neutral { background: var(--light-gray); border-left: 4px solid #94a3b8; color: var(--slate); }
+  .callout.teal { background: #ccfbf1; border-left: 4px solid var(--teal); color: #0f766e; }
+
+  /* ── Priority action items ── */
+  .action-list {
+    list-style: none; max-width: 800px; width: 100%; margin-top: 1vh;
+  }
+  .action-list li {
+    display: flex; align-items: flex-start; gap: 0.8rem;
+    padding: 0.8vh 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-size: clamp(0.75rem, 1.05vw, 0.92rem);
+    line-height: 1.5; color: var(--navy);
+  }
+  .action-list li:last-child { border-bottom: none; }
+  .action-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; min-width: 22px;
+    border-radius: 50%; font-size: 0.72rem; font-weight: 700;
+    color: white; margin-top: 0.15em;
+  }
+  .action-num.red { background: var(--red); }
+  .action-num.amber { background: var(--amber); }
+  .action-num.teal { background: var(--teal); }
+
+  /* ── Two-column layout ── */
+  .two-col {
+    display: flex; gap: 3vw; max-width: 960px; width: 100%; margin-top: 1.5vh;
+    align-items: flex-start;
+  }
+  .two-col .col { flex: 1; }
+  .two-col .col-narrow { flex: 0 0 220px; }
+
+  /* ── Hypothesis list (compact) ── */
+  .hyp-list {
+    list-style: none; width: 100%;
+  }
+  .hyp-list li {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.4vh 0;
+    font-size: clamp(0.72rem, 0.98vw, 0.88rem);
+    line-height: 1.5; color: var(--navy);
+  }
+
+  /* ── Small caps label ── */
+  .sc-label {
+    font-size: clamp(0.6rem, 0.75vw, 0.7rem);
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--warm-gray); margin-bottom: 0.5vh;
+  }
+
+  /* ── Pyramid visual ── */
+  .pyramid {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0.5vh; max-width: 700px; width: 100%; margin-top: 1.5vh;
+  }
+  .pyramid-row {
+    display: flex; align-items: center; gap: 1vw; width: 100%;
+  }
+  .pyramid-box {
+    border-radius: 8px; padding: 1vh 1.5vw;
+    font-weight: 600; font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    text-align: center; color: var(--white);
+  }
+  .pyramid-label {
+    font-size: clamp(0.65rem, 0.82vw, 0.75rem);
+    color: var(--warm-gray); flex: 1; text-align: left;
+    font-style: italic;
+  }
+
+  /* ── Branding + counter ── */
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 4vh 4vw; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .compare { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+    .two-col { flex-direction: column; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<div class="sidebar" id="sidebar"></div>
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- PROLOG                                                      -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S1 — Titel -->
+  <div class="slide active">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">Eine Einf&uuml;hrung<br>in nuMetrix</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Diagnostische Analytik f&uuml;r den Materialfluss im Spital
+    </p>
+    <p class="subtitle fade-in" style="margin-top: 2vh; opacity: 0.5; font-size: clamp(0.75rem, 1vw, 0.9rem);">
+      Februar 2026
+    </p>
+  </div>
+
+  <!-- S2 — Das Problem -->
+  <div class="slide">
+    <div class="logo fade-in">Das Problem</div>
+    <h2 class="fade-in">Der Materialfluss im Spital leckt</h2>
+    <div class="flow fade-in">
+      <div class="flow-box filled">Empfangen</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Bewegt</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Verbraucht</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled">Verrechnet</div>
+    </div>
+    <ul class="impacts fade-in" style="margin-top: 2vh;">
+      <li><span class="bullet red"></span><span>Diese Kette leckt. Branchensch&auml;tzungen: <strong>2&ndash;5% der Materialausgaben</strong> gehen durch Prozessl&uuml;cken verloren.</span></li>
+      <li><span class="bullet amber"></span><span>Die Daten existieren &mdash; aber eingesperrt in <strong>herstellerspezifischen ERP-Silos</strong>, die nicht miteinander sprechen.</span></li>
+      <li><span class="bullet teal"></span><span>Niemand gleicht ab, bis zur Jahresrevision. Dann ist die Spur kalt.</span></li>
+    </ul>
+  </div>
+
+  <!-- S3 — Was es ist / Was es nicht ist -->
+  <div class="slide">
+    <div class="logo fade-in">Was es ist</div>
+    <h2 class="fade-in">Was nuMetrix ist (und was nicht)</h2>
+    <div class="compare fade-in">
+      <div class="compare-card good">
+        <div class="compare-title">Was es ist</div>
+        <div class="compare-text">
+          Eine <strong>strukturierte Untersuchungspipeline</strong>. Nimmt ERP-Exporte auf, validiert jede Zeile, f&uuml;hrt automatisierte Diagnostik durch und liefert pr&uuml;fbare Befunde mit Ursachenanalyse.<br><br>
+          Jede Zahl ist nachvollziehbar. Jeder Befund hat eine Quellzeile.
+        </div>
+      </div>
+      <div class="compare-card warn">
+        <div class="compare-title">Was es nicht ist</div>
+        <div class="compare-text">
+          Kein Dashboard. Kein BI. Kein ERP-Plugin. Nicht &laquo;KI-getrieben&raquo; im Marketing-Sinne.<br><br>
+          Es ist ein <strong>Ingenieursystem</strong> mit KI als Beschleuniger &mdash; keine Blackbox.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S4 — Die zwei S&auml;ulen -->
+  <div class="slide">
+    <div class="logo fade-in">Zwei S&auml;ulen</div>
+    <h2 class="fade-in">Die zwei S&auml;ulen</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">Stabiles Ger&uuml;st</div>
+        <div class="compare-text">
+          dbt + DuckDB Pipeline. Versionierte Vertr&auml;ge. YAML-kompilierte Probes. Multi-Tenant-Isolation.<br><br>
+          Das Fundament, das Ergebnisse <strong>reproduzierbar und pr&uuml;fbar</strong> macht.
+        </div>
+      </div>
+      <div class="compare-card domain">
+        <div class="compare-title">KI als Fachexperte</div>
+        <div class="compare-text">
+          KI betreibt nuMetrix nicht &mdash; sie hat es <em>informiert</em>. ERP-Datenformate, medizinisches Wissen, regulatorischer Kontext, Betriebslogik.<br><br>
+          Fachwissen <strong>zur Bauzeit injiziert</strong>, nicht zur Laufzeit.
+        </div>
+      </div>
+    </div>
+    <div class="callout teal fade-in">
+      Das Framework nutzt moderne Technologie, verlässt sich aber nicht auf KI ohne stabiles Gerüst.
+    </div>
+  </div>
+
+  <!-- S5 — Atempause -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- AKT I: DAS DATENFUNDAMENT                                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S6 — Abschnitt: Das Datenfundament -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Akt I</div>
+    <h2 class="fade-in">Das Datenfundament</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Alles aufnehmen. Nichts beurteilen. Dann alles validieren.</p>
+  </div>
+
+  <!-- S7 — Bronze / Silver / Gold -->
+  <div class="slide">
+    <div class="logo fade-in">Medaillon</div>
+    <h2 class="fade-in">Bronze / Silver / Gold</h2>
+    <div class="flow fade-in">
+      <div class="flow-box">CSV-Dateien</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box filled"><strong>Bronze</strong><br><small>Aufnahme</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>Silver</strong><br><small>Validierung</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box" style="border-color: var(--amber); border-width: 3px;"><strong>Gold</strong><br><small>Vertrag</small></div>
+    </div>
+    <ul class="impacts fade-in" style="margin-top: 2vh;">
+      <li><span class="bullet indigo"></span><span><strong>Bronze</strong> &mdash; Jede Zeile aus jeder CSV, genau wie sie ankommt. Keine Transformation.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Silver</strong> &mdash; Jede Zeile validiert und markiert. Ung&uuml;ltige Zeilen werden nie still entfernt.</span></li>
+      <li><span class="bullet amber"></span><span><strong>Gold</strong> &mdash; Nur g&uuml;ltige Zeilen. Versioniertes Schema. Die API-Oberfl&auml;che f&uuml;r alle nachgelagerten Analysen.</span></li>
+    </ul>
+  </div>
+
+  <!-- S8 — Quellsystem-agnostisch -->
+  <div class="slide">
+    <div class="logo fade-in">Quellsysteme</div>
+    <h2 class="fade-in">Quellsystem-agnostisch</h2>
+    <div class="card-grid fade-in" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="card">
+        <div class="card-title">OPALE</div>
+        <div class="card-desc">Schweizer Spital-ERP<br><code style="font-size: 0.85em;">case_token</code></div>
+      </div>
+      <div class="card">
+        <div class="card-title">SAP MM</div>
+        <div class="card-desc">Deutscher Standard<br><code style="font-size: 0.85em;">AUFNR</code></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Navision</div>
+        <div class="card-desc">Microsoft Dynamics<br><code style="font-size: 0.85em;">No_</code></div>
+      </div>
+    </div>
+    <div class="callout info fade-in">
+      SAP nennt einen Patientenfall <code>AUFNR</code>. Navision nennt ihn <code>No_</code>. OPALE nennt ihn <code>case_token</code>.<br>
+      Alle werden zu <strong>case_id</strong>. Einmal &uuml;bersetzen, an der Grenze. Ab Silver weiss kein Modell mehr, welches ERP die Daten lieferte.
+    </div>
+  </div>
+
+  <!-- S9 — Sieben Kernentit&auml;ten -->
+  <div class="slide">
+    <div class="logo fade-in">Gold-Vertrag</div>
+    <h2 class="fade-in">Sieben Kernentit&auml;ten</h2>
+    <div class="card-grid fade-in" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="card">
+        <div class="card-title">Fall</div>
+        <div class="card-desc">Patientenepisode</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Eingriff</div>
+        <div class="card-desc">Klinische Intervention</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Material</div>
+        <div class="card-desc">Artikelstammdaten</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Kostenstelle</div>
+        <div class="card-desc">Organisationseinheit</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Verbrauch</div>
+        <div class="card-desc">Materialeinsatz</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Bewegung</div>
+        <div class="card-desc">Lagertransfer</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Verrechnungsereignis</div>
+        <div class="card-desc">Erl&ouml;sposition</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Das kanonische Schema. Quellsystem-agnostisch. Pseudonymisiert. Jeder Probe arbeitet auf diesen Entit&auml;ten.
+    </p>
+  </div>
+
+  <!-- S10 — Multi-Tenant-Isolation -->
+  <div class="slide">
+    <div class="logo fade-in">Multi-Tenant</div>
+    <h2 class="fade-in">Multi-Tenant-Isolation</h2>
+    <div class="flow fade-in">
+      <div class="flow-box">hospital_alpha</div>
+      <div class="flow-box">hospital_beta</div>
+      <div class="flow-box">hospital_zeta</div>
+    </div>
+    <div class="flow fade-in" style="margin-top: 1vh;">
+      <div class="flow-arrow">&darr;</div>
+      <div class="flow-arrow">&darr;</div>
+      <div class="flow-arrow">&darr;</div>
+    </div>
+    <div class="flow fade-in" style="margin-top: 0.5vh;">
+      <div class="flow-box teal-filled" style="min-width: 300px;"><strong>Platform Layer</strong><br><small>UNION ALL &uuml;ber alle Mandanten</small></div>
+    </div>
+    <ul class="impacts fade-in" style="margin-top: 1.5vh;">
+      <li><span class="bullet teal"></span><span>Jedes Spital ist ein <strong>isoliertes DuckDB-Schema</strong>. Unabh&auml;ngig zur&uuml;cksetzbar.</span></li>
+      <li><span class="bullet indigo"></span><span>Die Platform-Schicht vereint alle Mandanten f&uuml;r <strong>spital&uuml;bergreifende Analytik</strong>.</span></li>
+      <li><span class="bullet green"></span><span>Gleiche Probes, gleiche Fragen &mdash; andere Daten, andere Antworten.</span></li>
+    </ul>
+  </div>
+
+  <!-- S11 — Kein stilles Filtern -->
+  <div class="slide">
+    <div class="logo fade-in">Kernprinzip</div>
+    <h2 class="fade-in">Kein stilles Filtern</h2>
+    <div class="compare fade-in">
+      <div class="compare-card warn">
+        <div class="compare-title">Traditioneller Ansatz</div>
+        <div class="compare-text">
+          Ung&uuml;ltige Zeilen im ETL entfernen. &laquo;98% Datenqualit&auml;t&raquo; im Bericht.<br><br>
+          <strong>Niemand fragt nach den 2%.</strong>
+        </div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">nuMetrix-Ansatz</div>
+        <div class="compare-text">
+          Jede Zeile markieren: <code>is_valid</code> + <code>invalid_reason</code>.<br>
+          Ung&uuml;ltige Zeilen bleiben sichtbar.<br><br>
+          <strong>Datenqualit&auml;t wird ein Befund, keine Fussnote.</strong>
+        </div>
+      </div>
+    </div>
+    <div class="callout warn fade-in">
+      In einem Spital: 17'250 Nullpreis-Materialien kaskadieren zu 211K ung&uuml;ltigen Verrechnungs- + Verbrauchszeilen. <strong>CHF 1.24M</strong> unsichtbar f&uuml;r jedes System, das still filtert.
+    </div>
+  </div>
+
+  <!-- S12 — Gold = Der Produktvertrag -->
+  <div class="slide">
+    <div class="logo fade-in">Vertrag</div>
+    <h2 class="fade-in">Gold = Der Produktvertrag</h2>
+    <div class="flow fade-in">
+      <div class="flow-box filled">gold_contract.v1.json</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Probes</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Explorer</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled">Berichte</div>
+    </div>
+    <ul class="impacts fade-in" style="margin-top: 2vh;">
+      <li><span class="bullet teal"></span><span>Gold hat einen <strong>versionierten JSON-Schema-Vertrag</strong>. Jeder nachgelagerte Konsument programmiert dagegen.</span></li>
+      <li><span class="bullet indigo"></span><span>Probes, Explorer, Dashboards &mdash; alle referenzieren Gold, nie interne Schichten.</span></li>
+      <li><span class="bullet amber"></span><span><strong>Schichtverantwortung darf nicht lecken.</strong> Bronze = Struktur. Silver = Fachwahrheit. Gold = Konsum.</span></li>
+    </ul>
+  </div>
+
+  <!-- S13 — Atempause -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- AKT II: DIE ANALYTIKPYRAMIDE                                -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S14 — Abschnitt: Die Analytikpyramide -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Akt II</div>
+    <h2 class="fade-in">Die Analytikpyramide</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Von Symptomen zu Ursachen</p>
+  </div>
+
+  <!-- S15 — F&uuml;nf Schichten -->
+  <div class="slide">
+    <div class="logo fade-in">Pyramide</div>
+    <h2 class="fade-in">F&uuml;nf Schichten</h2>
+    <div class="pyramid fade-in">
+      <div class="pyramid-row">
+        <div class="pyramid-box" style="background: var(--slate); width: 40%; margin: 0 auto;">Massnahmenlisten</div>
+        <div class="pyramid-label">&laquo;Was tun wir dagegen?&raquo;</div>
+      </div>
+      <div class="pyramid-row">
+        <div class="pyramid-box" style="background: var(--purple); width: 50%; margin: 0 auto;">Diagnosen</div>
+        <div class="pyramid-label">&laquo;Warum passiert das?&raquo;</div>
+      </div>
+      <div class="pyramid-row">
+        <div class="pyramid-box" style="background: var(--amber); width: 60%; margin: 0 auto;">Hypothesen</div>
+        <div class="pyramid-label">&laquo;Ist dieses Gesch&auml;ftsrisiko real?&raquo;</div>
+      </div>
+      <div class="pyramid-row">
+        <div class="pyramid-box" style="background: var(--indigo); width: 70%; margin: 0 auto;">Assessments</div>
+        <div class="pyramid-label">&laquo;Wie gesund ist diese Entit&auml;t?&raquo;</div>
+      </div>
+      <div class="pyramid-row">
+        <div class="pyramid-box" style="background: var(--teal); width: 80%; margin: 0 auto;">Probes</div>
+        <div class="pyramid-label">&laquo;Was ist anomal?&raquo;</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Jede Schicht f&uuml;gt Bedeutung hinzu. Jede Schicht ist zur&uuml;ckverfolgbar bis zu den Daten.
+    </p>
+  </div>
+
+  <!-- S16 — Schicht 1: Probes -->
+  <div class="slide">
+    <div class="logo fade-in">Schicht 1</div>
+    <h2 class="fade-in">Probes</h2>
+    <p class="subtitle fade-in" style="margin-bottom: 1vh;">Automatisierte Diagnosetests. Wie Laboranalysen f&uuml;r die Daten eines Spitals.</p>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num">12</div>
+        <div class="stat-label">Probe-Typen</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">24</div>
+        <div class="stat-label">aktive Probes</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3</div>
+        <div class="stat-label">Kategorien<br><small>finanziell &middot; Datenqualit&auml;t &middot; Compliance</small></div>
+      </div>
+    </div>
+    <div class="callout info fade-in">
+      Jeder Probe liefert: <code>finding_id</code>, <code>severity</code>, <code>entity_type</code>, <code>entity_id</code>, <code>money_at_risk</code>, <code>evidence</code>.<br>
+      Jeder Probe ist <strong>YAML-definiert</strong>, versionskontrolliert und pr&uuml;fbar.
+    </div>
+  </div>
+
+  <!-- S17 — Schicht 2: Assessments -->
+  <div class="slide">
+    <div class="logo fade-in">Schicht 2</div>
+    <h2 class="fade-in">Assessments</h2>
+    <p class="subtitle fade-in" style="margin-bottom: 1vh;">Befunde aus mehreren Probes zu einem Gesundheitswert pro Entit&auml;t aggregieren.</p>
+    <div class="card-grid fade-in" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));">
+      <div class="card">
+        <div class="card-title">Material Gesamt</div>
+        <div class="card-desc">Alle Material-Probes</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Material Gesundheit</div>
+        <div class="card-desc">I/O, Trend, Preise, Haltbarkeit, Marge</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Material Compliance</div>
+        <div class="card-desc">Regulatorik &amp; R&uuml;ckverfolgbarkeit</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Verrechnungsqualit&auml;t</div>
+        <div class="card-desc">Duplikate, Waisen, Integrit&auml;t</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Fall-Finanzintegrit&auml;t</div>
+        <div class="card-desc">Erl&ouml;sverlust, KST-Abweichung</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Ein Material, das von <span class="highlight">3 Probes</span> mit CHF 100K Risiko markiert wird &ne; eines mit 1 Probe und CHF 10K. Assessments erfassen das.
+    </p>
+  </div>
+
+  <!-- S18 — Schicht 3: Hypothesen -->
+  <div class="slide">
+    <div class="logo fade-in">Schicht 3</div>
+    <h2 class="fade-in">Hypothesen</h2>
+    <p class="subtitle fade-in" style="margin-bottom: 1vh;">Gesch&auml;ftsfragen in nat&uuml;rlicher Sprache, ausgewertet gegen Probe-Evidenz.</p>
+    <div class="two-col fade-in">
+      <div class="col">
+        <ul class="hyp-list">
+          <li><span class="badge badge-financial">REVO</span> Materialien verbraucht, aber nicht verrechnet?</li>
+          <li><span class="badge badge-financial">DUPL</span> Gleiches Ereignis doppelt verrechnet?</li>
+          <li><span class="badge badge-data">PHAN</span> Verrechnung f&uuml;r nicht existierende F&auml;lle?</li>
+          <li><span class="badge badge-data">STAL</span> Artikelkatalog veraltet?</li>
+          <li><span class="badge badge-financial">COMA</span> Kosten am falschen Ort?</li>
+          <li><span class="badge badge-compliance">COGA</span> Kontrollierte Substanzen r&uuml;ckverfolgbar?</li>
+          <li><span class="badge badge-financial">XILE</span> Materialien zwischen Standorten unverfolgt?</li>
+          <li><span class="badge badge-financial">GENO</span> &Uuml;berzahlung f&uuml;r Generika?</li>
+          <li><span class="badge badge-operational">IOIM</span> Mehr rein als raus?</li>
+        </ul>
+      </div>
+      <div class="col-narrow" style="padding-top: 0.5vh;">
+        <div class="stat" style="margin-bottom: 1.5vh;">
+          <div class="stat-num" style="font-size: clamp(1.2rem, 2vw, 1.8rem);">4</div>
+          <div class="stat-label">Verdicts<br><small>best&auml;tigt &middot; plausibel &middot; nicht beobachtet &middot; unzureichend</small></div>
+        </div>
+        <div class="callout info" style="font-size: clamp(0.68rem, 0.85vw, 0.78rem); padding: 1vh 1vw;">
+          Gleiche Hypothesen &uuml;ber alle Spit&auml;ler. Gleiche Frage, andere Daten, andere Verdicts.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S19 — Schicht 4: Diagnosen -->
+  <div class="slide">
+    <div class="logo fade-in">Schicht 4</div>
+    <h2 class="fade-in">Diagnosen</h2>
+    <p class="subtitle fade-in" style="margin-bottom: 1vh;">Warum ist eine best&auml;tigte Hypothese wahr? Strukturierte Ursachenanalyse.</p>
+    <table class="data-table fade-in" style="max-width: 800px;">
+      <thead>
+        <tr><th>Kategorie</th><th>Beschreibung</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>process_failure</code></td><td>Unterbrochener oder unvollst&auml;ndiger Gesch&auml;ftsprozess</td></tr>
+        <tr><td><code>system_failure</code></td><td>IT-Systemfehler oder Integrationsl&uuml;cke</td></tr>
+        <tr><td><code>data_quality</code></td><td>Veraltete, fehlende oder inkonsistente Stammdaten</td></tr>
+        <tr><td><code>behavioral</code></td><td>Menschliche Verhaltensmuster (Workarounds, &uuml;bersprungene Schritte)</td></tr>
+        <tr><td><code>structural</code></td><td>Organisatorische oder vertragliche Fehlausrichtung</td></tr>
+        <tr><td><code>external</code></td><td>Externe Faktoren (Lieferant, Regulierung)</td></tr>
+      </tbody>
+    </table>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      8 Diagnosen definiert. Jede liefert: Ursache + Konfidenz + Erkl&auml;rung + Empfehlung in <span class="highlight">DE / FR / EN</span>.
+    </p>
+  </div>
+
+  <!-- S20 — Schicht 5: Massnahmenlisten -->
+  <div class="slide">
+    <div class="logo fade-in">Schicht 5</div>
+    <h2 class="fade-in">Massnahmenlisten</h2>
+    <p class="subtitle fade-in" style="margin-bottom: 1.5vh;">Die Schicht, die den Kreis schliesst. Aktuell geplant, noch nicht umgesetzt.</p>
+    <div class="flow fade-in">
+      <div class="flow-box teal-filled">Erkennen</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled">Bewerten</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled">Hypothese</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled">Diagnose</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box" style="border-color: var(--slate); border-style: dashed;"><strong>Handeln</strong></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box" style="border-color: var(--slate); border-style: dashed;"><strong>Verifizieren</strong></div>
+    </div>
+    <div class="callout neutral fade-in">
+      Massnahmentypen: <strong>Untersuchen</strong>, <strong>Korrigieren</strong>, <strong>&Uuml;berwachen</strong>, <strong>Akzeptieren</strong>, <strong>Unterdr&uuml;cken</strong>.<br>
+      L&ouml;sungsverfolgung: Befund-Disposition &uuml;ber die Zeit.
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Heute diagnostiziert nuMetrix. Menschen entscheiden und handeln. Morgen schliesst sich der Kreis.
+    </p>
+  </div>
+
+  <!-- S21 — Ein Beispiel durchgehen -->
+  <div class="slide">
+    <div class="logo fade-in">Beispiel</div>
+    <h2 class="fade-in">Ein Beispiel durchgehen</h2>
+    <p class="sc-label fade-in">Erl&ouml;sverlust &mdash; ein Befund, f&uuml;nf Schichten</p>
+    <ol class="action-list fade-in">
+      <li>
+        <span class="action-num teal">1</span>
+        <span><strong>Probe</strong> &mdash; <code>probe_revenue_leakage</code> findet 54'830 Verbrauchsereignisse ohne passende Verrechnung.</span>
+      </li>
+      <li>
+        <span class="action-num teal">2</span>
+        <span><strong>Assessment</strong> &mdash; <code>assessment_case_financial_integrity</code> bewertet 6'661 F&auml;lle als mittleres Risiko.</span>
+      </li>
+      <li>
+        <span class="action-num teal">3</span>
+        <span><strong>Hypothese</strong> &mdash; <span class="badge badge-financial">REVO</span> &laquo;Materialien verbraucht, aber nicht verrechnet?&raquo; &rarr; <span class="badge badge-confirmed">Best&auml;tigt</span> (Score 0.67).</span>
+      </li>
+      <li>
+        <span class="action-num teal">4</span>
+        <span><strong>Diagnose</strong> &mdash; <code>diag_billing_workflow_gap</code> &rarr; process_failure, L&uuml;cken in der Verrechnungsschnittstelle.</span>
+      </li>
+      <li>
+        <span class="action-num teal">5</span>
+        <span><strong>Massnahme</strong> &mdash; &laquo;Verrechnungsschnittstellen-Logs f&uuml;r betroffene Kostenstellen pr&uuml;fen.&raquo;</span>
+      </li>
+    </ol>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Vom Symptom zur Empfehlung. Jeder Schritt nachvollziehbar.
+    </p>
+  </div>
+
+  <!-- S22 — Dreisprachig ab Start -->
+  <div class="slide">
+    <div class="logo fade-in">Sprachen</div>
+    <h2 class="fade-in">Dreisprachig ab Start</h2>
+    <div class="card-grid fade-in" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="card">
+        <div class="card-title">Deutsch</div>
+        <div class="card-desc">Hypothesen, Befunde,<br>Diagnosen, Empfehlungen</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Fran&ccedil;ais</div>
+        <div class="card-desc">Hypoth&egrave;ses, r&eacute;sultats,<br>diagnostics, recommandations</div>
+      </div>
+      <div class="card">
+        <div class="card-title">English</div>
+        <div class="card-desc">Hypotheses, findings,<br>diagnoses, recommendations</div>
+      </div>
+    </div>
+    <ul class="impacts fade-in" style="margin-top: 2vh;">
+      <li><span class="bullet teal"></span><span>Jede Befundinterpretation, Hypothesenaussage, Diagnoseerkl&auml;rung und Empfehlung in <strong>DE / FR / EN</strong>.</span></li>
+      <li><span class="bullet indigo"></span><span>Explorer unterst&uuml;tzt <strong>Sprachwechsel</strong>. PDF-Berichte pro Sprache generiert.</span></li>
+      <li><span class="bullet green"></span><span>Keine &Uuml;bersetzungsschicht. <strong>Dreisprachig von Tag eins.</strong></span></li>
+    </ul>
+  </div>
+
+  <!-- S23 — Atempause -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- AKT III: DIE HALTUNG                                        -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S24 — Abschnitt: Die Haltung -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Akt III</div>
+    <h2 class="fade-in">Die Haltung</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Die Ingenieurdisziplin, die Ergebnisse vertrauensw&uuml;rdig macht</p>
+  </div>
+
+  <!-- S25 — Sieben Prinzipien -->
+  <div class="slide">
+    <div class="logo fade-in">Prinzipien</div>
+    <h2 class="fade-in">Sieben Prinzipien</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><strong>Kein stilles Filtern</strong> &mdash; ung&uuml;ltige Zeilen werden markiert, nicht entfernt</span></li>
+      <li><span class="bullet teal"></span><span><strong>Qualit&auml;t ist abfragbar</strong> &mdash; Datenqualit&auml;t ist ein Befund, keine Fussnote</span></li>
+      <li><span class="bullet teal"></span><span><strong>Jede Zahl ist nachvollziehbar</strong> &mdash; Befund &rarr; Probe &rarr; Entit&auml;t &rarr; Quellzeile</span></li>
+      <li><span class="bullet teal"></span><span><strong>Befunde, keine Meinungen</strong> &mdash; Schweregrad und money_at_risk, nicht &laquo;gut&raquo; oder &laquo;schlecht&raquo;</span></li>
+      <li><span class="bullet teal"></span><span><strong>Schichtverantwortung darf nicht lecken</strong> &mdash; Bronze / Silver / Gold haben je eine Aufgabe</span></li>
+      <li><span class="bullet teal"></span><span><strong>Gold ist der Produktvertrag</strong> &mdash; alles Nachgelagerte programmiert gegen Gold</span></li>
+      <li><span class="bullet teal"></span><span><strong>Privacy by Design</strong> &mdash; alle IDs sind pseudonymisierte Token</span></li>
+    </ul>
+  </div>
+
+  <!-- S26 — Pr&uuml;fbare Probes -->
+  <div class="slide">
+    <div class="logo fade-in">Pr&uuml;fbarkeit</div>
+    <h2 class="fade-in">Pr&uuml;fbare Probes</h2>
+    <div class="flow fade-in">
+      <div class="flow-box">probes/*.yaml</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box filled">probecompile.py</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled">dbt SQL</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Befunde</div>
+    </div>
+    <ul class="impacts fade-in" style="margin-top: 2vh;">
+      <li><span class="bullet teal"></span><span>YAML-definiert, versionskontrolliert, zu SQL kompiliert.</span></li>
+      <li><span class="bullet indigo"></span><span>Jeder Probe hat: <code>probe_id</code>, <code>version</code>, klare Fragestellung, definierte Schwellenwerte.</span></li>
+      <li><span class="bullet green"></span><span>12 Probe-Typen: balance, duplicate, mandatory_item, ratio, trend, temporal_sequence, distribution_outlier, silver_audit, entity_filter, hand_written, enrichment, reconciliation.</span></li>
+    </ul>
+    <div class="callout info fade-in">
+      Ein Revisor kann die Probe-Definition lesen, verstehen was gepr&uuml;ft wird, das SQL verifizieren und jeden Befund bis zur Quellzeile zur&uuml;ckverfolgen.
+    </div>
+  </div>
+
+  <!-- S27 — Kalibriert, nicht nur getestet -->
+  <div class="slide">
+    <div class="logo fade-in">Kalibrierung</div>
+    <h2 class="fade-in">Kalibriert, nicht nur getestet</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">Synthetische Mandanten</div>
+        <div class="compare-text">
+          <strong>4 Mandanten</strong> mit kalibrierten Fehlerraten.<br>
+          Bekannte Seeds, bekannte Injektionsraten.<br>
+          Deterministisch &mdash; gleicher Seed = gleiche Daten.<br><br>
+          Precision / Recall-Messung gegen <strong>bekannte Defekte</strong>.
+        </div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">Reale Daten</div>
+        <div class="compare-text">
+          <strong>1 Mandant</strong> &mdash; Schweizer Regionalspital.<br>
+          68K Episoden, 2.4M Verrechnungsereignisse, CHF 33M.<br><br>
+          Probe-Validierung gegen <strong>Produktionsdaten</strong>.
+        </div>
+      </div>
+    </div>
+    <div class="callout teal fade-in">
+      Synthetische Mandanten beweisen, dass die Probes Defekte finden <em>k&ouml;nnen</em>. Reale Daten beweisen, dass sie es <em>tun</em>.
+    </div>
+  </div>
+
+  <!-- S28 — Der Explorer -->
+  <div class="slide">
+    <div class="logo fade-in">Explorer</div>
+    <h2 class="fade-in">Der Explorer</h2>
+    <p class="subtitle fade-in" style="margin-bottom: 1vh;">Kein Dashboard. Ein Untersuchungswerkzeug.</p>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><strong>Datengetriebene Dimensionen</strong> &mdash; erkennt Entit&auml;ten automatisch aus dem Schema, kein Hardcoding</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Probe-Befundkatalog</strong> &mdash; alle Befunde durchsuchen mit dreisprachiger Interpretation</span></li>
+      <li><span class="bullet green"></span><span><strong>Entit&auml;t-Detailseiten</strong> &mdash; jeden Fall, jedes Material, jede Kostenstelle mit verwandten Fakten aufschl&uuml;sseln</span></li>
+      <li><span class="bullet purple"></span><span><strong>Taxonomie-Browser</strong> &mdash; Kostenstellen-Hierarchien, ATC-Arzneimittelcodes, MiGEL-Codes</span></li>
+      <li><span class="bullet amber"></span><span><strong>&Uuml;berall navigierbar</strong> &mdash; Hypothese &rarr; Evidenzkette &rarr; Probes &rarr; Befunde &rarr; Entit&auml;ten</span></li>
+    </ul>
+    <div class="callout info fade-in">
+      SvelteKit-App. DE / FR / EN Sprachwechsel. Liest DuckDB read-only &mdash; keine Lock-Konflikte.
+    </div>
+  </div>
+
+  <!-- S29 — Atempause -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- AKT IV: ARCHITEKTUR                                         -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S30 — Abschnitt: Architektur -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Akt IV</div>
+    <h2 class="fade-in">Architektur</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Moderne Technologie. Stabiles Ger&uuml;st.</p>
+  </div>
+
+  <!-- S31 — Der Stack -->
+  <div class="slide">
+    <div class="logo fade-in">Stack</div>
+    <h2 class="fade-in">Der Stack</h2>
+    <div class="card-grid fade-in" style="grid-template-columns: repeat(3, 1fr);">
+      <div class="card">
+        <div class="card-title">dbt + DuckDB</div>
+        <div class="card-desc">Pipeline &amp; Warehouse<br>In-Process, kein Server</div>
+      </div>
+      <div class="card">
+        <div class="card-title">SvelteKit</div>
+        <div class="card-desc">Explorer-App<br>Untersuchungsoberfl&auml;che</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Dagster</div>
+        <div class="card-desc">Orchestrierung<br>Automatischer Rebuild</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Evidence.dev</div>
+        <div class="card-desc">Statisches BI-Dashboard<br>Spital&uuml;bergreifende Sicht</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Python</div>
+        <div class="card-desc">Compiler, Validatoren<br>Datengenerierung</div>
+      </div>
+      <div class="card">
+        <div class="card-title">YAML + JSON</div>
+        <div class="card-desc">Gesamte Fachlogik<br>Deklarativ</div>
+      </div>
+    </div>
+    <div class="callout teal fade-in">
+      Keine Cloud-Abh&auml;ngigkeit. L&auml;uft auf einem Laptop. Lieferbar als statische Seite oder Desktop-App (Tauri).
+    </div>
+  </div>
+
+  <!-- S32 — KI als Fachexperte -->
+  <div class="slide">
+    <div class="logo fade-in">KI-Rolle</div>
+    <h2 class="fade-in">KI als Fachexperte</h2>
+    <p class="subtitle fade-in" style="margin-bottom: 1vh;">Was KI zu nuMetrix beigetragen hat:</p>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><strong>ERP-Datenformate</strong> &mdash; OPALE-CSV-Schemata, SAP-MM-Tabellen, Navision-Konventionen</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Betriebswissen</strong> &mdash; Bewegungsarten, DRG-Abrechnungsregeln, I/O-Koeffizienten</span></li>
+      <li><span class="bullet purple"></span><span><strong>Medizin &amp; Regulierung</strong> &mdash; Implantat-R&uuml;ckverfolgbarkeit, Bet&auml;ubungsmittelgesetz, MiGEL-Codes, KVG-Pflichten</span></li>
+    </ul>
+    <div class="callout info fade-in">
+      Kein Spital-Beratungsmandat. Keine sechsmonatige Analysephase.<br>
+      KI lieferte das Fachwissen. Das Framework machte es nutzbar.
+    </div>
+    <div class="callout warn fade-in" style="margin-top: 1vh;">
+      KI ist der Multiplikator. Das Framework ist das Fundament.<br>
+      Ohne Ger&uuml;st ist KI Halluzination. Ohne KI dauert das Ger&uuml;st Jahre.
+    </div>
+  </div>
+
+  <!-- S33 — Atempause -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- AKT V: DER WEG NACH VORN                                    -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S34 — Abschnitt: Der Weg nach vorn -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Akt V</div>
+    <h2 class="fade-in">Der Weg nach vorn</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Was gebaut ist. Was als N&auml;chstes kommt. Wohin das f&uuml;hrt.</p>
+  </div>
+
+  <!-- S35 — Was gebaut ist -->
+  <div class="slide">
+    <div class="logo fade-in">Gebaut</div>
+    <h2 class="fade-in">Was gebaut ist</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num">5</div>
+        <div class="stat-label">Mandanten<br><small>4 synthetisch + 1 real</small></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3</div>
+        <div class="stat-label">Quellsysteme</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">24 + 5</div>
+        <div class="stat-label">Probes + Assessments</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">9</div>
+        <div class="stat-label">Hypothesen</div>
+      </div>
+    </div>
+    <div class="stats fade-in" style="margin-top: 1vh;">
+      <div class="stat">
+        <div class="stat-num">8</div>
+        <div class="stat-label">Diagnosen</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">29</div>
+        <div class="stat-label">Platform-Modelle</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3</div>
+        <div class="stat-label">PDF-Berichtstypen<br><small>DE / FR / EN</small></div>
+      </div>
+      <div class="stat">
+        <div class="stat-num navy">Explorer</div>
+        <div class="stat-label">SvelteKit-App<br><small>DE / FR / EN</small></div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Bew&auml;hrt an echten Spitaldaten: <span class="highlight">68K Episoden, 2.4M Verrechnungsereignisse, CHF 33M Materialfluss</span>.
+    </p>
+  </div>
+
+  <!-- S36 — Was als N&auml;chstes kommt -->
+  <div class="slide">
+    <div class="logo fade-in">Ausblick</div>
+    <h2 class="fade-in">Was als N&auml;chstes kommt</h2>
+    <ol class="action-list fade-in">
+      <li>
+        <span class="action-num teal">1</span>
+        <span><strong>Massnahmenlisten</strong> &mdash; Den Kreis von Erkennung bis L&ouml;sung schliessen. Befund-Dispositionsverfolgung.</span>
+      </li>
+      <li>
+        <span class="action-num teal">2</span>
+        <span><strong>Temporale Modellierung</strong> &mdash; SCD-Typ-2-Snapshots f&uuml;r historische Genauigkeit. Ver&auml;nderungen &uuml;ber die Zeit verfolgen.</span>
+      </li>
+      <li>
+        <span class="action-num teal">3</span>
+        <span><strong>Konfigurierbare Probes</strong> &mdash; Anwendbar auf spezifische Materialgruppen, Preisbereiche, Kostenstellen.</span>
+      </li>
+      <li>
+        <span class="action-num amber">4</span>
+        <span><strong>Forward Compiler</strong> &mdash; Nat&uuml;rliche Sprache &rarr; Probe-YAML. Eine Pr&uuml;fung in Worten beschreiben, einen Probe erhalten.</span>
+      </li>
+      <li>
+        <span class="action-num amber">5</span>
+        <span><strong>Cloud-Deployment</strong> &mdash; Hybrides Modell: Verarbeitung lokal, Exploration &uuml;ber DuckDB-WASM im Browser. Zero-Server-Analytik.</span>
+      </li>
+      <li>
+        <span class="action-num amber">6</span>
+        <span><strong>Automatisierte Aufnahme</strong> &mdash; SFTP / Upload-Endpunkt. Von manuellen CSV-Drops zu geplanter Pipeline.</span>
+      </li>
+    </ol>
+  </div>
+
+  <!-- S37 — Abschluss -->
+  <div class="slide">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in" style="line-height: 1.3;">Ein System,<br>das Vertrauen verdient</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      nuMetrix ersetzt kein menschliches Urteil.<br>
+      Es liefert die Evidenzbasis daf&uuml;r.
+    </p>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      Jeder Befund ist nachvollziehbar. Jeder Probe ist pr&uuml;fbar.<br>
+      Jede Ursache hat eine Empfehlung.
+    </p>
+    <p class="subtitle fade-in" style="margin-top: 2vh; opacity: 0.5;">
+      nuMetrix &mdash; Februar 2026
+    </p>
+  </div>
+
+  <!-- S38 — Atempause (Ende) -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+</div>
+
+<div class="brand">nuMetrix</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = '\u00b7\u00b7\u00b7';
+    } else {
+      var title = slide.querySelector('h2');
+      var h1 = slide.querySelector('h1');
+      var logo = slide.querySelector('.logo');
+      if (h1) {
+        label.textContent = h1.textContent.trim();
+      } else if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var n = 0;
+    for (var j = 0; j <= index; j++) {
+      if (!slides[j].classList.contains('breathing')) n++;
+    }
+    counter.textContent = n + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

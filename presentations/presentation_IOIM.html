@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix — I/O Imbalance: First Use Case</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --accent-glow: rgba(42, 143, 143, 0.08);
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout {
+    display: flex; width: 100%; height: 100%;
+  }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area {
+    flex: 1; position: relative; height: 100%; overflow: hidden;
+  }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 5vh 6vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  /* ── Typography ── */
+  .logo {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 2vh;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2.5vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 2.8vw, 2.3rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 850px;
+  }
+
+  h3 {
+    font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+    font-weight: 600; color: var(--navy);
+    margin-bottom: 0.8vh;
+  }
+
+  .subtitle {
+    font-size: clamp(0.95rem, 1.6vw, 1.3rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+
+  /* ── Staggered fade-in ── */
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 2vh 0;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.2vw; margin-top: 2vh;
+  }
+
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.5vh 1.8vw;
+    font-weight: 600; font-size: clamp(0.78rem, 1vw, 0.95rem);
+    color: var(--navy); text-align: center; min-width: 90px;
+  }
+
+  .flow-box.active-step {
+    background: var(--teal); color: var(--white);
+  }
+
+  .flow-arrow {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Two-column layout ── */
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3vw; width: 100%; max-width: 1000px;
+    text-align: left;
+  }
+
+  .columns p, .columns li {
+    font-size: clamp(0.78rem, 1vw, 0.92rem);
+    line-height: 1.55; color: var(--slate);
+  }
+
+  .columns ul { list-style: none; padding: 0; }
+  .columns ul li { padding: 0.35vh 0 0.35vh 1.2em; position: relative; }
+  .columns ul li::before {
+    content: '';
+    position: absolute; left: 0; top: 1.1em;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--teal);
+  }
+
+  /* ── Step cards ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1.5vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+
+  .step {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2vh 1.5vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .step-num {
+    font-size: clamp(1.6rem, 2.5vw, 2.4rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.6vh;
+  }
+
+  .step-title {
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+
+  .step-desc {
+    font-size: clamp(0.72rem, 0.9vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.45;
+  }
+
+  /* ── Stat cards ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .stat-card {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2vh 1.5vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-value {
+    font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+    font-weight: 800; font-variant-numeric: tabular-nums;
+    line-height: 1.1;
+  }
+
+  .stat-label {
+    font-size: clamp(0.68rem, 0.85vw, 0.8rem);
+    color: var(--warm-gray); margin-top: 0.4vh;
+  }
+
+  /* ── Population bar ── */
+  .pop-bar {
+    display: flex; height: 36px; border-radius: 8px;
+    overflow: hidden; width: 100%; max-width: 900px; margin-top: 1.5vh;
+  }
+
+  .pop-bar div {
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(0.7rem, 0.9vw, 0.85rem);
+    font-weight: 600; color: var(--white);
+  }
+
+  .pop-legend {
+    display: flex; width: 100%; max-width: 900px;
+    font-size: clamp(0.68rem, 0.85vw, 0.8rem);
+    color: var(--warm-gray); margin-top: 0.5vh;
+  }
+
+  /* ── Matrix table ── */
+  .matrix {
+    width: 100%; max-width: 900px;
+    border-collapse: collapse;
+    font-size: clamp(0.75rem, 0.95vw, 0.88rem);
+    margin-top: 1.5vh;
+  }
+
+  .matrix th {
+    text-align: left; padding: 0.6vh 1vw;
+    border-bottom: 2px solid var(--light-gray);
+    color: var(--warm-gray); font-weight: 500;
+    font-size: clamp(0.65rem, 0.8vw, 0.78rem);
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  .matrix th.right, .matrix td.right { text-align: right; }
+
+  .matrix td {
+    padding: 0.5vh 1vw;
+    border-bottom: 1px solid var(--light-gray);
+    vertical-align: middle; color: var(--navy);
+  }
+
+  .matrix tr:last-child td { border-bottom: none; }
+
+  /* ── Bridge visual ── */
+  .bridge {
+    display: flex; align-items: stretch; justify-content: center;
+    gap: 0; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .bridge-side {
+    flex: 1; padding: 2.5vh 2vw;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: flex-start; gap: 0.8vh;
+  }
+
+  .bridge-left {
+    background: var(--green-soft);
+    border: 1px solid rgba(22, 163, 74, 0.2);
+    border-radius: 12px 0 0 12px;
+  }
+
+  .bridge-right {
+    background: var(--red-soft);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    border-radius: 0 12px 12px 0;
+  }
+
+  .bridge-center {
+    width: 50px; min-width: 50px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: linear-gradient(90deg, var(--green-soft), var(--red-soft));
+    font-size: clamp(0.65rem, 0.8vw, 0.75rem);
+    color: var(--warm-gray); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  .bridge-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+
+  .bridge-text {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5; text-align: center;
+  }
+
+  .bridge-table {
+    width: 100%; border-collapse: collapse; margin-top: 0.8vh;
+    font-size: clamp(0.68rem, 0.85vw, 0.8rem);
+  }
+
+  .bridge-table td {
+    padding: 0.25vh 0.5vw; color: var(--slate);
+  }
+
+  .bridge-table td.right { text-align: right; font-weight: 600; }
+
+  /* ── Callout ── */
+  .callout {
+    background: var(--accent-glow);
+    border-left: 4px solid var(--teal);
+    border-radius: 0 8px 8px 0;
+    padding: 1.5vh 1.5vw;
+    max-width: 900px; width: 100%;
+    font-size: clamp(0.78rem, 1vw, 0.92rem);
+    color: var(--navy); line-height: 1.5;
+  }
+
+  .callout.amber { border-left-color: var(--amber); background: var(--amber-soft); }
+  .callout.green { border-left-color: var(--green); background: var(--green-soft); }
+  .callout.red { border-left-color: var(--red); background: var(--red-soft); }
+
+  /* ── Root cause cards ── */
+  .root-causes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .root-card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.2vh 1.5vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .root-icon {
+    font-size: clamp(1.4rem, 2.2vw, 2rem);
+    margin-bottom: 0.6vh;
+  }
+
+  .root-title {
+    font-size: clamp(0.82rem, 1.1vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+
+  .root-desc {
+    font-size: clamp(0.68rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Trace (evidence chain) ── */
+  .trace {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0.8vh; max-width: 700px; width: 100%; margin-top: 2vh;
+  }
+
+  .trace-row {
+    display: flex; align-items: center; gap: 1.5vw; width: 100%;
+  }
+
+  .trace-label {
+    width: 120px; min-width: 120px; text-align: right;
+    font-size: clamp(0.68rem, 0.85vw, 0.8rem);
+    font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  }
+
+  .trace-value {
+    flex: 1;
+    font-size: clamp(0.78rem, 1vw, 0.92rem);
+    color: var(--navy); line-height: 1.4;
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 8px; padding: 1vh 1.2vw;
+    box-shadow: 0 1px 6px rgba(26, 39, 68, 0.03);
+  }
+
+  .trace-down {
+    font-size: clamp(0.9rem, 1.3vw, 1.2rem);
+    color: var(--teal);
+  }
+
+  /* ── Check-list styling ── */
+  .check-list li::before { background: var(--green) !important; }
+  .warn-list li::before { background: var(--amber) !important; }
+
+  /* ── Vertical flow ── */
+  .flow-vertical {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.3vh;
+    margin-top: 1.5vh;
+  }
+
+  .flow-vertical .flow-arrow {
+    font-size: clamp(0.9rem, 1.3vw, 1.2rem);
+  }
+
+  .flow-split {
+    display: flex; gap: 2vw; align-items: flex-start;
+    margin-top: 0.5vh;
+  }
+
+  .flow-branch {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.3vh; text-align: center;
+  }
+
+  .flow-branch .flow-box { min-width: 130px; }
+
+  .flow-note {
+    font-size: clamp(0.65rem, 0.8vw, 0.75rem);
+    color: var(--warm-gray); margin-top: 0.3vh;
+    line-height: 1.3;
+  }
+
+  /* ── Capability cards ── */
+  .capabilities {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .cap-card {
+    background: var(--white); border-radius: 12px;
+    padding: 2vh 1.5vw; text-align: center;
+    border-top: 4px solid var(--teal);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .cap-icon {
+    font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+    margin-bottom: 0.8vh; color: var(--teal);
+  }
+
+  .cap-title {
+    font-size: clamp(0.85rem, 1.1vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+
+  .cap-desc {
+    font-size: clamp(0.68rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.45;
+  }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Branding + counter ── */
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  /* ── Color helpers ── */
+  .c-red { color: var(--red); }
+  .c-green { color: var(--green); }
+  .c-amber { color: var(--amber); }
+  .c-purple { color: var(--purple); }
+  .c-teal { color: var(--teal); }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 4vh 4vw; }
+    .columns { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+    .root-causes, .capabilities { grid-template-columns: 1fr 1fr; }
+    .bridge { flex-direction: column; }
+    .bridge-left { border-radius: 12px 12px 0 0; }
+    .bridge-right { border-radius: 0 0 12px 12px; }
+    .bridge-center {
+      width: 100%; min-width: unset;
+      height: 36px; flex-direction: row;
+    }
+    .trace-row { flex-direction: column; gap: 0.5vh; }
+    .trace-label { width: auto; text-align: left; }
+    .flow-split { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<div class="sidebar" id="sidebar"></div>
+
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══ 1: Title ═══ -->
+  <div class="slide active">
+    <div class="logo fade-in">nuMetrix &middot; First Use Case</div>
+    <h1 class="fade-in">I/O Imbalance<br><span class="highlight">Measurement</span></h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Material inflow vs. patient-level consumption.<br>
+      Where the gap is, why it exists, and what to do about it.
+    </p>
+    <p class="fade-in" style="margin-top: 3vh; font-size: clamp(0.78rem, 1vw, 0.9rem); color: var(--warm-gray);">
+      SZO (Spitalzentrum Oberwallis) &middot; Brig &amp; Visp<br>
+      Data: 2023&ndash;2024 &middot; 5,393 materials &middot; CHF 1&ndash;99 band
+    </p>
+  </div>
+
+  <!-- ═══ 2: The Challenge ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Challenge</div>
+    <h2 class="fade-in">From 40+ use cases,<br>one was chosen as the <span class="highlight">nucleus</span></h2>
+    <div class="columns fade-in" style="margin-top: 2vh;">
+      <div>
+        <h3>The Agreement</h3>
+        <ul>
+          <li><strong>Measure the ratio</strong> of material consumption (Output) against warehouse-to-ward transfers (Input)</li>
+          <li><strong>CHF 1&ndash;99</strong> &mdash; the middle ground where high-volume untracked leakage occurs</li>
+          <li><strong>Fully automated</strong> evaluation against real data (SZO) and synthetic tenants</li>
+          <li><strong>Revenue Leakage</strong> is four iterations later &mdash; I/O must be stabilized first</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Why This First?</h3>
+        <ul>
+          <li>Items over CHF 1,000 are already tracked manually</li>
+          <li>Items under CHF 1.00 are irrelevant</li>
+          <li>The <strong>CHF 1&ndash;99 band</strong> is where nobody looks &mdash; and where volume hides</li>
+          <li>Count vs. cost: same coefficient (same price on both sides)</li>
+        </ul>
+        <div class="callout amber" style="margin-top: 1.5vh;">
+          <strong>Key insight:</strong> Structural data issues (e.g., mapping 4-digit location codes to 5-digit cost centers) must be resolved before tackling billing tariffs.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 3: The Approach ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Approach</div>
+    <h2 class="fade-in">End-to-end, from CSV intake to verdict</h2>
+    <div class="flow fade-in">
+      <div class="flow-box">Bronze<br><span style="font-weight: 400; font-size: 0.8em; color: var(--warm-gray);">CSV intake</span></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Silver<br><span style="font-weight: 400; font-size: 0.8em; color: var(--warm-gray);">Validation</span></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Gold<br><span style="font-weight: 400; font-size: 0.8em; color: var(--warm-gray);">I/O model</span></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Probes<br><span style="font-weight: 400; font-size: 0.8em; color: var(--warm-gray);">Anomaly detection</span></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box active-step">Hypothesis<br><span style="font-weight: 400; font-size: 0.8em; color: rgba(255,255,255,0.8);">Verdict</span></div>
+    </div>
+    <div class="columns fade-in" style="margin-top: 3vh;">
+      <div>
+        <h3>The Model</h3>
+        <ul>
+          <li><strong>Input</strong> = SUM(quantity) of TRANSFER movements (warehouse &rarr; ward)</li>
+          <li><strong>Output</strong> = SUM(quantity) of patient-level usage</li>
+          <li><strong>Grain</strong>: material &times; month</li>
+          <li><strong>Filter</strong>: standard_price CHF 1&ndash;99</li>
+          <li><strong>Overlap detection</strong>: auto-exclude periods without both-sided data</li>
+        </ul>
+      </div>
+      <div>
+        <h3>The Probes</h3>
+        <ul>
+          <li><strong>I/O coefficient ratio</strong> &mdash; flags &gt;20% deviation from 1.0</li>
+          <li><strong>I/O trend</strong> &mdash; flags worsening drift over time</li>
+          <li><strong>Weekly variants</strong> &mdash; same logic, finer granularity</li>
+          <li><strong>Population filter</strong> &mdash; only materials with both transfer AND usage</li>
+        </ul>
+        <p style="margin-top: 0.8vh; font-size: clamp(0.72rem, 0.9vw, 0.85rem); color: var(--warm-gray);">
+          Severity: <span class="c-red">high</span> (&gt;50% imbalance), <span class="c-amber">medium</span> (&gt;20%)
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 4: Breathing ═══ -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══ 5: Three Populations ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">First Discovery</div>
+    <h2 class="fade-in">Three Populations</h2>
+    <p class="subtitle fade-in" style="margin-bottom: 1vh;">Materials in the CHF 1&ndash;99 band fall into three cleanly separated groups.</p>
+    <div class="pop-bar fade-in">
+      <div style="width: 25%; background: var(--red);">25%</div>
+      <div style="width: 43%; background: var(--teal);">43%</div>
+      <div style="width: 32%; background: var(--purple);">32%</div>
+    </div>
+    <div class="pop-legend fade-in">
+      <div style="width: 25%;">Transfer-only (1,323)</div>
+      <div style="width: 43%;">Both present (2,343)</div>
+      <div style="width: 32%;">Usage-only (1,727)</div>
+    </div>
+    <div class="columns fade-in" style="margin-top: 2vh;">
+      <div>
+        <h3 class="c-red">Transfer-only &mdash; 25%</h3>
+        <p>Delivered to wards, never scanned at patient level.</p>
+        <p style="margin-top: 0.5vh; color: var(--warm-gray); font-size: clamp(0.72rem, 0.9vw, 0.85rem);">Disinfectant wipes, isolation gowns, garbage bags, hand towels. <strong>Ward consumables.</strong> Nurses take from stock without scanning.</p>
+
+        <h3 class="c-purple" style="margin-top: 1.5vh;">Usage-only &mdash; 32%</h3>
+        <p>Patient consumption recorded, zero warehouse transfers.</p>
+        <p style="margin-top: 0.5vh; color: var(--warm-gray); font-size: clamp(0.72rem, 0.9vw, 0.85rem);">Almost entirely <strong>oncology medications</strong> &mdash; Xtandi, Kisqali, Venclyxto, Brukinsa. Dispensed directly from pharmacy.</p>
+      </div>
+      <div>
+        <h3 class="c-teal">Both present &mdash; 43%</h3>
+        <p>The <strong>only</strong> population where I/O coefficient is meaningful.</p>
+        <p style="margin-top: 0.8vh; font-size: clamp(0.9rem, 1.2vw, 1.05rem); font-weight: 600;">Overall coefficient: <span class="c-amber">0.47</span></p>
+        <p style="color: var(--warm-gray); font-size: clamp(0.72rem, 0.9vw, 0.85rem);">Half of what enters the ward never gets documented at patient level.</p>
+        <div class="callout green" style="margin-top: 1.5vh;">
+          <strong>Implication:</strong> The probe must filter to "both present" only. Transfer-only and usage-only are structural, not anomalies. The raw CHF 30.6M shrinks to <strong>CHF 4.3M</strong> after this sharpening.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 6: The Findings ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Findings</div>
+    <h2 class="fade-in">After sharpening: overlap period, both-present only</h2>
+    <div class="stat-grid fade-in">
+      <div class="stat-card">
+        <div class="stat-value c-teal">1,875</div>
+        <div class="stat-label">Findings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value c-amber">CHF 4.3M</div>
+        <div class="stat-label">Value at risk</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color: var(--navy);">923</div>
+        <div class="stat-label">Materials (&ge;100 transfers)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value c-green">0.47</div>
+        <div class="stat-label">Overall coefficient</div>
+      </div>
+    </div>
+    <table class="matrix fade-in">
+      <thead>
+        <tr><th>Category</th><th class="right">Materials</th><th class="right">%</th><th class="right">Avg. coeff.</th><th class="right">CHF at stake</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="c-red">&#9632;</span> Under-recorded (&lt;0.80)</td>
+          <td class="right">657</td>
+          <td class="right">71%</td>
+          <td class="right">0.37</td>
+          <td class="right">CHF 2.20M</td>
+        </tr>
+        <tr>
+          <td><span class="c-green">&#9632;</span> Balanced (0.80&ndash;1.20)</td>
+          <td class="right">220</td>
+          <td class="right">24%</td>
+          <td class="right">0.93</td>
+          <td class="right">CHF 0.25M</td>
+        </tr>
+        <tr>
+          <td><span class="c-purple">&#9632;</span> Over-recorded (&gt;1.20)</td>
+          <td class="right">46</td>
+          <td class="right">5%</td>
+          <td class="right">2.77</td>
+          <td class="right">CHF 0.32M</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout fade-in" style="margin-top: 1.5vh;">
+      <strong>24% are perfectly balanced</strong> &mdash; this proves accurate tracking <em>is</em> possible in this hospital. The question is what separates balanced from unbalanced.
+    </div>
+  </div>
+
+  <!-- ═══ 7: Balanced vs Unbalanced ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Split</div>
+    <h2 class="fade-in">What separates balanced<br>from unbalanced?</h2>
+    <div class="bridge fade-in">
+      <div class="bridge-side bridge-left">
+        <div class="bridge-title" style="color: var(--green);">Balanced (~1.0)</div>
+        <div class="bridge-text">Every unit delivered is documented at patient level</div>
+        <table class="bridge-table">
+          <tr><td>Ringerfundin 500ml</td><td class="right c-green">~1.0</td></tr>
+          <tr><td>NaCl 0.9% Ecobag</td><td class="right c-green">~1.0</td></tr>
+          <tr><td>Cefuroxim 1.5g</td><td class="right c-green">~1.0</td></tr>
+          <tr><td>Esmeron 50mg</td><td class="right c-green">~1.0</td></tr>
+          <tr><td>Sufenta 50mcg</td><td class="right c-green">~1.0</td></tr>
+          <tr><td>Set Desinfection</td><td class="right c-green">~1.0</td></tr>
+        </table>
+        <div class="bridge-text" style="margin-top: 0.8vh;"><strong>OR / anesthesia / imaging</strong><br>Per-patient documentation by protocol</div>
+      </div>
+      <div class="bridge-center">vs</div>
+      <div class="bridge-side bridge-right">
+        <div class="bridge-title" style="color: var(--red);">Under-recorded (&lt;0.50)</div>
+        <div class="bridge-text">Less than half reaches patient records</div>
+        <table class="bridge-table">
+          <tr><td>Ringerfundin 1000ml</td><td class="right c-red">0.31</td></tr>
+          <tr><td>Tena Pants</td><td class="right c-red">0.13</td></tr>
+          <tr><td>Kenacort A 40mg</td><td class="right c-red">0.19</td></tr>
+          <tr><td>EasyPump (infusion)</td><td class="right c-red">0.32</td></tr>
+          <tr><td>Octenisept</td><td class="right c-red">0.23</td></tr>
+          <tr><td>Set sondage v&eacute;sical</td><td class="right c-red">0.30</td></tr>
+        </table>
+        <div class="bridge-text" style="margin-top: 0.8vh;"><strong>Ward consumables</strong><br>Taken from cabinets without scanning</div>
+      </div>
+    </div>
+    <div class="callout amber fade-in" style="margin-top: 1.5vh;">
+      <strong>The Ringerfundin split:</strong> 500ml (anesthesia, per-patient) = coefficient 1.0. 1000ml (ward use, from cabinet) = coefficient 0.31. Same product family, same hospital, different workflow.
+    </div>
+  </div>
+
+  <!-- ═══ 8: Breathing ═══ -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══ 9: Why This Happens ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Root Cause</div>
+    <h2 class="fade-in">The 0.47 coefficient is an<br><span class="highlight">architectural constant</span></h2>
+    <div class="flow-vertical fade-in">
+      <div class="flow-box" style="min-width: 220px;">Warehouse<br><span style="font-weight: 400; font-size: 0.8em; color: var(--warm-gray);">(TRANSFER events)</span></div>
+      <div class="flow-arrow">&darr;</div>
+      <div style="font-size: clamp(0.75rem, 0.95vw, 0.88rem); color: var(--warm-gray); font-weight: 600;">Ward stock / floor stock</div>
+      <div class="flow-split">
+        <div class="flow-branch">
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-box" style="border-color: var(--green);"><span class="c-green">Scanned</span><br>at patient level</div>
+          <div class="flow-note">Coeff &asymp; 1.0<br>24% of both-present</div>
+        </div>
+        <div class="flow-branch">
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-box" style="border-color: var(--red);"><span class="c-red">Not scanned</span><br>(ward use)</div>
+          <div class="flow-note">Transfer-only or<br>coeff &lt; 0.50</div>
+        </div>
+        <div class="flow-branch">
+          <div class="flow-arrow">&darr;</div>
+          <div class="flow-box" style="border-color: var(--purple);"><span class="c-purple">Direct from</span><br>pharmacy</div>
+          <div class="flow-note">Usage-only<br>32% of all materials</div>
+        </div>
+      </div>
+    </div>
+    <div class="columns fade-in" style="margin-top: 2vh;">
+      <div>
+        <ul>
+          <li><strong>OR / anesthesia / radiology</strong>: tight coupling (coeff ~1.0). Every item documented by clinical protocol.</li>
+          <li><strong>Wards</strong>: loose coupling (coeff 0.13&ndash;0.50). Bulk supplies consumed without scanning. By design.</li>
+        </ul>
+      </div>
+      <div>
+        <ul>
+          <li><strong>Pharmacy / specialist units</strong>: no coupling (usage-only). Oncology drugs dispensed directly. Expected.</li>
+          <li><strong>Stable over 24 months</strong> &mdash; Ringerfundin 1000ml stays at 0.26&ndash;0.37. A process feature, not an incident.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 10: Diagnosis ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Automated Diagnosis</div>
+    <h2 class="fade-in">Process failure:<br>inventory &harr; patient-usage disconnect</h2>
+    <div class="columns fade-in" style="margin-top: 1.5vh;">
+      <div>
+        <h3>What the System Found</h3>
+        <ul>
+          <li><strong>Hypothesis:</strong> hyp_io_imbalance &mdash; <span class="c-green" style="font-weight: 600;">Confirmed</span></li>
+          <li><strong>Evidence score:</strong> 5 probes evaluated, strong cross-probe agreement</li>
+          <li><strong>Diagnosis:</strong> process_failure / inventory_patient_usage_disconnect</li>
+          <li><strong>Confidence:</strong> 60% base + 15% boost (trend) + 10% boost (material health)</li>
+        </ul>
+        <div class="callout" style="margin-top: 1.5vh;">
+          <strong>Interpretation:</strong> Inventory transfers significantly exceed patient-level usage for 1,875 materials. The I/O coefficient indicates a disconnect between what enters the ward and what is documented as used.
+        </div>
+      </div>
+      <div>
+        <h3>Evidence Chain</h3>
+        <div class="trace" style="align-items: flex-start; gap: 0.6vh; margin-top: 0.5vh;">
+          <div class="trace-row">
+            <div class="trace-label" style="color: #6d28d9; width: 90px; min-width: 90px;">Primary</div>
+            <div class="trace-value">I/O coefficient ratio probe</div>
+          </div>
+          <div class="trace-row">
+            <div class="trace-label" style="color: var(--teal); width: 90px; min-width: 90px;">Support</div>
+            <div class="trace-value">I/O coefficient trend probe</div>
+          </div>
+          <div class="trace-row">
+            <div class="trace-label" style="color: var(--teal); width: 90px; min-width: 90px;">Support</div>
+            <div class="trace-value">Weekly I/O coefficient</div>
+          </div>
+          <div class="trace-row">
+            <div class="trace-label" style="color: var(--warm-gray); width: 90px; min-width: 90px;">Context</div>
+            <div class="trace-value">Weekly trend</div>
+          </div>
+          <div class="trace-row">
+            <div class="trace-label" style="color: var(--teal); width: 90px; min-width: 90px;">Support</div>
+            <div class="trace-value">Material health assessment</div>
+          </div>
+        </div>
+        <p style="margin-top: 1vh; font-size: clamp(0.72rem, 0.9vw, 0.85rem); color: var(--warm-gray);">
+          All automated. No AI at render time.<br>
+          Template-based interpretations in EN / DE / FR.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 11: Ward-Level Analysis ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Going Deeper</div>
+    <h2 class="fade-in">Ward-level analysis</h2>
+    <p class="subtitle fade-in" style="margin-bottom: 1vh;">Clinical wards and logistics cost centers are <span class="highlight">structurally disjoint</span>. We bridged them via service mandates.</p>
+    <div class="columns fade-in" style="margin-top: 1.5vh;">
+      <div>
+        <h3>The Bridge</h3>
+        <ul>
+          <li><strong>Clinical ward</strong> (requester) &harr; <strong>Sachkosten CC</strong> (provider)</li>
+          <li>222 service mandates, 134 unique ward&ndash;provider pairs</li>
+          <li><strong>99%</strong> of usage CCs have a mandate</li>
+          <li>But only <strong>11 of 47</strong> providers have mapped transfer data</li>
+          <li>23 wards routed to 7 providers &mdash; 33.4% of usage covered</li>
+        </ul>
+        <p style="margin-top: 0.8vh; font-size: clamp(0.72rem, 0.9vw, 0.85rem); color: var(--warm-gray);">Gap is on the Brig side (H3 master data gap). Visp has 90% coverage.</p>
+      </div>
+      <div>
+        <h3>Ward Results</h3>
+        <div class="stat-grid" style="grid-template-columns: 1fr 1fr; gap: 1vw;">
+          <div class="stat-card">
+            <div class="stat-value c-teal" style="font-size: clamp(1.2rem, 2vw, 1.6rem);">20,134</div>
+            <div class="stat-label">Rows computed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="font-size: clamp(1.2rem, 2vw, 1.6rem); color: var(--navy);">23</div>
+            <div class="stat-label">Wards analyzed</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value c-red" style="font-size: clamp(1.2rem, 2vw, 1.6rem);">CHF 909K</div>
+            <div class="stat-label">Over-transferred</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value c-purple" style="font-size: clamp(1.2rem, 2vw, 1.6rem);">CHF 611K</div>
+            <div class="stat-label">Under-transferred</div>
+          </div>
+        </div>
+        <p style="margin-top: 0.8vh; font-size: clamp(0.72rem, 0.9vw, 0.85rem); color: var(--warm-gray);">
+          Top providers: V-Notfallstation and V-IPS serve 12 and 9 wards respectively, with strong positive deltas.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 12: Breathing ═══ -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══ 13: Recommended Actions ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Treatment</div>
+    <h2 class="fade-in">Recommended Actions</h2>
+    <div class="columns fade-in" style="margin-top: 1.5vh;">
+      <div>
+        <h3 class="c-green">Immediate</h3>
+        <ul class="check-list">
+          <li><strong>Focus on highest-volume materials with I/O &lt; 0.5</strong> &mdash; Ringerfundin 1000ml, Tena, Kenacort, EasyPump. These 8 materials alone account for CHF 300K+ in gap.</li>
+          <li><strong>Audit ward scanning workflow</strong> for those materials &mdash; identify where patient-level documentation breaks down.</li>
+          <li><strong>Use balanced materials as benchmark</strong> &mdash; the 220 balanced items prove the system works. Ask: what do OR materials have that ward materials don't?</li>
+        </ul>
+
+        <h3 class="c-amber" style="margin-top: 2vh;">Next Phase</h3>
+        <ul class="warn-list">
+          <li><strong>Classify materials by tracking expectation</strong> &mdash; OR-mandated (expect ~1.0), ward-optional (expect &lt;1.0), pharmacy-direct (expect usage-only).</li>
+          <li><strong>Complete Brig mapping</strong> &mdash; when H3 master data is extended, ward coverage goes from 33% to ~80%.</li>
+        </ul>
+      </div>
+      <div>
+        <h3 class="c-teal">Watch For</h3>
+        <ul>
+          <li><strong>Trend changes</strong> &mdash; A stable 0.30 is a process feature. A <em>drop</em> from 0.90 to 0.30 is an incident. Weekly probes detect this automatically.</li>
+          <li><strong>Over-recorded items</strong> &mdash; Freestyle glucose sensors (coeff 8.3), Novorapid insulin (coeff 21.2). These bypass warehouse. May indicate unbridged supply routes.</li>
+        </ul>
+
+        <div class="callout red" style="margin-top: 2vh;">
+          <strong>What this is NOT about:</strong> Revenue leakage. That requires tariff mapping and insurance billing logic &mdash; four iterations later per the agreed roadmap.
+        </div>
+        <div class="callout green" style="margin-top: 1vh;">
+          <strong>What this IS about:</strong> Making the invisible visible. CHF 4.3M in material value flows through wards with no patient-level documentation. Now we can see it, track it, and act on it.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 14: What We Built ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">What We Built</div>
+    <h2 class="fade-in">Fully automated. Every number is queryable.</h2>
+    <div class="root-causes fade-in" style="grid-template-columns: repeat(2, 1fr); gap: 2vw;">
+      <div class="root-card" style="text-align: left; padding: 2.5vh 2vw;">
+        <div class="root-title" style="font-size: clamp(0.9rem, 1.2vw, 1.05rem); margin-bottom: 1vh;">Gold Models (6)</div>
+        <ul style="list-style: none; padding: 0; font-size: clamp(0.72rem, 0.9vw, 0.85rem); color: var(--slate);">
+          <li style="padding: 0.2vh 0;">&#10003; I/O coefficient (monthly)</li>
+          <li style="padding: 0.2vh 0;">&#10003; I/O coefficient trend (3-month rolling)</li>
+          <li style="padding: 0.2vh 0;">&#10003; I/O by cost center</li>
+          <li style="padding: 0.2vh 0;">&#10003; I/O by ward (service mandate bridge)</li>
+          <li style="padding: 0.2vh 0;">&#10003; Weekly coefficient + weekly trend</li>
+        </ul>
+        <div class="root-title" style="font-size: clamp(0.9rem, 1.2vw, 1.05rem); margin-top: 1.5vh; margin-bottom: 1vh;">Probes (4)</div>
+        <ul style="list-style: none; padding: 0; font-size: clamp(0.72rem, 0.9vw, 0.85rem); color: var(--slate);">
+          <li style="padding: 0.2vh 0;">&#10003; Ratio probe (monthly + weekly)</li>
+          <li style="padding: 0.2vh 0;">&#10003; Trend probe (monthly + weekly)</li>
+        </ul>
+      </div>
+      <div class="root-card" style="text-align: left; padding: 2.5vh 2vw;">
+        <div class="root-title" style="font-size: clamp(0.9rem, 1.2vw, 1.05rem); margin-bottom: 1vh;">Analytics Pyramid</div>
+        <ul style="list-style: none; padding: 0; font-size: clamp(0.72rem, 0.9vw, 0.85rem); color: var(--slate);">
+          <li style="padding: 0.2vh 0;">&#10003; Hypothesis: hyp_io_imbalance (5-probe chain)</li>
+          <li style="padding: 0.2vh 0;">&#10003; Diagnosis: inventory process gap</li>
+          <li style="padding: 0.2vh 0;">&#10003; Platform layer: all models unioned</li>
+          <li style="padding: 0.2vh 0;">&#10003; Evidence page: drill-down dashboard</li>
+          <li style="padding: 0.2vh 0;">&#10003; Explorer: hypothesis detail + presentation</li>
+          <li style="padding: 0.2vh 0;">&#10003; Interpretations: EN / DE / FR</li>
+        </ul>
+        <div class="root-title" style="font-size: clamp(0.9rem, 1.2vw, 1.05rem); margin-top: 1.5vh; margin-bottom: 1vh;">Documentation</div>
+        <ul style="list-style: none; padding: 0; font-size: clamp(0.72rem, 0.9vw, 0.85rem); color: var(--slate);">
+          <li style="padding: 0.2vh 0;">&#10003; Spike design doc</li>
+          <li style="padding: 0.2vh 0;">&#10003; CC mapping analysis</li>
+          <li style="padding: 0.2vh 0;">&#10003; Deep analysis (3 populations)</li>
+          <li style="padding: 0.2vh 0;">&#10003; Ward model design</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 15: Closing ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in" style="font-size: clamp(2.5rem, 5vw, 4rem);"><span class="c-amber">CHF 4.3M</span></h1>
+    <p class="subtitle fade-in" style="font-size: clamp(1.1rem, 1.8vw, 1.5rem); margin-bottom: 3vh;">in undocumented material flow</p>
+    <div class="columns fade-in" style="margin-top: 0;">
+      <div>
+        <h3>We know&hellip;</h3>
+        <ul class="check-list">
+          <li>Exactly which materials are affected (1,875)</li>
+          <li>Why the gap exists (ward scanning workflow)</li>
+          <li>Where it happens (23 wards, 7 providers)</li>
+          <li>That tracking <em>works</em> for 24% of materials</li>
+          <li>That the gap is stable (not worsening)</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Next steps&hellip;</h3>
+        <ul>
+          <li>Audit top-8 materials (CHF 300K+ gap)</li>
+          <li>Classify materials by tracking expectation</li>
+          <li>Complete Brig site mapping</li>
+          <li>Cross-hospital comparison (when data arrives)</li>
+          <li>Revenue leakage (iteration 5, after I/O is stable)</li>
+        </ul>
+      </div>
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="fade-in" style="font-size: clamp(1rem, 1.6vw, 1.3rem); font-weight: 600; text-align: center; color: var(--navy);">
+      The core engine is running.<br>
+      <span class="highlight">Now we plug in the next use case.</span>
+    </p>
+  </div>
+
+</div>
+
+<div class="brand">nuMetrix &middot; February 2026</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  // ── Build thumbnail sidebar ──
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = 'nuMetrix';
+    } else {
+      var title = slide.querySelector('h1, h2');
+      var logo = slide.querySelector('.logo');
+      if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var num = 0;
+    for (var i = 0; i <= index; i++) {
+      if (!slides[i].classList.contains('breathing')) num++;
+    }
+    counter.textContent = num + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

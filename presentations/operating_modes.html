@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Five Operating Modes — Local to Make-as-a-Service</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+    --rose: #e11d48;
+    --rose-soft: #fff1f2;
+    --cyan: #0891b2;
+    --cyan-soft: #ecfeff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout { display: flex; width: 100%; height: 100%; }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+  .thumb.jin-thumb { background: linear-gradient(135deg, #1a3a4a 0%, #0f2938 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label,
+  .thumb.jin-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area { flex: 1; position: relative; height: 100%; overflow: hidden; }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 7vh 10vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 2vh;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2.5vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 2.8vw, 2.3rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.95rem, 1.6vw, 1.3rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+  .indigo { color: var(--indigo); font-weight: 500; }
+  .purple { color: var(--purple); }
+  .amber { color: var(--amber); }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 2vh 0;
+  }
+
+  /* ── Section slides ── */
+  .section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+  }
+  .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .section-slide .logo { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  .jin-slide {
+    background: linear-gradient(135deg, #1a3a4a 0%, #0f2938 100%);
+  }
+  .jin-slide h1, .jin-slide h2 { color: var(--white); }
+  .jin-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .jin-slide .logo { color: var(--teal-light); }
+  .jin-slide .divider { background: var(--teal-light); }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.5vw; margin-top: 2vh;
+  }
+
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.5vh 2vw;
+    font-weight: 600; font-size: clamp(0.82rem, 1.1vw, 1rem);
+    color: var(--navy); text-align: center; min-width: 100px;
+  }
+  .flow-box.filled { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .flow-box.teal-filled { background: var(--teal); border-color: var(--teal); color: var(--white); }
+  .flow-box.indigo-filled { background: var(--indigo); border-color: var(--indigo); color: var(--white); }
+  .flow-box.purple-filled { background: var(--purple); border-color: var(--purple); color: var(--white); }
+
+  .flow-arrow {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Stat cards ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2.5vh 1.5vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.6vh;
+  }
+
+  .stat-label {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Impact list ── */
+  .impacts {
+    list-style: none; max-width: 750px; width: 100%; margin-top: 1.5vh;
+  }
+  .impacts li {
+    font-size: clamp(0.9rem, 1.4vw, 1.15rem);
+    line-height: 1.7; color: var(--navy);
+    padding: 0.7vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.1);
+    display: flex; align-items: baseline; gap: 0.8rem;
+  }
+  .impacts li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block; width: 8px; height: 8px; min-width: 8px;
+    border-radius: 50%; margin-top: 0.5em;
+  }
+  .bullet.teal { background: var(--teal); }
+  .bullet.indigo { background: var(--indigo); }
+  .bullet.purple { background: var(--purple); }
+  .bullet.amber { background: var(--amber); }
+  .bullet.green { background: var(--green); }
+
+  /* ── Comparison cards ── */
+  .compare {
+    display: flex; gap: 2.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .compare-card {
+    flex: 1; border-radius: 12px; padding: 2.5vh 2vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+  .compare-card.engine { background: var(--indigo-soft); border: 1px solid #c7d2fe; }
+  .compare-card.domain { background: var(--amber-soft); border: 1px solid #fde68a; }
+  .compare-card.ai { background: var(--purple-soft); border: 1px solid #c4b5fd; }
+  .compare-card.good { background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .compare-card.cyan { background: var(--cyan-soft); border: 1px solid #a5f3fc; }
+
+  .compare-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; margin-bottom: 0.8vh;
+  }
+  .compare-card.engine .compare-title { color: #3730a3; }
+  .compare-card.domain .compare-title { color: #92400e; }
+  .compare-card.ai .compare-title { color: #5b21b6; }
+  .compare-card.good .compare-title { color: #166534; }
+  .compare-card.cyan .compare-title { color: #155e75; }
+
+  .compare-text {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--slate); line-height: 1.5;
+  }
+  .compare-text strong { color: var(--navy); }
+  .compare-text code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9em; background: rgba(0,0,0,0.06);
+    padding: 0.1em 0.4em; border-radius: 3px;
+  }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2vw; max-width: 960px; width: 100%; margin-top: 2vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-icon {
+    font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+    margin-bottom: 0.8vh;
+  }
+  .card-title {
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+  .card-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Cycle diagram ── */
+  .cycle {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; margin-top: 3vh; max-width: 900px;
+  }
+
+  .cycle-phase {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2.5vh 3vw;
+    border-radius: 16px; min-width: 180px;
+    position: relative;
+  }
+
+  .cycle-phase.make { background: var(--indigo-soft); border: 2px solid #c7d2fe; }
+  .cycle-phase.explore { background: var(--cyan-soft); border: 2px solid #a5f3fc; }
+  .cycle-phase.evolve { background: var(--purple-soft); border: 2px solid #c4b5fd; }
+
+  .cycle-verb {
+    font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+    font-weight: 700; margin-bottom: 0.5vh;
+  }
+  .cycle-phase.make .cycle-verb { color: #3730a3; }
+  .cycle-phase.explore .cycle-verb { color: #155e75; }
+  .cycle-phase.evolve .cycle-verb { color: #5b21b6; }
+
+  .cycle-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--slate); text-align: center; line-height: 1.5;
+  }
+
+  .cycle-arrow {
+    font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+    color: var(--teal); font-weight: 300;
+    padding: 0 1vw;
+  }
+
+  /* ── Domain cards (2-col) ── */
+  .domain-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .domain-card {
+    background: var(--white); border-radius: 10px;
+    padding: 2vh 1.5vw; text-align: left;
+    border: 1px solid rgba(42, 143, 143, 0.12);
+    box-shadow: 0 1px 8px rgba(26, 39, 68, 0.03);
+  }
+
+  .domain-name {
+    font-size: clamp(0.85rem, 1.1vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.3vh;
+  }
+
+  .domain-entities {
+    font-size: clamp(0.7rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.4; margin-bottom: 0.5vh;
+  }
+
+  .domain-probes {
+    font-size: clamp(0.68rem, 0.85vw, 0.78rem);
+    color: var(--teal); font-style: italic; line-height: 1.4;
+  }
+
+  /* ── Branding + counter ── */
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 5vh 5vw; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .compare { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+    .domain-grid { grid-template-columns: 1fr; }
+    .cycle { flex-direction: column; }
+    .cycle-arrow { transform: rotate(90deg); }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<div class="sidebar" id="sidebar"></div>
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- TITLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide active jin-slide">
+    <div class="logo fade-in">Operating Modes</div>
+    <h1 class="fade-in">Five topologies.<br>One product.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Pre-make and make. AFS, KLS, SIS.<br>
+      Where things live. Where make happens.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE SPLIT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Split</div>
+    <h2 class="fade-in">The pipeline has two phases.</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><strong>Pre-make</strong> &mdash; preparation. Extracts source data from the DLZ. Fetches notes and bookmarks from the SIS. Writes everything to the AFS. Commits to git. <em>Has side effects.</em></span></li>
+      <li><span class="bullet teal"></span><span><strong>Make</strong> &mdash; build. Reads only from AFS. Writes only to KLS. No SIS mutation. No external fetches. No network calls. <em>A pure function.</em></span></li>
+      <li><span class="bullet teal"></span><span><strong>The cut is the security boundary.</strong> Whoever controls make controls the analytical truth. Every build is reproducible from its AFS commit.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Everything that goes into make is in git.</strong> Auditable. Reversible. Reproducible.</span></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE THREE STORES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Three Stores</div>
+    <h2 class="fade-in">AFS. KLS. SIS.<br>Each has its own role, its own access pattern.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">AFS</div>
+        <div class="compare-text">
+          The <strong>Analytical Framework</strong>.<br>
+          A git repo. YAML instruments.<br>
+          Compiled artifacts, published notes.<br><br>
+          <strong>Read + write</strong> by pre-make and make.
+        </div>
+      </div>
+      <div class="compare-card domain">
+        <div class="compare-title">KLS</div>
+        <div class="compare-text">
+          The <strong>Knowledge Store</strong>.<br>
+          A DuckDB file. Immutable after build.<br>
+          Bronze &rarr; Silver &rarr; Gold &rarr; findings.<br><br>
+          <strong>Written by make. Read by Explorer.</strong>
+        </div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">SIS</div>
+        <div class="compare-text">
+          The <strong>System Information Store</strong>.<br>
+          A DuckDB file. Mutable.<br>
+          Notes, bookmarks, audit, preferences.<br><br>
+          <strong>Messenger and memory. Never in make.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE PIPELINE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Pipeline</div>
+    <h2 class="fade-in">Pre-Make. Make. Explore.</h2>
+    <div class="cycle fade-in">
+      <div class="cycle-phase make">
+        <div class="cycle-verb">Pre-Make</div>
+        <div class="cycle-desc">Extract from DLZ.<br>Fetch SIS notes.<br>Commit to AFS.</div>
+      </div>
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-phase explore">
+        <div class="cycle-verb">Make</div>
+        <div class="cycle-desc">AFS in, KLS out.<br>Pure function.<br>No side effects.</div>
+      </div>
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-phase evolve">
+        <div class="cycle-verb">Explore</div>
+        <div class="cycle-desc">Browse findings.<br>Write notes.<br>Save bookmarks.</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Notes and bookmarks written in Explore go to SIS. Pre-make publishes them to AFS.<br>
+      <span class="highlight">The SIS is the bridge between users who don't have git and the build that needs git.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE FIVE MODES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Five Modes</div>
+    <h2 class="fade-in">Same product. Different placement.</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet indigo"></span><span><strong>1. Local</strong> &mdash; everything on one machine. Developer's laptop. No auth. Simplest and most private.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>2. Proxy (P2P2P)</strong> &mdash; KLS on the owner's machine. Explorer in the cloud. One SIS in the cloud. Your data. Your machine. Their browser.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>3. Cloud (R2)</strong> &mdash; KLS uploaded to Cloudflare R2. Explorer + SIS in the cloud. GitHub OAuth. Always on.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>4. Semi-Cloud</strong> &mdash; KLS stays local (via proxy). SIS in the cloud. For compliance: KLS can't leave, SIS can.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>5. Make-as-a-Service</strong> &mdash; make runs in the cloud. Triggered by git push. No local machine needed. The endgame.</span></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- DECISION TREE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Which Mode?</div>
+    <h2 class="fade-in">Pick by data sensitivity and collaboration</h2>
+    <div class="domain-grid fade-in">
+      <div class="domain-card">
+        <div class="domain-name">Only you use it</div>
+        <div class="domain-entities">Mode 1 &mdash; Local</div>
+        <div class="domain-probes">Simplest. Everything on one machine.</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Multi-viewer, sensitive data</div>
+        <div class="domain-entities">Mode 2 &mdash; Proxy (P2P2P)</div>
+        <div class="domain-probes">KLS stays local. Tunnel serves remote viewers. Ctrl+C unplugs.</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Non-sensitive, always-on</div>
+        <div class="domain-entities">Mode 3 &mdash; Cloud (R2)</div>
+        <div class="domain-probes">Upload KLS. Standard cloud auth. 24/7 availability.</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Compliance: data can't leave</div>
+        <div class="domain-entities">Mode 4 &mdash; Semi-Cloud</div>
+        <div class="domain-probes">KLS stays local via proxy. User activity (SIS) OK in cloud.</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Automated CI/CD builds</div>
+        <div class="domain-entities">Mode 5 &mdash; Make-as-a-Service</div>
+        <div class="domain-probes">Cloud worker runs pre-make + make. Git push triggers.</div>
+      </div>
+      <div class="domain-card">
+        <div class="domain-name">Mixed fleet</div>
+        <div class="domain-entities">All five can coexist</div>
+        <div class="domain-probes">Explorer picker shows cloud tenants, proxy tenants, or both.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- ONE SIS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">One SIS per Tenant</div>
+    <h2 class="fade-in">Messenger and memory.<br>Never split. Never merged.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">Memory (long-term)</div>
+        <div class="compare-text">
+          Notes, bookmarks,<br>
+          acknowledgments, preferences.<br>
+          Notes and bookmarks<br>
+          published to AFS by pre-make.<br><br>
+          <strong>Survives rebuilds.</strong>
+        </div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">Messenger (short-term)</div>
+        <div class="compare-text">
+          Recents (navigation journal),<br>
+          session state, scroll position.<br>
+          Rotated, never published.<br><br>
+          <strong>Ephemeral by design.</strong>
+        </div>
+      </div>
+      <div class="compare-card cyan">
+        <div class="compare-title">One Location</div>
+        <div class="compare-text">
+          Local mode: developer's machine.<br>
+          All cloud modes: in the cloud.<br>
+          Pre-make always knows<br>
+          where to fetch from.<br><br>
+          <strong>No splits. No merge conflicts.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- FLOW -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Flow</div>
+    <h2 class="fade-in">One path. All five modes.</h2>
+    <div class="flow fade-in">
+      <div class="flow-box indigo-filled"><strong>DLZ</strong><br><small>source data</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box indigo-filled"><strong>pre-make</strong><br><small>gather</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box indigo-filled"><strong>AFS</strong><br><small>git</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box indigo-filled"><strong>make</strong><br><small>pure function</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>KLS</strong><br><small>Explorer reads</small></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      In Mode 1, this whole flow runs on the developer's laptop.<br>
+      In Mode 5, it runs in the cloud on git push.<br><br>
+      <span class="highlight">The code paths converge. Only the placement differs.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- CLOSING -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide jin-slide">
+    <div class="logo fade-in">Operating Modes</div>
+    <h1 class="fade-in" style="line-height: 1.3;">One product.<br>Five topologies.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Start with Local for development.<br>
+      Move to Proxy (P2P2P) for sensitive data.<br>
+      Cloud (R2) when you want always-on.<br>
+      Make-as-a-Service when you want CI/CD.<br><br>
+      <span style="color: var(--teal-light); font-weight: 500;">The code paths converge. The security boundary holds.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+</div>
+
+<div class="brand">jinflow.io</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    var isJin = slide.classList.contains('jin-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (isJin) thumb.classList.add('jin-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = 'jinflow';
+    } else {
+      var title = slide.querySelector('h1, h2');
+      var logo = slide.querySelector('.logo');
+      if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var n = 0;
+    for (var j = 0; j <= index; j++) {
+      if (!slides[j].classList.contains('breathing')) n++;
+    }
+    counter.textContent = n + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

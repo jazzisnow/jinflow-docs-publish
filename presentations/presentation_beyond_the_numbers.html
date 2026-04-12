@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix — Beyond the Numbers</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --rose: #e11d48;
+    --rose-soft: #fff1f2;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 7vh 10vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 2vh;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2.5vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 2.8vw, 2.3rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.95rem, 1.6vw, 1.3rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+  .rose { color: var(--rose); font-weight: 500; }
+  .red { color: var(--red); }
+  .green { color: var(--green); }
+  .amber { color: var(--amber); }
+  .purple { color: var(--purple); }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 2vh 0;
+  }
+
+  /* ── Section slide ── */
+  .section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+  }
+  .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .section-slide .logo { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  /* ── Warm section slide (human stories) ── */
+  .warm-slide {
+    background: linear-gradient(135deg, #4a1942 0%, #2d1f3e 100%);
+  }
+  .warm-slide h2 { color: var(--white); }
+  .warm-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .warm-slide .logo { color: #f9a8d4; }
+  .warm-slide .divider { background: #f9a8d4; }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  .quote-large {
+    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    font-weight: 300; font-style: italic; line-height: 1.4;
+    text-align: center; color: var(--navy); max-width: 800px;
+  }
+
+  /* ── Stat cards ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2.5vh 1.5vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.6vh;
+  }
+
+  .stat-num.rose-num { color: var(--rose); }
+
+  .stat-label {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Impact list ── */
+  .impacts {
+    list-style: none; max-width: 750px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .impacts li {
+    font-size: clamp(0.9rem, 1.4vw, 1.15rem);
+    line-height: 1.7; color: var(--navy);
+    padding: 0.7vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.1);
+    display: flex; align-items: baseline; gap: 0.8rem;
+  }
+  .impacts li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block; width: 8px; height: 8px; min-width: 8px;
+    border-radius: 50%; margin-top: 0.5em;
+  }
+  .bullet.teal { background: var(--teal); }
+  .bullet.amber { background: var(--amber); }
+  .bullet.purple { background: var(--purple); }
+  .bullet.red { background: var(--red); }
+  .bullet.green { background: var(--green); }
+  .bullet.rose { background: var(--rose); }
+
+  /* ── Comparison cards ── */
+  .compare {
+    display: flex; gap: 2.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .compare-card {
+    flex: 1; border-radius: 12px; padding: 2.5vh 2vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .compare-card.financial { background: var(--amber-soft); border: 1px solid #fde68a; }
+  .compare-card.clinical { background: var(--rose-soft); border: 1px solid #fecdd3; }
+  .compare-card.career { background: var(--purple-soft); border: 1px solid #c4b5fd; }
+  .compare-card.good { background: var(--green-soft); border: 1px solid #bbf7d0; }
+
+  .compare-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; margin-bottom: 0.8vh;
+  }
+  .compare-card.financial .compare-title { color: #92400e; }
+  .compare-card.clinical .compare-title { color: #9f1239; }
+  .compare-card.career .compare-title { color: #5b21b6; }
+  .compare-card.good .compare-title { color: #166534; }
+
+  .compare-text {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--slate); line-height: 1.5;
+  }
+
+  .compare-text strong { color: var(--navy); }
+
+  /* ── Reframe box ── */
+  .reframe {
+    max-width: 800px; width: 100%; margin-top: 2vh;
+  }
+
+  .reframe-row {
+    display: flex; align-items: stretch; gap: 0;
+    margin-bottom: 1.2vh;
+  }
+
+  .reframe-label {
+    width: 100px; min-width: 100px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px 0 0 8px; padding: 1.2vh 1vw;
+    font-weight: 600; font-size: clamp(0.7rem, 0.95vw, 0.85rem);
+    color: var(--white); text-transform: uppercase; letter-spacing: 0.05em;
+  }
+
+  .reframe-label.fin { background: var(--amber); }
+  .reframe-label.life { background: var(--rose); }
+
+  .reframe-content {
+    flex: 1; padding: 1.2vh 1.5vw;
+    border-radius: 0 8px 8px 0;
+    font-size: clamp(0.82rem, 1.1vw, 0.95rem);
+    line-height: 1.5; color: var(--navy);
+  }
+
+  .reframe-label.fin + .reframe-content { background: var(--amber-soft); }
+  .reframe-label.life + .reframe-content { background: var(--rose-soft); }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2vw; max-width: 960px; width: 100%; margin-top: 2vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-icon {
+    font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+    margin-bottom: 0.8vh;
+  }
+
+  .card-title {
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+
+  .card-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Progress bar ── */
+  .progress-track {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 3px; background: rgba(42, 143, 143, 0.1);
+    z-index: 300;
+  }
+
+  .progress-bar {
+    height: 100%; width: 0;
+    background: var(--teal);
+    transition: width 0.3s ease;
+  }
+
+  /* ── Branding + counter ── */
+  .brand {
+    position: fixed; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: fixed; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .slide { padding: 5vh 5vw; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .compare { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+    .reframe-row { flex-direction: column; }
+    .reframe-label { width: 100%; border-radius: 8px 8px 0 0; }
+    .reframe-content { border-radius: 0 0 8px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-track"><div class="progress-bar" id="progress"></div></div>
+
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- TITLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide active" data-duration="12">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">Beyond the Numbers</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      We talk about money. CHF millions. Revenue leakage.<br>
+      But behind every financial anomaly<br>
+      is a patient. And a person who cares for them.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE SURFACE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="14">
+    <div class="logo fade-in">The Surface</div>
+    <h2 class="fade-in">We built a diagnostic system.<br>It finds millions.</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num">CHF 30M</div>
+        <div class="stat-label">financial anomalies<br>detected at SZO</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">27</div>
+        <div class="stat-label">automated probes<br>running continuously</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">8</div>
+        <div class="stat-label">root cause<br>diagnoses</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">3</div>
+        <div class="stat-label">languages<br>DE / EN / FR</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      The CFO listens. The board nods. The numbers are impressive.<br>
+      <span class="highlight">But this is not the story.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE TURN -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="12">
+    <div class="logo fade-in">The Question</div>
+    <div class="quote-large fade-in">
+      What does a &ldquo;finding&rdquo;<br>
+      actually mean?
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      A finding is not a number on a dashboard.<br>
+      It is something that happened &mdash;<br>
+      or failed to happen &mdash; to a real person.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing" data-duration="4">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: THE PATIENT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide warm-slide" data-duration="7">
+    <div class="logo fade-in">Act I</div>
+    <h2 class="fade-in">The Patient</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Behind every data anomaly is someone who trusted a hospital with their life.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE MISSING IMPLANT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="18">
+    <div class="logo fade-in">The Missing Implant</div>
+    <h2 class="fade-in">A hip replacement.<br>No implant in the usage log.</h2>
+    <div class="reframe fade-in">
+      <div class="reframe-row">
+        <div class="reframe-label fin">Financial</div>
+        <div class="reframe-content">CHF 2,500 at risk. A billing gap. A documentation deficiency.</div>
+      </div>
+      <div class="reframe-row">
+        <div class="reframe-label life">Patient</div>
+        <div class="reframe-content"><strong>A patient who cannot be found if their prosthesis is recalled.</strong> No record of what was implanted. No way to contact them. No way to protect them.</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      The probe sees a missing record.<br>
+      The patient has a hip they trust will last 20 years.<br>
+      <span class="rose">If the manufacturer issues a recall &mdash; the hospital has no list.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 437,034 INVISIBLE UNITS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="18">
+    <div class="logo fade-in">The Invisible Flow</div>
+    <h2 class="fade-in">437,034 units.<br>Zero patient attribution.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card financial">
+        <div class="compare-title">What the data says</div>
+        <div class="compare-text">
+          Material 620260 at SZO.<br>
+          437,034 units transferred from<br>
+          warehouse to ward over 36 months.<br><br>
+          <strong>Zero</strong> documented as used on a patient.<br>
+          CHF 17.8M in material flow with no attribution.
+        </div>
+      </div>
+      <div class="compare-card clinical">
+        <div class="compare-title">What it means</div>
+        <div class="compare-text">
+          If this material is subject to a safety recall tomorrow,<br>
+          <strong>there is no patient list.</strong><br><br>
+          Not because the hospital is negligent.<br>
+          Because the system does not require it.<br>
+          The gap is invisible until you look.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- EXPIRED ONCOLOGY CATALOGUE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="20">
+    <div class="logo fade-in">The Stale Catalogue</div>
+    <h2 class="fade-in">CHF 3.1M in expired oncology entries.<br>Still actively administered.</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet rose"></span><span><strong>Opdivo 240mg</strong> &mdash; CHF 879K billed against a catalogue entry that expired 18 months ago. Immunotherapy. A nurse looking up dosing information works from stale data.</span></li>
+      <li><span class="bullet rose"></span><span><strong>Pelgraz 6mg</strong> &mdash; CHF 394K. The catalogue entry references an old formulation. If the approved indications changed, clinical staff may not know.</span></li>
+      <li><span class="bullet rose"></span><span><strong>Ibrance 125mg</strong> &mdash; CHF 220K. High-cost oncology capsules. Expired entries may carry superseded contraindication warnings.</span></li>
+    </ul>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      The probe detects a billing risk. The clinical reality:<br>
+      <span class="rose">care decisions are being made with outdated reference data.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- OR VS WARD -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="16">
+    <div class="logo fade-in">The Proof</div>
+    <h2 class="fade-in">The OR tracks at 100%.<br>The ward tracks at 31%.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card good">
+        <div class="compare-title">Operating Room</div>
+        <div class="compare-text">
+          I/O coefficient &asymp; 1.0<br><br>
+          Every suture, every IV bag, every drug vial<br>
+          documented per patient. Because anaesthesia<br>
+          and surgical protocols <strong>require</strong> it.<br><br>
+          The capability exists.
+        </div>
+      </div>
+      <div class="compare-card clinical">
+        <div class="compare-title">General Ward</div>
+        <div class="compare-text">
+          I/O coefficient &asymp; 0.31<br><br>
+          For every 100 units sent to the ward,<br>
+          only 31 are attributed to a patient.<br>
+          Rational under DRG lump-sum billing.<br><br>
+          <strong>But not neutral for patient safety.</strong>
+        </div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      The gap is not a limitation. It is a choice.<br>
+      The OR proves the capability. The ward reveals the trade-off.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing" data-duration="4">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: THE CAREER -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide warm-slide" data-duration="7">
+    <div class="logo fade-in">Act II</div>
+    <h2 class="fade-in">The Career</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Behind every compliance gap is a person who carries the risk.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- CONTROLLED SUBSTANCES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="18">
+    <div class="logo fade-in">Controlled Substances</div>
+    <h2 class="fade-in">Not an institutional compliance risk.<br>A personal criminal liability.</h2>
+    <div class="reframe fade-in">
+      <div class="reframe-row">
+        <div class="reframe-label fin">Financial</div>
+        <div class="reframe-content">Unaccounted stock. Reconciliation gap. Regulatory finding in the next audit.</div>
+      </div>
+      <div class="reframe-row">
+        <div class="reframe-label life">Career</div>
+        <div class="reframe-content"><strong>The Narcotics Act (BtMG) makes individuals personally liable.</strong> The pharmacist. The ward nurse. The department head. Named people. Not the institution.</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      At SZO, the controlled substance field is 0% populated.<br>
+      The probe <em>cannot run</em>. The gap is not detected &mdash; it is <span class="rose">invisible</span>.<br>
+      Which is worse than a confirmed finding.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE NURSE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="16">
+    <div class="logo fade-in">The Nurse</div>
+    <div class="quote fade-in">
+      She is not a fraudster.<br>
+      She is not negligent.<br>
+      She is following a rational workflow<br>
+      in a constrained system.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      A ward nurse who doesn't scan every IV bag<br>
+      is not doing something wrong. She is doing what the system allows.<br>
+      The gap is not personal. <span class="highlight">The gap is systemic.</span><br><br>
+      But when something goes wrong &mdash;<br>
+      the investigation looks at <em>individuals</em>.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- BILLING ANOMALIES IN COURT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="16">
+    <div class="logo fade-in">Context Changes Everything</div>
+    <h2 class="fade-in">A billing event timestamped<br>before the material was used.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card financial">
+        <div class="compare-title">In an audit</div>
+        <div class="compare-text">
+          A data entry error.<br>
+          A clock synchronisation issue.<br>
+          A rounding artefact.<br><br>
+          Severity: <strong>medium.</strong><br>
+          Explanation: technical.
+        </div>
+      </div>
+      <div class="compare-card career">
+        <div class="compare-title">In litigation</div>
+        <div class="compare-text">
+          Evidence of record manipulation.<br>
+          A charge created to justify a cost<br>
+          that had not yet been incurred.<br><br>
+          Severity: <strong>career-ending.</strong><br>
+          Explanation: required under oath.
+        </div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      The same data point. Two interpretations.<br>
+      <span class="rose">The difference is who is asking &mdash; and why.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing" data-duration="4">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: THE BRIDGE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide warm-slide" data-duration="7">
+    <div class="logo fade-in">Act III</div>
+    <h2 class="fade-in">The Bridge</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">From financial detection to clinical protection.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- EVERY ANOMALY IS A CONVERSATION -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="16">
+    <div class="logo fade-in">The Conversation</div>
+    <h2 class="fade-in">Every financial anomaly<br>is a clinical safety conversation<br>waiting to happen.</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet rose"></span><span>The revenue leakage finding leads to a <strong>floor conversation</strong> with the ward about scanning workflows.</span></li>
+      <li><span class="bullet rose"></span><span>That conversation changes <strong>documentation practices</strong> &mdash; what gets recorded, when, by whom.</span></li>
+      <li><span class="bullet rose"></span><span>Those practices determine whether the next patient's care is <strong>fully traceable</strong>.</span></li>
+      <li><span class="bullet teal"></span><span>The financial fix and the patient safety improvement are <strong>the same intervention</strong>.</span></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE NETWORK EFFECT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="14">
+    <div class="logo fade-in">The Network</div>
+    <h2 class="fade-in">Shared learning.<br>No single hospital learns fast enough.</h2>
+    <div class="card-grid fade-in">
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--teal);">A</div>
+        <div class="card-title">Hospital A</div>
+        <div class="card-desc">Detects a billing workflow gap. Retrains ward staff on scanner protocols. Documentation improves. Finding disappears in 3 weeks.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--teal);">B</div>
+        <div class="card-title">Hospital B</div>
+        <div class="card-desc">Same diagnosis appears. The system suggests: &ldquo;Hospital A resolved this via staff retraining &mdash; 3 weeks, effective.&rdquo;</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--rose);">N</div>
+        <div class="card-title">The Network</div>
+        <div class="card-desc">Every resolved diagnosis becomes institutional knowledge. Financial interventions that also protect patients &mdash; shared across the system.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- EVIDENCE FOR THE DILIGENT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="18">
+    <div class="logo fade-in">The Shield</div>
+    <h2 class="fade-in">The diligent deserve evidence.</h2>
+    <p class="subtitle fade-in">
+      When the audit comes. When the recall happens.<br>
+      When the litigation starts.<br><br>
+      Who has the documentation?
+    </p>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      A hospital that runs systematic, automated, reproducible<br>
+      diagnostic checks can demonstrate <span class="highlight">due diligence</span>.<br><br>
+      A hospital that relies on year-end manual reconciliation cannot.<br><br>
+      nuMetrix provides the <strong>evidence chain</strong><br>
+      that protects the people who do the right thing.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- LEARNING WITHOUT BLAME -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="14">
+    <div class="logo fade-in">Without Blame</div>
+    <div class="quote fade-in">
+      The system flags anomalies.<br>
+      It does not assign blame.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      A probe detects the gap. A diagnosis attributes it to<br>
+      <em>process failure</em>, <em>system failure</em>, or <em>structural misalignment</em>.<br><br>
+      The treatment layer prescribes investigation &mdash; not punishment.<br><br>
+      <span class="highlight">Learning without blame. Evolution without accusation.<br>Decisions without pretending certainty.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing" data-duration="5">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: THE POINT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide warm-slide" data-duration="7">
+    <div class="logo fade-in">The Point</div>
+    <h2 class="fade-in">Why We Do This</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">It was never just about the money.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THREE THINGS WE PROTECT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="18">
+    <div class="logo fade-in">What We Protect</div>
+    <h2 class="fade-in">Three things. In this order.</h2>
+    <div class="stats fade-in">
+      <div class="stat" style="border-color: rgba(225, 29, 72, 0.3);">
+        <div class="stat-num rose-num">1</div>
+        <div class="stat-label" style="font-size: clamp(0.85rem, 1.1vw, 1rem); color: var(--navy); font-weight: 500;">Lives</div>
+        <div class="stat-label" style="margin-top: 0.4vh;">Patients who trust<br>hospitals with their bodies</div>
+      </div>
+      <div class="stat" style="border-color: rgba(124, 58, 237, 0.3);">
+        <div class="stat-num" style="color: var(--purple);">2</div>
+        <div class="stat-label" style="font-size: clamp(0.85rem, 1.1vw, 1rem); color: var(--navy); font-weight: 500;">Careers</div>
+        <div class="stat-label" style="margin-top: 0.4vh;">Nurses, pharmacists, doctors<br>who carry the daily risk</div>
+      </div>
+      <div class="stat" style="border-color: rgba(42, 143, 143, 0.3);">
+        <div class="stat-num">3</div>
+        <div class="stat-label" style="font-size: clamp(0.85rem, 1.1vw, 1rem); color: var(--navy); font-weight: 500;">Money</div>
+        <div class="stat-label" style="margin-top: 0.4vh;">The resource that enables<br>everything above</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      The money matters because it funds the care.<br>
+      The career matters because it sustains the people.<br>
+      <span class="rose">The life matters because it is the reason we are here.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- CLOSING -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide" data-duration="22">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in" style="line-height: 1.3;">The money is the symptom.<br><span style="color: var(--rose);">The patient is the point.</span></h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Every probe we build. Every hypothesis we test.<br>
+      Every diagnosis we explain.<br><br>
+      It all flows toward the same thing:<br>
+      <span class="highlight">making the invisible visible</span> &mdash;<br>
+      so that the people who care for patients<br>
+      can do so with better data, better systems,<br>
+      and the evidence to prove they tried.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing" data-duration="6">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+</div>
+
+<div class="brand">nuMetrix</div>
+<div class="slide-counter" id="counter"></div>
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var counter = document.getElementById('counter');
+  var progress = document.getElementById('progress');
+  var current = 0;
+  var timer = null;
+  var paused = false;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  // ── Compute total duration for progress bar ──
+  var totalDuration = 0;
+  var cumulativeDurations = [];
+  slides.forEach(function(s) {
+    cumulativeDurations.push(totalDuration);
+    totalDuration += parseInt(s.getAttribute('data-duration') || '10', 10);
+  });
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var n = 0;
+    for (var j = 0; j <= index; j++) {
+      if (!slides[j].classList.contains('breathing')) n++;
+    }
+    counter.textContent = n + ' / ' + contentTotal;
+  }
+
+  function updateProgress(index) {
+    var pct = (cumulativeDurations[index] / totalDuration) * 100;
+    progress.style.width = pct + '%';
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+    updateCounter(index);
+    updateProgress(index);
+  }
+
+  function scheduleNext() {
+    clearTimeout(timer);
+    if (paused) return;
+    var duration = parseInt(slides[current].getAttribute('data-duration') || '10', 10);
+    timer = setTimeout(function() {
+      if (current < slides.length - 1) {
+        current++;
+        show(current);
+        scheduleNext();
+      } else {
+        progress.style.width = '100%';
+      }
+    }, duration * 1000);
+  }
+
+  function advance() {
+    clearTimeout(timer);
+    if (current < slides.length - 1) {
+      current++;
+      show(current);
+      scheduleNext();
+    }
+  }
+
+  function back() {
+    clearTimeout(timer);
+    if (current > 0) {
+      current--;
+      show(current);
+      scheduleNext();
+    }
+  }
+
+  function togglePause() {
+    paused = !paused;
+    if (!paused) scheduleNext();
+    else clearTimeout(timer);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === ' ') {
+      e.preventDefault(); togglePause();
+    }
+  });
+
+  document.addEventListener('click', function() {
+    advance();
+  });
+
+  show(0);
+  scheduleNext();
+})();
+</script>
+
+</body>
+</html>
