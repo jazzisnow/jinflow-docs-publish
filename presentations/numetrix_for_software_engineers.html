@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix for Software Engineers</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+    --rose: #e11d48;
+    --rose-soft: #fff1f2;
+    --cyan: #0891b2;
+    --cyan-soft: #ecfeff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout { display: flex; width: 100%; height: 100%; }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area { flex: 1; position: relative; height: 100%; overflow: hidden; }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 5vh 6vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(0.85rem, 1.4vw, 1.15rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 1.5vh;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.2rem, 2.4vw, 2rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 1.5vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.82rem, 1.3vw, 1.1rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 1.5vh 0;
+  }
+
+  /* ── Section slides ── */
+  .section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+  }
+  .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .section-slide .logo { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Stat cards ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.5vw; max-width: 1000px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2vh 1.2vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.5rem, 2.5vw, 2.4rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.5vh;
+  }
+  .stat-num.red { color: var(--red); }
+  .stat-num.amber { color: var(--amber); }
+  .stat-num.green { color: var(--green); }
+  .stat-num.navy { color: var(--navy); }
+  .stat-num.purple { color: var(--purple); }
+  .stat-num.indigo { color: var(--indigo); }
+
+  .stat-label {
+    font-size: clamp(0.68rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-block;
+    padding: 0.2em 0.6em;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
+  }
+  .badge-financial { background: #dbeafe; color: #1e40af; }
+  .badge-data { background: #fef3c7; color: #92400e; }
+  .badge-compliance { background: #fce7f3; color: #9d174d; }
+  .badge-operational { background: #d1fae5; color: #065f46; }
+  .badge-confirmed { background: var(--green-soft); color: var(--green); }
+  .badge-not-observed { background: var(--light-gray); color: var(--warm-gray); }
+  .badge-teal { background: #ccfbf1; color: #0f766e; }
+  .badge-purple { background: var(--purple-soft); color: var(--purple); }
+
+  /* ── Impact list ── */
+  .impacts {
+    list-style: none; max-width: 800px; width: 100%; margin-top: 1vh;
+  }
+  .impacts li {
+    font-size: clamp(0.78rem, 1.15vw, 0.98rem);
+    line-height: 1.6; color: var(--navy);
+    padding: 0.5vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.08);
+    display: flex; align-items: baseline; gap: 0.7rem;
+  }
+  .impacts li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block; width: 7px; height: 7px; min-width: 7px;
+    border-radius: 50%; margin-top: 0.45em;
+  }
+  .bullet.teal { background: var(--teal); }
+  .bullet.red { background: var(--red); }
+  .bullet.amber { background: var(--amber); }
+  .bullet.green { background: var(--green); }
+  .bullet.purple { background: var(--purple); }
+  .bullet.indigo { background: var(--indigo); }
+
+  /* ── Comparison cards ── */
+  .compare {
+    display: flex; gap: 2vw; max-width: 960px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .compare-card {
+    flex: 1; border-radius: 12px; padding: 2vh 1.5vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+  .compare-card.brig { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .compare-card.visp { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .compare-card.engine { background: var(--indigo-soft); border: 1px solid #c7d2fe; }
+  .compare-card.domain { background: var(--amber-soft); border: 1px solid #fde68a; }
+  .compare-card.warn { background: var(--red-soft); border: 1px solid #fecaca; }
+  .compare-card.neutral { background: var(--light-gray); border: 1px solid #cbd5e1; }
+  .compare-card.good { background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .compare-card.purple { background: var(--purple-soft); border: 1px solid #c4b5fd; }
+  .compare-card.cyan { background: var(--cyan-soft); border: 1px solid #a5f3fc; }
+
+  .compare-title {
+    font-size: clamp(0.82rem, 1.1vw, 0.98rem);
+    font-weight: 600; margin-bottom: 0.6vh;
+  }
+  .compare-card.brig .compare-title { color: #1e40af; }
+  .compare-card.visp .compare-title { color: #166534; }
+  .compare-card.engine .compare-title { color: #3730a3; }
+  .compare-card.domain .compare-title { color: #92400e; }
+  .compare-card.warn .compare-title { color: #991b1b; }
+  .compare-card.neutral .compare-title { color: var(--navy); }
+  .compare-card.good .compare-title { color: #166534; }
+  .compare-card.purple .compare-title { color: #5b21b6; }
+  .compare-card.cyan .compare-title { color: #155e75; }
+
+  .compare-text {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--slate); line-height: 1.5;
+  }
+  .compare-text strong { color: var(--navy); }
+
+  /* ── Data table ── */
+  .data-table {
+    width: 100%; max-width: 960px; margin-top: 1.5vh;
+    border-collapse: collapse;
+    font-size: clamp(0.68rem, 0.92vw, 0.84rem);
+  }
+  .data-table th {
+    background: var(--light-gray);
+    font-weight: 600; text-align: left;
+    padding: 0.8vh 1vw;
+    border-bottom: 2px solid #cbd5e1;
+    color: var(--navy); white-space: nowrap;
+  }
+  .data-table th.right, .data-table td.right { text-align: right; }
+  .data-table td {
+    padding: 0.6vh 1vw;
+    border-bottom: 1px solid var(--light-gray);
+    vertical-align: top;
+  }
+  .data-table td.mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9em;
+  }
+  .data-table tr:nth-child(even) { background: #f8fafc; }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1.5vw; max-width: 960px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2vh 1.5vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-title {
+    font-size: clamp(0.78rem, 1.05vw, 0.92rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.3vh;
+  }
+  .card-desc {
+    font-size: clamp(0.68rem, 0.88vw, 0.8rem);
+    color: var(--warm-gray); line-height: 1.45;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.2vw; margin-top: 1.5vh;
+  }
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.2vh 1.5vw;
+    font-weight: 600; font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--navy); text-align: center; min-width: 90px;
+  }
+  .flow-box.filled { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .flow-box.teal-filled { background: var(--teal); border-color: var(--teal); color: var(--white); }
+  .flow-box.amber-border { border-color: var(--amber); }
+  .flow-box.red-border { border-color: var(--red); }
+  .flow-box.purple-border { border-color: var(--purple); }
+  .flow-box.green-border { border-color: var(--green); }
+  .flow-arrow {
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    color: var(--teal); font-weight: 300;
+  }
+  .flow-arrow-up {
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Callout box ── */
+  .callout {
+    max-width: 800px; width: 100%;
+    padding: 1.8vh 2vw;
+    border-radius: 10px; margin-top: 1.5vh;
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    line-height: 1.55;
+  }
+  .callout.info { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af; }
+  .callout.warn { background: var(--amber-soft); border-left: 4px solid var(--amber); color: #92400e; }
+  .callout.danger { background: var(--red-soft); border-left: 4px solid var(--red); color: #991b1b; }
+  .callout.neutral { background: var(--light-gray); border-left: 4px solid #94a3b8; color: var(--slate); }
+  .callout.teal { background: #ccfbf1; border-left: 4px solid var(--teal); color: #0f766e; }
+
+  /* ── Action list ── */
+  .action-list {
+    list-style: none; max-width: 800px; width: 100%; margin-top: 1vh;
+  }
+  .action-list li {
+    display: flex; align-items: flex-start; gap: 0.8rem;
+    padding: 0.8vh 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-size: clamp(0.75rem, 1.05vw, 0.92rem);
+    line-height: 1.5; color: var(--navy);
+  }
+  .action-list li:last-child { border-bottom: none; }
+  .action-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; min-width: 22px;
+    border-radius: 50%; font-size: 0.72rem; font-weight: 700;
+    color: white; margin-top: 0.15em;
+  }
+  .action-num.red { background: var(--red); }
+  .action-num.amber { background: var(--amber); }
+  .action-num.teal { background: var(--teal); }
+
+  /* ── Two-column layout ── */
+  .two-col {
+    display: flex; gap: 3vw; max-width: 960px; width: 100%; margin-top: 1.5vh;
+    align-items: flex-start;
+  }
+  .two-col .col { flex: 1; }
+  .two-col .col-narrow { flex: 0 0 220px; }
+
+  /* ── Small caps label ── */
+  .sc-label {
+    font-size: clamp(0.6rem, 0.75vw, 0.7rem);
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--warm-gray); margin-bottom: 0.5vh;
+  }
+
+  /* ── Code block ── */
+  .code-block {
+    background: #1e293b; color: #e2e8f0;
+    border-radius: 10px; padding: 2vh 2vw;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: clamp(0.62rem, 0.82vw, 0.76rem);
+    line-height: 1.55; overflow-x: auto;
+    max-width: 960px; width: 100%; margin-top: 1.5vh;
+    white-space: pre; tab-size: 2;
+    text-align: left;
+  }
+  .code-block .kw { color: #c084fc; }
+  .code-block .fn { color: #67e8f9; }
+  .code-block .str { color: #86efac; }
+  .code-block .cm { color: #64748b; }
+  .code-block .num { color: #fbbf24; }
+  .code-block .op { color: #94a3b8; }
+  .code-block .jinja { color: #f472b6; }
+  .code-block .yaml-key { color: #67e8f9; }
+  .code-block .yaml-val { color: #e2e8f0; }
+  .code-block .file-label {
+    display: block; color: #64748b; font-size: 0.9em;
+    margin-bottom: 0.8vh; font-style: italic;
+  }
+
+  /* ── Branding + counter ── */
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 4vh 4vw; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .compare { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+    .two-col { flex-direction: column; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<div class="sidebar" id="sidebar"></div>
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- PROLOGUE                                                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S1 — Title -->
+  <div class="slide active">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">nuMetrix for<br>Software Engineers</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      The code around the pipeline: SvelteKit Explorer, YAML-to-SQL compilers,<br>synthetic data generators, and contract validation
+    </p>
+    <p class="subtitle fade-in" style="margin-top: 2vh; opacity: 0.5; font-size: clamp(0.75rem, 1vw, 0.9rem);">
+      March 2026
+    </p>
+  </div>
+
+  <!-- S2 — What You'll See Today -->
+  <div class="slide">
+    <div class="logo fade-in">Overview</div>
+    <h2 class="fade-in">What You&rsquo;ll See Today</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><strong>Act I</strong> &mdash; The DSL compilers: YAML &rarr; SQL for probes, hypotheses, and diagnoses</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Act II</strong> &mdash; The Explorer: SvelteKit, read-only DuckDB, runtime discovery, i18n</span></li>
+      <li><span class="bullet purple"></span><span><strong>Act III</strong> &mdash; Data generation: synthetic tenants, column mapping, defect injection</span></li>
+      <li><span class="bullet amber"></span><span><strong>Act IV</strong> &mdash; Testing and visualization: Vitest, CI validation, Evidence.dev, Cytoscape</span></li>
+      <li><span class="bullet green"></span><span><strong>Act V</strong> &mdash; Architecture patterns and what&rsquo;s next</span></li>
+    </ul>
+    <div class="callout teal fade-in">
+      Companion to <em>nuMetrix for Data Engineers</em>. That deck covered dbt models, medallion layers, and dispatch macros. This one covers the <strong>TypeScript, Python, and DSL code</strong> that surrounds the pipeline.
+    </div>
+  </div>
+
+  <!-- S3 — The Software Stack -->
+  <div class="slide">
+    <div class="logo fade-in">Stack</div>
+    <h2 class="fade-in">The Software Stack</h2>
+    <div class="card-grid fade-in" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="card">
+        <div class="card-title">SvelteKit 5</div>
+        <div class="card-desc">Explorer frontend, API routes, file-based routing</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Python 3.12</div>
+        <div class="card-desc">YAML-to-SQL compilers, data generators, validators</div>
+      </div>
+      <div class="card">
+        <div class="card-title">DuckDB</div>
+        <div class="card-desc">In-process analytics DB. Single file, zero config</div>
+      </div>
+      <div class="card">
+        <div class="card-title">TypeScript 5.9</div>
+        <div class="card-desc">Type-safe server queries, DuckDB result typing</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Tailwind 4</div>
+        <div class="card-desc">Utility-first CSS for Explorer UI</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Vitest</div>
+        <div class="card-desc">Unit tests with mocked DuckDB connections</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cytoscape + Dagre</div>
+        <div class="card-desc">Pipeline DAG rendering and hierarchical layout</div>
+      </div>
+      <div class="card">
+        <div class="card-title">Tauri</div>
+        <div class="card-desc">Desktop app shell (Rust + WebView)</div>
+      </div>
+    </div>
+    <div class="callout neutral fade-in">
+      One monorepo. Three runtimes (Node, Python, Rust). Zero cloud services &mdash; everything runs on a single laptop with an in-process DuckDB.
+    </div>
+  </div>
+
+  <!-- S4 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT I: THE DSL COMPILERS                                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S5 — Section: The DSL Compilers -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act I</div>
+    <h2 class="fade-in">The DSL Compilers</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">YAML in, SQL out. Three compilers, one pattern.</p>
+  </div>
+
+  <!-- S6 — Three Compilers, One Pattern -->
+  <div class="slide">
+    <div class="logo fade-in">Architecture</div>
+    <h2 class="fade-in">Three Compilers, One Pattern</h2>
+    <div class="flow fade-in">
+      <div class="flow-box"><strong>YAML</strong><br><small>definition</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>Compiler</strong><br><small>Python</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box filled"><strong>.sql</strong><br><small>dbt model</small></div>
+    </div>
+    <ul class="impacts fade-in" style="margin-top: 2vh;">
+      <li><span class="bullet teal"></span><span><strong>probecompile.py</strong> &mdash; Probes &amp; assessments &rarr; <code>probe_findings__*.sql</code></span></li>
+      <li><span class="bullet indigo"></span><span><strong>hypothesiscompile.py</strong> &mdash; Hypotheses &rarr; <code>hypothesis_verdicts.sql</code></span></li>
+      <li><span class="bullet purple"></span><span><strong>diagnosiscompile.py</strong> &mdash; Diagnoses &rarr; <code>diagnosis_verdicts.sql</code></span></li>
+    </ul>
+    <div class="callout info fade-in">
+      Shared pipeline: <strong>load YAML &rarr; validate against contract &rarr; resolve entity refs &rarr; generate CTEs &rarr; emit uniform schema</strong>. Domain authors write YAML; dbt sees SQL.
+    </div>
+  </div>
+
+  <!-- S7 — Contract Resolution -->
+  <div class="slide">
+    <div class="logo fade-in">Contracts</div>
+    <h2 class="fade-in">Contract Resolution</h2>
+    <div class="code-block fade-in"><span class="file-label">scripts/probecompile.py</span>
+<span class="kw">def</span> <span class="fn">resolve_ref</span>(contract: <span class="str">dict</span>, entity_name: <span class="str">str</span>) -> <span class="str">str</span>:
+    <span class="str">"""Resolve entity name to dbt ref."""</span>
+    entity = contract[<span class="str">"entities"</span>][entity_name]
+    <span class="kw">return</span> <span class="str">"{{ ref('"</span> + entity[<span class="str">"dbt_model"</span>] + <span class="str">"') }}"</span></div>
+    <div class="code-block fade-in"><span class="file-label">contracts/gold_contract.v1.json (excerpt)</span>
+{
+  <span class="yaml-key">"entities"</span>: {
+    <span class="yaml-key">"BillingEvent"</span>: {
+      <span class="str">"dbt_model"</span>: <span class="str">"gold_billing_events"</span>,
+      <span class="str">"fields"</span>: { <span class="str">"billing_id"</span>: <span class="str">"varchar"</span>, <span class="str">"billed_amount"</span>: <span class="str">"numeric"</span>, ... }
+    },
+    <span class="yaml-key">"CaseMaterialUsage"</span>: {
+      <span class="str">"dbt_model"</span>: <span class="str">"gold_case_material_usage"</span>, ...
+    }
+  }
+}</div>
+    <div class="callout teal fade-in">
+      Probes reference <code>BillingEvent</code>, not <code>gold_billing_events</code>. The contract is the indirection layer &mdash; if a dbt model renames, only the contract JSON changes.
+    </div>
+  </div>
+
+  <!-- S8 — Compiling a Balance Probe -->
+  <div class="slide">
+    <div class="logo fade-in">Balance</div>
+    <h2 class="fade-in">Compiling a Balance Probe</h2>
+    <div class="code-block fade-in"><span class="file-label">scripts/probecompile.py &mdash; compile_balance() (abridged)</span>
+<span class="kw">def</span> <span class="fn">compile_balance</span>(probe, contract):
+    left   = probe[<span class="str">"left"</span>]      <span class="cm"># e.g. CaseMaterialUsage.quantity</span>
+    right  = probe[<span class="str">"right"</span>]     <span class="cm"># e.g. BillingEvent.quantity</span>
+
+    left_ref  = <span class="fn">resolve_ref</span>(contract, left[<span class="str">"entity"</span>])
+    right_ref = <span class="fn">resolve_ref</span>(contract, right[<span class="str">"entity"</span>])
+
+    left_cte = <span class="str">f"""left_agg as (
+    select {join_key},
+           {left['aggregate']}({left['expression']}) as left_value
+    from {left_ref}
+    group by {join_key}
+)"""</span>
+    <span class="cm"># ... right_cte, time_buckets, compared CTE ...</span>
+
+    compared = <span class="str">f"""compared as (
+    select l.{join_key}, t.time_bucket,
+           l.left_value, coalesce(r.right_value, 0) as right_value,
+           100.0 * (l.left_value - coalesce(r.right_value, 0))
+                 / l.left_value as pct_diff
+    from left_agg l
+    left join right_agg r on l.{join_key} = r.{join_key}
+    left join time_buckets t on l.{join_key} = t.{join_key}
+    where abs(pct_diff) > {tol}
+)"""</span></div>
+    <div class="callout neutral fade-in">
+      Every probe type follows this pattern: domain-specific CTEs &rarr; <code>compared</code> CTE &rarr; uniform <code>findings_select()</code> output.
+    </div>
+  </div>
+
+  <!-- S9 — The Findings Contract -->
+  <div class="slide">
+    <div class="logo fade-in">Output</div>
+    <h2 class="fade-in">The Findings Contract</h2>
+    <div class="code-block fade-in"><span class="file-label">scripts/probecompile.py &mdash; findings_select()</span>
+<span class="kw">def</span> <span class="fn">findings_select</span>(pid, version, scope, entity_id_expr,
+                    time_bucket_expr, severity_expr,
+                    money_at_risk_expr, evidence_expr):
+    <span class="kw">return</span> <span class="str">f"""select
+    md5('{pid}' || '|' || '{{{{ var("tenant_id") }}}}' || '|'
+        || cast({entity_id_expr} as varchar)) as finding_id,
+    '{{{{ var("tenant_id") }}}}' as tenant_id,
+    '{pid}'       as probe_id,
+    '{version}'   as probe_version,
+    {severity_expr}       as severity,
+    '{scope["entity_type"]}'  as entity_type,
+    cast({entity_id_expr} as varchar) as entity_id,
+    {time_bucket_expr}    as time_bucket,
+    {money_at_risk_expr}  as money_at_risk,
+    {evidence_expr}       as evidence"""</span></div>
+    <div class="callout info fade-in">
+      Every probe &mdash; balance, duplicate, outlier, temporal, assessment &mdash; calls this function. <strong>11 uniform columns.</strong> Deterministic <code>finding_id</code> via MD5. Evidence is inline JSON for drill-down.
+    </div>
+  </div>
+
+  <!-- S10 — The Reverse Compiler -->
+  <div class="slide">
+    <div class="logo fade-in">Registry</div>
+    <h2 class="fade-in">The Reverse Compiler</h2>
+    <div class="code-block fade-in"><span class="file-label">scripts/proberegistry.py &mdash; YAML structure → human language</span>
+<span class="cm"># Type-dispatched: each probe type has a text generator</span>
+TYPE_GENERATORS = {
+    <span class="str">"balance"</span>: gen_balance,  <span class="str">"duplicate"</span>: gen_duplicate,
+    <span class="str">"mandatory_item"</span>: gen_mandatory_item,  <span class="str">"assessment"</span>: gen_assessment, ...
+}
+
+<span class="kw">def</span> <span class="fn">gen_balance</span>(probe, glossary):
+    ent = <span class="fn">entity_label</span>(entity, lang, glossary)   <span class="cm"># "Case" → "Fall" (de)</span>
+    <span class="kw">return</span> {
+      <span class="str">f"display_name_{lang}"</span>: <span class="str">f"{humanize(left_alias)} vs {humanize(right_alias)}"</span>,
+      <span class="str">f"description_{lang}"</span>:  <span class="str">f"Compares {left_alias} against {right_alias} per {ent}."</span>,
+      <span class="str">f"interpretation_{lang}"</span>: <span class="str">f"{ent} {{entity_id}} shows a gap of {{money_at_risk}}."</span>
+    }</div>
+    <div class="code-block fade-in"><span class="file-label">scripts/registry_glossary.yaml &mdash; tri-lingual vocabulary</span>
+<span class="yaml-key">entities</span>:
+  <span class="yaml-key">BillingEvent</span>:
+    <span class="yaml-key">en</span>: <span class="str">billing event</span>    <span class="yaml-key">de</span>: <span class="str">Abrechnungsereignis</span>    <span class="yaml-key">fr</span>: <span class="str">événement de facturation</span>
+<span class="yaml-key">fields</span>:
+  <span class="yaml-key">billed_amount</span>:
+    <span class="yaml-key">en</span>: <span class="str">billed amount</span>    <span class="yaml-key">de</span>: <span class="str">Abrechnungsbetrag</span>       <span class="yaml-key">fr</span>: <span class="str">montant facturé</span></div>
+    <div class="callout teal fade-in">
+      The forward compiler turns YAML &rarr; SQL. The <strong>reverse compiler</strong> turns YAML &rarr; human language. Auto-generated display names, descriptions, and per-finding interpretation templates in DE/EN/FR. Manual <code>registry:</code> overrides win per-field, per-language.
+    </div>
+  </div>
+
+  <!-- S11 — Hypothesis Compiler -->
+  <div class="slide">
+    <div class="logo fade-in">Hypotheses</div>
+    <h2 class="fade-in">Hypothesis Compiler</h2>
+    <div class="code-block fade-in"><span class="file-label">scripts/hypothesiscompile.py &mdash; evidence + scoring + verdict</span>
+<span class="cm">-- Evidence CTE: UNION ALL of per-probe aggregates</span>
+<span class="kw">for</span> ev <span class="kw">in</span> hyp[<span class="str">"evidence"</span>]:
+    <span class="str">f"""select '{pid}' as probe_id, '{role}' as role,
+        {weight} as weight, count(*) as finding_count,
+        coalesce(sum(money_at_risk), 0) as money_at_risk
+    from {{{{ ref('probe_findings__{pid}') }}}}"""</span>
+
+<span class="cm">-- Weighted scoring: SUM(weight * signal * direction) / SUM(weight)</span>
+signal = <span class="str">"case when finding_count > 0 then 1 else 0 end"</span>      <span class="cm"># binary</span>
+signal = <span class="str">"least(1.0, ln(1 + count) / ln(1 + saturation))"</span>  <span class="cm"># graduated</span>
+direction = <span class="str">"case when role = 'counter' then -1 else 1 end"</span>
+
+<span class="cm">-- Verdict: primary gate + score thresholds</span>
+<span class="kw">case</span>
+    <span class="kw">when</span> primary_has_findings = <span class="num">0</span> <span class="kw">then</span> <span class="str">'not_observed'</span>
+    <span class="kw">when</span> evidence_score >= <span class="num">0.7</span>      <span class="kw">then</span> <span class="str">'confirmed'</span>
+    <span class="kw">when</span> evidence_score >= <span class="num">0.3</span>      <span class="kw">then</span> <span class="str">'plausible'</span>
+    <span class="kw">else</span> <span class="str">'not_observed'</span>
+<span class="kw">end</span> <span class="kw">as</span> status</div>
+    <div class="callout neutral fade-in">
+      The primary probe is a <strong>hard gate</strong>: zero primary findings = not_observed, regardless of score. Counter-evidence probes subtract from the score. Binary or log-curve signal scaling.
+    </div>
+  </div>
+
+  <!-- S11 — Diagnosis Compiler -->
+  <div class="slide">
+    <div class="logo fade-in">Diagnoses</div>
+    <h2 class="fade-in">Diagnosis Compiler</h2>
+    <div class="code-block fade-in"><span class="file-label">scripts/diagnosiscompile.py &mdash; three-stage pattern</span>
+<span class="cm">-- Stage 1: Hypothesis gate (only confirmed)</span>
+__hypothesis <span class="kw">as</span> (
+    <span class="kw">select</span> * <span class="kw">from</span> <span class="jinja">{{ ref('hypothesis_verdicts') }}</span>
+    <span class="kw">where</span> hypothesis_id = <span class="str">'hyp_revenue_leakage'</span>
+      <span class="kw">and</span> status = <span class="str">'confirmed'</span>
+),
+<span class="cm">-- Stage 2: Condition checks (all must pass)</span>
+__conditions <span class="kw">as</span> (
+    <span class="kw">select</span> <span class="str">'probe_revenue_leakage'</span>, <span class="fn">count</span>(*), <span class="fn">sum</span>(money_at_risk)
+    <span class="kw">from</span> <span class="jinja">{{ ref('probe_findings__probe_revenue_leakage') }}</span>
+    <span class="kw">having</span> <span class="fn">count</span>(*) > <span class="num">10</span>
+    <span class="cm">-- HAVING filters: no row emitted = condition not met</span>
+),
+<span class="cm">-- Stage 3: Confidence = base + conditional boosts, capped at 1.0</span>
+__confidence <span class="kw">as</span> (
+    <span class="kw">select</span> <span class="fn">least</span>(<span class="num">1.0</span>,
+        <span class="num">0.6</span>                                  <span class="cm">-- base</span>
+        + <span class="kw">case when</span> ... > <span class="num">50</span> <span class="kw">then</span> <span class="num">0.15</span> <span class="kw">else</span> <span class="num">0</span> <span class="kw">end</span>  <span class="cm">-- boost_if</span>
+        + <span class="kw">case when</span> ... > <span class="num">5000</span> <span class="kw">then</span> <span class="num">0.1</span> <span class="kw">else</span> <span class="num">0</span> <span class="kw">end</span>  <span class="cm">-- boost_if</span>
+    )
+)
+<span class="cm">-- Final: emit row only if ALL conditions passed</span>
+<span class="kw">where</span> (<span class="kw">select</span> <span class="fn">count</span>(*) <span class="kw">from</span> __conditions) = <span class="num">2</span>  <span class="cm">-- expected count</span></div>
+  </div>
+
+  <!-- S12 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT II: THE EXPLORER                                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S13 — Section: The Explorer -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act II</div>
+    <h2 class="fade-in">The Explorer</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">SvelteKit frontend. Read-only DuckDB. Zero-deploy tenant discovery.</p>
+  </div>
+
+  <!-- S14 — SvelteKit Route Architecture -->
+  <div class="slide">
+    <div class="logo fade-in">Routes</div>
+    <h2 class="fade-in">SvelteKit Route Architecture</h2>
+    <div class="card-grid fade-in" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+      <div class="card">
+        <div class="card-title">/[tenant]/dimensions</div>
+        <div class="card-desc">Browse 7 Gold entities. Drill down to [entity]/[id].</div>
+      </div>
+      <div class="card">
+        <div class="card-title">/[tenant]/findings</div>
+        <div class="card-desc">All probe findings. Filter by probe_id, severity.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">/[tenant]/hypotheses</div>
+        <div class="card-desc">Evidence chain, verdict badges, diagnosis drill-down.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">/[tenant]/taxonomies</div>
+        <div class="card-desc">Tree views, cardinality analysis, member cross-walk.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">/[tenant]/probe-builder</div>
+        <div class="card-desc">Interactive YAML editor. Live compile via Python subprocess.</div>
+      </div>
+      <div class="card">
+        <div class="card-title">/[tenant]/system/pipeline</div>
+        <div class="card-desc">DAG graph: Cytoscape + Dagre layout engine.</div>
+      </div>
+    </div>
+    <div class="callout neutral fade-in">
+      <strong>25 route directories</strong> under <code>[tenant]/</code>. Every route is tenant-scoped. File-based routing &mdash; the filesystem <em>is</em> the API surface.
+    </div>
+  </div>
+
+  <!-- S15 — Read-Only DuckDB Connection -->
+  <div class="slide">
+    <div class="logo fade-in">DuckDB</div>
+    <h2 class="fade-in">Read-Only DuckDB Connection</h2>
+    <div class="code-block fade-in"><span class="file-label">explorer/src/lib/server/db.ts</span>
+<span class="kw">const</span> { Database, OPEN_READONLY } = <span class="fn">require</span>(<span class="str">'duckdb-async'</span>);
+
+<span class="kw">let</span> db: DatabaseType | <span class="kw">null</span> = <span class="kw">null</span>;
+<span class="kw">let</span> dbMtimeMs: <span class="str">number</span> = <span class="num">0</span>;
+
+<span class="kw">export async function</span> <span class="fn">getDb</span>(): Promise&lt;DatabaseType&gt; {
+    <span class="kw">const</span> stat = fs.<span class="fn">statSync</span>(DB_PATH);
+    <span class="kw">if</span> (db &amp;&amp; stat.mtimeMs !== dbMtimeMs) {
+        <span class="kw">try</span> { <span class="kw">await</span> db.<span class="fn">close</span>(); } <span class="kw">catch</span> {}  <span class="cm">// stale handle</span>
+        db = <span class="kw">null</span>;
+    }
+    <span class="kw">if</span> (!db) {
+        db = <span class="kw">await</span> Database.<span class="fn">create</span>(DB_PATH, OPEN_READONLY);
+        dbMtimeMs = stat.mtimeMs;
+    }
+    <span class="kw">return</span> db;
+}</div>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><code>OPEN_READONLY</code> &mdash; Explorer never locks the database. dbt and Evidence write concurrently.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>mtime reconnect</strong> &mdash; After <code>dbt build</code>, the next query automatically picks up the fresh file.</span></li>
+      <li><span class="bullet amber"></span><span><code>createRequire</code> &mdash; Workaround for Vite ESM bundling with native Node addons.</span></li>
+    </ul>
+  </div>
+
+  <!-- S16 — Runtime Table Discovery -->
+  <div class="slide">
+    <div class="logo fade-in">Discovery</div>
+    <h2 class="fade-in">Runtime Table Discovery</h2>
+    <div class="code-block fade-in"><span class="file-label">explorer/src/lib/server/queries/findings.ts</span>
+<span class="kw">async function</span> <span class="fn">discoverProbeTables</span>(tenant: <span class="str">string</span>): Promise&lt;<span class="str">string</span>[]&gt; {
+    <span class="kw">const</span> rows = <span class="kw">await</span> <span class="fn">safeQuery</span>&lt;{ table_name: <span class="str">string</span> }&gt;(
+        <span class="str">`SELECT table_name FROM information_schema.tables
+         WHERE table_schema = $1
+           AND table_name LIKE 'probe_findings__%'`</span>,
+        tenant
+    );
+    <span class="kw">return</span> rows.<span class="fn">map</span>(r =&gt; r.table_name);
+}
+
+<span class="kw">function</span> <span class="fn">buildUnion</span>(tenant: <span class="str">string</span>, tables: <span class="str">string</span>[]): <span class="str">string</span> {
+    <span class="kw">return</span> tables
+        .<span class="fn">map</span>(t =&gt; <span class="str">`SELECT * FROM "${tenant}".${t}`</span>)
+        .<span class="fn">join</span>(<span class="str">' UNION ALL BY NAME '</span>);
+}</div>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><strong>No hardcoded table list</strong> &mdash; queries <code>information_schema</code> to discover what probes exist at runtime.</span></li>
+      <li><span class="bullet indigo"></span><span><code>UNION ALL BY NAME</code> &mdash; DuckDB-specific: unions by column name, not position. Different probe types have different evidence shapes.</span></li>
+      <li><span class="bullet amber"></span><span><code>safeQuery</code> &mdash; wraps errors into empty arrays for graceful degradation.</span></li>
+    </ul>
+  </div>
+
+  <!-- S17 — Locale Switching with Svelte Stores -->
+  <div class="slide">
+    <div class="logo fade-in">i18n</div>
+    <h2 class="fade-in">Locale Switching with Svelte Stores</h2>
+    <div class="code-block fade-in"><span class="file-label">explorer/src/lib/i18n/index.ts</span>
+<span class="kw">import</span> { writable, derived } <span class="kw">from</span> <span class="str">'svelte/store'</span>;
+<span class="kw">import</span> de <span class="kw">from</span> <span class="str">'./locales/de.json'</span>;
+<span class="kw">import</span> en <span class="kw">from</span> <span class="str">'./locales/en.json'</span>;
+<span class="kw">import</span> fr <span class="kw">from</span> <span class="str">'./locales/fr.json'</span>;
+
+<span class="kw">export const</span> locale = <span class="fn">writable</span>&lt;Locale&gt;(<span class="str">'de'</span>);
+
+<span class="kw">export const</span> t = <span class="fn">derived</span>(locale, ($locale) =&gt; {
+    <span class="kw">return</span> (key: <span class="str">string</span>): <span class="str">string</span> =&gt; {
+        <span class="kw">return</span> <span class="fn">getNestedValue</span>(messages[$locale], key);
+    };
+});
+
+<span class="cm">/** Fallback: 'dimensions.case_material_usage' → 'Case Material Usage' */</span>
+<span class="kw">function</span> <span class="fn">humanize</span>(path: <span class="str">string</span>): <span class="str">string</span> {
+    <span class="kw">return</span> path.<span class="fn">slice</span>(path.<span class="fn">lastIndexOf</span>(<span class="str">'.'</span>) + <span class="num">1</span>)
+        .<span class="fn">replace</span>(/_/g, <span class="str">' '</span>)
+        .<span class="fn">replace</span>(/\b\w/g, c =&gt; c.<span class="fn">toUpperCase</span>());
+}</div>
+    <div class="callout info fade-in">
+      <code>locale.set('fr')</code> triggers reactivity. <code>$t('dimensions.cases')</code> in templates. Missing translations degrade to title-cased snake_case &mdash; no crashes, no blank labels.
+    </div>
+  </div>
+
+  <!-- S18 — Live Probe Builder API -->
+  <div class="slide">
+    <div class="logo fade-in">Probe Builder</div>
+    <h2 class="fade-in">Live Probe Builder API</h2>
+    <div class="code-block fade-in"><span class="file-label">explorer/src/routes/api/probe-builder/compile/+server.ts</span>
+<span class="kw">const</span> COMPILE_SINGLE = path.<span class="fn">join</span>(PROJECT_ROOT, <span class="str">'scripts'</span>, <span class="str">'probecompile_single.py'</span>);
+<span class="kw">const</span> PYTHON = path.<span class="fn">join</span>(PROJECT_ROOT, <span class="str">'.venv'</span>, <span class="str">'bin'</span>, <span class="str">'python3'</span>);
+
+<span class="kw">export const</span> POST: RequestHandler = <span class="kw">async</span> ({ request }) =&gt; {
+    <span class="kw">const</span> { yaml } = <span class="kw">await</span> request.<span class="fn">json</span>();
+
+    <span class="kw">const</span> child = <span class="fn">spawn</span>(PYTHON, [COMPILE_SINGLE], {
+        cwd: PROJECT_ROOT,
+        stdio: [<span class="str">'pipe'</span>, <span class="str">'pipe'</span>, <span class="str">'pipe'</span>],
+        timeout: <span class="num">15000</span>
+    });
+
+    child.stdin.<span class="fn">write</span>(yaml);  <span class="cm">// YAML in via stdin</span>
+    child.stdin.<span class="fn">end</span>();
+
+    child.<span class="fn">on</span>(<span class="str">'close'</span>, (code) =&gt; {
+        <span class="cm">// JSON out via stdout: { ok, sql?, errors? }</span>
+        resolve(JSON.<span class="fn">parse</span>(stdout));
+    });
+};</div>
+    <div class="callout neutral fade-in">
+      SvelteKit API route &rarr; Python subprocess. <strong>stdin YAML, stdout JSON.</strong> 15-second timeout. The project&rsquo;s <code>.venv</code> ensures contract libraries are available. Stderr becomes structured error messages in the UI.
+    </div>
+  </div>
+
+  <!-- S19 — Hypothesis Detail Page -->
+  <div class="slide">
+    <div class="logo fade-in">Evidence</div>
+    <h2 class="fade-in">Hypothesis Detail Page</h2>
+    <div class="code-block fade-in"><span class="file-label">explorer/src/routes/[tenant]/hypotheses/[hypothesis_id]/+page.server.ts</span>
+<span class="kw">export const</span> load: PageServerLoad = <span class="kw">async</span> ({ params }) =&gt; {
+    <span class="cm">// Parallel fetch: hypothesis detail + probe catalog</span>
+    <span class="kw">const</span> [hypothesis, probeCatalog] = <span class="kw">await</span> Promise.<span class="fn">all</span>([
+        <span class="fn">getHypothesisDetail</span>(params.tenant, params.hypothesis_id),
+        <span class="fn">getProbeCatalog</span>(params.tenant)
+    ]);
+
+    <span class="cm">// Parse evidence string: "probe_rev_leakage(primary), ..."</span>
+    <span class="kw">const</span> evidenceEntries = hypothesis.evidence_probes
+        .<span class="fn">split</span>(<span class="str">', '</span>)
+        .<span class="fn">map</span>(entry =&gt; {
+            <span class="kw">const</span> match = entry.<span class="fn">match</span>(<span class="str">/^(.+)\((\w+)\)$/</span>);
+            <span class="kw">return</span> { probe_id: match[<span class="num">1</span>], role: match[<span class="num">2</span>] };
+        });
+
+    <span class="cm">// Merge three data sources: roles + catalog names + stats</span>
+    <span class="kw">const</span> evidenceStats = <span class="kw">await</span> <span class="fn">getHypothesisEvidence</span>(params.tenant, probeIds);
+
+    <span class="cm">// Lazy-load diagnoses only for confirmed hypotheses</span>
+    <span class="kw">const</span> diagnoses = hypothesis.status === <span class="str">'confirmed'</span>
+        ? <span class="kw">await</span> <span class="fn">getDiagnosesForHypothesis</span>(params.tenant, params.hypothesis_id)
+        : [];
+
+    <span class="kw">return</span> { hypothesis, evidence, diagnoses };
+};</div>
+  </div>
+
+  <!-- S20 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT III: DATA GENERATION & CONTRACTS                       -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S21 — Section: Data Generation & Contracts -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act III</div>
+    <h2 class="fade-in">Data Generation &amp; Contracts</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Deterministic synthetic data. Three ERP column mappings. Injected defects.</p>
+  </div>
+
+  <!-- S22 — Synthetic Data Architecture -->
+  <div class="slide">
+    <div class="logo fade-in">Generator</div>
+    <h2 class="fade-in">Synthetic Data Architecture</h2>
+    <div class="code-block fade-in"><span class="file-label">scripts/generate_synthetic_data.py &mdash; TENANT_CONFIGS</span>
+TENANT_CONFIGS = {
+    <span class="str">"hospital_alpha"</span>: {
+        <span class="yaml-key">"source_system"</span>: <span class="str">"opale"</span>,  <span class="yaml-key">"seed"</span>: <span class="num">42</span>,
+        <span class="yaml-key">"n_cases"</span>: <span class="num">2000</span>,
+        <span class="yaml-key">"cost_centers"</span>: [(<span class="str">"CC_OR1"</span>, <span class="str">"Operating Room 1"</span>, <span class="str">"OR"</span>), ...],
+        <span class="yaml-key">"leakage_pct"</span>: <span class="num">0.10</span>,  <span class="yaml-key">"price_multiplier"</span>: <span class="num">1.0</span>,
+    },
+    <span class="str">"hospital_beta"</span>: {
+        <span class="yaml-key">"source_system"</span>: <span class="str">"sap"</span>,  <span class="yaml-key">"seed"</span>: <span class="num">99</span>,
+        <span class="yaml-key">"n_cases"</span>: <span class="num">1500</span>,
+        <span class="yaml-key">"cost_centers"</span>: [(<span class="str">"KST_OP1"</span>, <span class="str">"OP-Saal 1"</span>, <span class="str">"OR"</span>), ...],  <span class="cm"># German</span>
+        <span class="yaml-key">"price_multiplier"</span>: <span class="num">0.95</span>,  <span class="cm"># EUR vs CHF</span>
+    },
+    <span class="str">"hospital_delta"</span>: {
+        <span class="yaml-key">"source_system"</span>: <span class="str">"opale"</span>,  <span class="yaml-key">"seed"</span>: <span class="num">512</span>,
+        <span class="yaml-key">"n_cases"</span>: <span class="num">150_000</span>,    <span class="cm"># stress-test tenant</span>
+        <span class="yaml-key">"orphan_billing_count"</span>: <span class="num">5000</span>,  <span class="cm"># 7 advanced defect types</span>
+        ...
+    },
+}</div>
+    <div class="callout info fade-in">
+      Fully <strong>deterministic</strong> (seeded PRNG). Each tenant varies seed, time range, case volume, procedure mix, cost center language (EN/DE/FR), and defect injection rates. <code>hospital_zeta</code> has <code>skip_synthetic: True</code> &mdash; real data only.
+    </div>
+  </div>
+
+  <!-- S23 — Column Mapping: Three ERPs -->
+  <div class="slide">
+    <div class="logo fade-in">Multi-Source</div>
+    <h2 class="fade-in">Column Mapping: Three ERPs</h2>
+    <div class="compare fade-in">
+      <div class="compare-card brig">
+        <div class="compare-title">OPALE (canonical)</div>
+        <div class="compare-text" style="font-family: monospace; font-size: 0.82em; line-height: 1.7;">
+          case_token<br>
+          start_time<br>
+          material_id<br>
+          quantity<br>
+          billed_amount<br>
+          cost_center_id
+        </div>
+      </div>
+      <div class="compare-card domain">
+        <div class="compare-title">SAP MM</div>
+        <div class="compare-text" style="font-family: monospace; font-size: 0.82em; line-height: 1.7;">
+          AUFNR<br>
+          ERDAT<br>
+          MATNR<br>
+          MENGE<br>
+          DMBTR<br>
+          KOSTL
+        </div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">Navision</div>
+        <div class="compare-text" style="font-family: monospace; font-size: 0.82em; line-height: 1.7;">
+          No_<br>
+          Starting_Date_Time<br>
+          Item_No_<br>
+          Quantity<br>
+          Amount<br>
+          Cost_Center_Code
+        </div>
+      </div>
+    </div>
+    <div class="callout teal fade-in">
+      Generators create data using <strong>canonical field names</strong>. At write time, SAP/Navision tenants remap columns through dictionaries. The dbt Bronze layer <strong>reverses</strong> this with source-system dispatch macros.
+    </div>
+  </div>
+
+  <!-- S24 — Defect Injection for Calibration -->
+  <div class="slide">
+    <div class="logo fade-in">Defects</div>
+    <h2 class="fade-in">Defect Injection for Calibration</h2>
+    <div class="code-block fade-in"><span class="file-label">scripts/generate_synthetic_data.py &mdash; hospital_delta advanced defects</span>
+<span class="cm"># 7 advanced defect types — probe calibration targets</span>
+<span class="str">"orphan_billing_count"</span>:   <span class="num">5000</span>,     <span class="cm"># billing for non-existent cases</span>
+<span class="str">"duplicate_billing_pct"</span>:  <span class="num">0.02</span>,     <span class="cm"># same material billed twice</span>
+<span class="str">"phantom_usage_pct"</span>:     <span class="num">0.01</span>,     <span class="cm"># usage refs non-existent material</span>
+<span class="str">"cross_cc_billing_pct"</span>:  <span class="num">0.04</span>,     <span class="cm"># billing CC ≠ case CC</span>
+<span class="str">"stale_pricing_pct"</span>:     <span class="num">0.08</span>,     <span class="cm"># unit_price &gt;20% off standard</span>
+<span class="str">"timing_anomaly_pct"</span>:    <span class="num">0.03</span>,     <span class="cm"># billing before usage timestamp</span>
+<span class="str">"partial_billing_pct"</span>:   <span class="num">0.05</span>,     <span class="cm"># qty billed &lt; qty used</span></div>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">Calibration Loop</div>
+        <div class="compare-text">
+          Inject <strong>known defects</strong> at known rates &rarr; run probes &rarr; verify probe catches match expected counts. If a probe misses injected defects, the probe logic has a bug.
+        </div>
+      </div>
+      <div class="compare-card warn">
+        <div class="compare-title">hospital_delta Profile</div>
+        <div class="compare-text">
+          <strong>150K cases</strong>, 1.68M billing rows, 44 cost centers. All 7 defect types active simultaneously &mdash; tests probe interaction and false-positive overlap.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S25 — Contract Validation -->
+  <div class="slide">
+    <div class="logo fade-in">Validation</div>
+    <h2 class="fade-in">Contract Validation</h2>
+    <div class="code-block fade-in"><span class="file-label">scripts/probecheck.py</span>
+<span class="kw">def</span> <span class="fn">validate_entity_ref</span>(contract, entity_name, errors, context):
+    entity = <span class="fn">get_entity</span>(contract, entity_name)
+    <span class="kw">if</span> entity <span class="kw">is</span> <span class="kw">None</span>:
+        errors.<span class="fn">append</span>(<span class="str">f"{context}: unknown entity '{entity_name}'. "</span>
+                      <span class="str">f"Valid: {sorted(contract['entities'].keys())}"</span>)
+    <span class="kw">return</span> entity
+
+SAFE_EXPRESSION_CHARS = <span class="fn">set</span>(<span class="str">"abcdefghijklmnopqrstuvwxyz_0123456789 *+-/()."</span>)
+
+<span class="kw">def</span> <span class="fn">validate_expression_tokens</span>(expression, entity_def, entity_name, errors, ctx):
+    <span class="str">"""Check expression only references valid fields and safe operators."""</span>
+    clean = expression.<span class="fn">lower</span>().<span class="fn">strip</span>()
+    <span class="kw">if not</span> <span class="fn">all</span>(c <span class="kw">in</span> SAFE_EXPRESSION_CHARS <span class="kw">for</span> c <span class="kw">in</span> clean):
+        bad = [c <span class="kw">for</span> c <span class="kw">in</span> clean <span class="kw">if</span> c <span class="kw">not in</span> SAFE_EXPRESSION_CHARS]
+        errors.<span class="fn">append</span>(<span class="str">f"{ctx}: unsafe characters: {bad}"</span>)
+    <span class="cm"># Tokenize and verify each non-numeric token is a real field</span>
+    <span class="kw">for</span> token <span class="kw">in</span> tokens:
+        <span class="kw">if not</span> token.<span class="fn">replace</span>(<span class="str">'.'</span>, <span class="str">''</span>).<span class="fn">isdigit</span>():
+            <span class="kw">if</span> token <span class="kw">not in</span> entity_def[<span class="str">"fields"</span>]:
+                errors.<span class="fn">append</span>(<span class="str">f"{ctx}: '{token}' not a field of '{entity_name}'"</span>)</div>
+    <div class="callout warn fade-in">
+      Lightweight <strong>SQL injection guard</strong>. YAML authors write expressions like <code>quantity * unit_price</code>. The validator whitelists characters, tokenizes on operators, and verifies every non-numeric token exists in the contract.
+    </div>
+  </div>
+
+  <!-- S26 — XLSX to CSV Conversion -->
+  <div class="slide">
+    <div class="logo fade-in">Real Data</div>
+    <h2 class="fade-in">XLSX to CSV Conversion</h2>
+    <div class="code-block fade-in"><span class="file-label">scripts/extract_opale_xlsx_csv.py &mdash; position-based column extraction</span>
+<span class="cm"># Sheets have no reliable headers — extract by column index</span>
+HOSP_COLS = {
+    <span class="str">"admission_code"</span>: <span class="num">1</span>,    <span class="cm"># Code Type d'admission</span>
+    <span class="str">"o_numero"</span>:       <span class="num">3</span>,    <span class="cm"># O-Numero de prestation</span>
+    <span class="str">"description"</span>:    <span class="num">4</span>,    <span class="cm"># Prestation DesiD</span>
+    <span class="str">"date"</span>:           <span class="num">5</span>,    <span class="cm"># Date de la prestation</span>
+    <span class="str">"cc_demandeur"</span>:   <span class="num">6</span>,    <span class="cm"># C/C demandeur</span>
+    <span class="str">"cc_producteur"</span>:  <span class="num">8</span>,    <span class="cm"># C/C producteur</span>
+    <span class="str">"quantity"</span>:       <span class="num">10</span>,   <span class="cm"># Quantite</span>
+    <span class="str">"montant"</span>:        <span class="num">11</span>,   <span class="cm"># Montant Facturable</span>
+    <span class="str">"sejour_id"</span>:      <span class="num">20</span>,   <span class="cm"># Identifiant du sejour</span>
+}
+
+AMBU_COLS = { ... }  <span class="cm"># Same fields, shifted right by 1 (leading empty column)</span>
+
+CASE_TYPE_MAP = {
+    <span class="str">"2000"</span>: <span class="str">"inpatient"</span>,   <span class="cm"># Stationar akutsomatisch</span>
+    <span class="str">"1000"</span>: <span class="str">"outpatient"</span>,  <span class="cm"># Ambulant</span>
+    <span class="str">"1010"</span>: <span class="str">"day-case"</span>,    <span class="cm"># Tagesfall</span>
+}</div>
+    <div class="callout neutral fade-in">
+      <strong>hospital_zeta</strong> is real data from SZO (Brig/Visp). 68K cases, 2.4M billing rows. XLSX sheets have different positional offsets for inpatient vs outpatient. Sapheneia codes map to canonical nuMetrix vocabulary.
+    </div>
+  </div>
+
+  <!-- S27 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT IV: TESTING & VISUALIZATION                            -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S28 — Section: Testing & Visualization -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act IV</div>
+    <h2 class="fade-in">Testing &amp; Visualization</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Vitest mocks, compile-time validation, static BI, and DAG rendering.</p>
+  </div>
+
+  <!-- S29 — Unit Tests with Mocked DuckDB -->
+  <div class="slide">
+    <div class="logo fade-in">Vitest</div>
+    <h2 class="fade-in">Unit Tests with Mocked DuckDB</h2>
+    <div class="code-block fade-in"><span class="file-label">explorer/src/lib/server/queries/taxonomies.test.ts</span>
+<span class="cm">// Mock the db module before importing the module under test</span>
+vi.<span class="fn">mock</span>(<span class="str">'../db.js'</span>, () =&gt; ({
+    query: vi.<span class="fn">fn</span>(),
+    validateTenantSlug: vi.<span class="fn">fn</span>((s: <span class="str">string</span>) =&gt; /^[a-z][a-z0-9_]*$/.<span class="fn">test</span>(s))
+}));
+
+<span class="kw">const</span> mockQuery = vi.<span class="fn">mocked</span>(query);
+
+describe(<span class="str">'buildTree'</span>, () =&gt; {
+    it(<span class="str">'nests children under their parent'</span>, () =&gt; {
+        <span class="kw">const</span> nodes = [<span class="fn">makeNode</span>(<span class="str">'root'</span>, <span class="kw">null</span>),
+                       <span class="fn">makeNode</span>(<span class="str">'child1'</span>, <span class="str">'root'</span>)];
+        <span class="kw">const</span> tree = <span class="fn">buildTree</span>(nodes);
+        expect(tree[<span class="num">0</span>].children).toHaveLength(<span class="num">1</span>);
+    });
+});
+
+describe(<span class="str">'getMemberCrossTaxonomy'</span>, () =&gt; {
+    it(<span class="str">'returns empty for invalid tenant slug'</span>, <span class="kw">async</span> () =&gt; {
+        <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">getMemberCrossTaxonomy</span>(<span class="str">'INVALID!'</span>, <span class="str">'0091'</span>);
+        expect(result).toEqual([]);
+        expect(mockQuery).not.toHaveBeenCalled(); <span class="cm">// slug rejected before query</span>
+    });
+});</div>
+    <div class="callout info fade-in">
+      <code>vi.mock</code> hoists to module top &mdash; replaces the real DuckDB connection <strong>before</strong> the module under test imports it. Pure functions like <code>buildTree</code> need no mocks at all. Error paths tested explicitly.
+    </div>
+  </div>
+
+  <!-- S30 — Compile-Time YAML Validation -->
+  <div class="slide">
+    <div class="logo fade-in">CI Gate</div>
+    <h2 class="fade-in">Compile-Time YAML Validation</h2>
+    <div class="flow fade-in">
+      <div class="flow-box"><strong>YAML</strong><br><small>probe definition</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>probecheck.py</strong></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box green-border"><strong>Pass</strong></div>
+    </div>
+    <ul class="impacts fade-in" style="margin-top: 2vh;">
+      <li><span class="bullet teal"></span><span><strong>Schema validation</strong> &mdash; Required keys, valid types, correct nesting</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Contract validation</strong> &mdash; Entity names exist in <code>gold_contract.v1.json</code></span></li>
+      <li><span class="bullet purple"></span><span><strong>Field validation</strong> &mdash; Every field reference resolves to a real column in the entity</span></li>
+      <li><span class="bullet amber"></span><span><strong>Expression safety</strong> &mdash; Whitelist characters, tokenize, verify each token is a field or number</span></li>
+      <li><span class="bullet green"></span><span><strong>Cross-reference</strong> &mdash; <code>probe_id</code> matches filename. Severity levels are valid enums.</span></li>
+    </ul>
+    <div class="callout teal fade-in">
+      Runs in CI before <code>probecompile.py</code>. Invalid YAML never reaches the SQL compiler. <strong>Shift-left validation</strong> &mdash; catch contract violations at author time, not at dbt build time.
+    </div>
+  </div>
+
+  <!-- S31 — Evidence.dev Static BI -->
+  <div class="slide">
+    <div class="logo fade-in">Evidence</div>
+    <h2 class="fade-in">Evidence.dev Static BI</h2>
+    <div class="flow fade-in">
+      <div class="flow-box filled"><strong>Platform</strong><br><small>DuckDB schema</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>npm run sources</strong><br><small>Parquet cache</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>npm run build</strong><br><small>static HTML</small></div>
+    </div>
+    <ul class="impacts fade-in" style="margin-top: 2vh;">
+      <li><span class="bullet teal"></span><span><strong>Markdown-based pages</strong> with inline SQL queries. No React, no dashboard builder.</span></li>
+      <li><span class="bullet indigo"></span><span>Queries run at <strong>build time</strong> against the Parquet cache. Zero runtime database dependency.</span></li>
+      <li><span class="bullet amber"></span><span><strong>Tenant dropdown</strong> &mdash; Platform layer provides all tenants in every query via <code>tenant_id</code> column.</span></li>
+      <li><span class="bullet purple"></span><span>Dagster asset <code>evidence_site</code> orchestrates: <code>npm run sources &amp;&amp; npm run build</code> after platform gold.</span></li>
+    </ul>
+    <div class="callout neutral fade-in">
+      Two BI surfaces: Explorer (interactive, per-tenant) and Evidence (static, cross-tenant). Same DuckDB, different access patterns.
+    </div>
+  </div>
+
+  <!-- S32 — Pipeline Graph: Cytoscape + Dagre -->
+  <div class="slide">
+    <div class="logo fade-in">Pipeline</div>
+    <h2 class="fade-in">Pipeline Graph: Cytoscape + Dagre</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">Runtime Discovery</div>
+        <div class="compare-text">
+          Nodes and edges are discovered from <code>information_schema</code> at request time. The graph shows exactly what exists in the current tenant &mdash; no static manifest.
+        </div>
+      </div>
+      <div class="compare-card purple">
+        <div class="compare-title">Layout Engine</div>
+        <div class="compare-text">
+          <strong>Dagre</strong> computes hierarchical DAG positions. <strong>Cytoscape.js</strong> renders and handles pan/zoom/select. Switchable between <em>layer mode</em> and <em>kind mode</em>.
+        </div>
+      </div>
+    </div>
+    <ul class="impacts fade-in" style="margin-top: 1.5vh;">
+      <li><span class="bullet teal"></span><span>Nodes colored by layer: <span class="badge badge-teal">Bronze</span> <span class="badge badge-confirmed">Silver</span> <span class="badge badge-financial">Gold</span> <span class="badge badge-purple">Probes</span></span></li>
+      <li><span class="bullet indigo"></span><span><strong>Visible-only re-layout</strong> &mdash; collapse/expand layers without recomputing the entire graph.</span></li>
+      <li><span class="bullet amber"></span><span>Click a node &rarr; detail panel with schema, row counts, upstream/downstream links.</span></li>
+    </ul>
+  </div>
+
+  <!-- S33 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT V: ARCHITECTURE & PATTERNS                             -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S34 — Section: Architecture & Patterns -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act V</div>
+    <h2 class="fade-in">Architecture &amp; Patterns</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Recurring design decisions and what they buy you.</p>
+  </div>
+
+  <!-- S35 — Design Patterns Recap -->
+  <div class="slide">
+    <div class="logo fade-in">Patterns</div>
+    <h2 class="fade-in">Design Patterns Recap</h2>
+    <div class="compare fade-in" style="flex-wrap: wrap;">
+      <div class="compare-card engine" style="flex: 1 1 45%;">
+        <div class="compare-title">Read-Only Consumption</div>
+        <div class="compare-text">
+          Explorer opens DuckDB with <code>OPEN_READONLY</code>. No write locks, no contention. dbt writes, Explorer reads &mdash; <strong>zero coordination</strong>.
+        </div>
+      </div>
+      <div class="compare-card purple" style="flex: 1 1 45%;">
+        <div class="compare-title">DSL-to-SQL Compilation</div>
+        <div class="compare-text">
+          Domain experts write YAML. Compilers generate validated SQL. dbt treats it as native models. <strong>Separation of concerns</strong> at the authoring boundary.
+        </div>
+      </div>
+      <div class="compare-card good" style="flex: 1 1 45%;">
+        <div class="compare-title">Contract-First Design</div>
+        <div class="compare-text">
+          JSON contracts define entity schemas. Probes reference contracts, not tables. <strong>Rename a model</strong> &rarr; update one JSON field &rarr; recompile.
+        </div>
+      </div>
+      <div class="compare-card domain" style="flex: 1 1 45%;">
+        <div class="compare-title">Parameterized Generation</div>
+        <div class="compare-text">
+          Synthetic data uses <strong>seeded PRNG + config dicts</strong>. Same code, different parameters &rarr; OPALE, SAP, or Navision CSV with controlled defect rates.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S36 — What's Built, What's Next -->
+  <div class="slide">
+    <div class="logo fade-in">Status</div>
+    <h2 class="fade-in">What&rsquo;s Built, What&rsquo;s Next</h2>
+    <div class="two-col fade-in">
+      <div class="col">
+        <div class="sc-label">Built &amp; Working</div>
+        <ul class="impacts">
+          <li><span class="bullet green"></span><span>3 YAML-to-SQL compilers + validators</span></li>
+          <li><span class="bullet green"></span><span>SvelteKit Explorer with 25 route directories</span></li>
+          <li><span class="bullet green"></span><span>Live probe builder (TS &rarr; Python subprocess)</span></li>
+          <li><span class="bullet green"></span><span>DE/EN/FR i18n with graceful fallback</span></li>
+          <li><span class="bullet green"></span><span>5-tenant synthetic data generator</span></li>
+          <li><span class="bullet green"></span><span>Real data XLSX converter (hospital_zeta)</span></li>
+          <li><span class="bullet green"></span><span>Pipeline DAG with Cytoscape + Dagre</span></li>
+          <li><span class="bullet green"></span><span>Evidence.dev static BI site</span></li>
+        </ul>
+      </div>
+      <div class="col">
+        <div class="sc-label">Road Ahead</div>
+        <ul class="impacts">
+          <li><span class="bullet amber"></span><span>Tauri desktop app packaging</span></li>
+          <li><span class="bullet amber"></span><span>API endpoint test coverage</span></li>
+          <li><span class="bullet amber"></span><span>Probe builder: save &amp; deploy from UI</span></li>
+          <li><span class="bullet amber"></span><span>Presentation mode for hypothesis reports</span></li>
+          <li><span class="bullet amber"></span><span>Cross-tenant comparison dashboards</span></li>
+          <li><span class="bullet amber"></span><span>RBAC: tenant-scoped user permissions</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- S37 — One Codebase, Multiple Surfaces -->
+  <div class="slide">
+    <div class="logo fade-in">nuMetrix</div>
+    <h2 class="fade-in">One Codebase, Multiple Surfaces</h2>
+    <div class="flow fade-in">
+      <div class="flow-box filled"><strong>YAML DSL</strong><br><small>probes, hypotheses, diagnoses</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>Python</strong><br><small>compilers, generators</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>dbt + DuckDB</strong><br><small>pipeline engine</small></div>
+    </div>
+    <div class="flow fade-in" style="margin-top: 1.5vh;">
+      <div class="flow-box" style="border-color: var(--amber); border-width: 3px;"><strong>Explorer</strong><br><small>SvelteKit</small></div>
+      <div class="flow-box" style="border-color: var(--purple); border-width: 3px;"><strong>Evidence</strong><br><small>static BI</small></div>
+      <div class="flow-box" style="border-color: var(--green); border-width: 3px;"><strong>Tauri</strong><br><small>desktop</small></div>
+      <div class="flow-box" style="border-color: var(--indigo); border-width: 3px;"><strong>Dagster</strong><br><small>orchestration</small></div>
+    </div>
+    <div class="callout teal fade-in">
+      All surfaces consume the same DuckDB. All probes are compiled from the same YAML. All tenants share the same pipeline. <strong>One truth, many views.</strong>
+    </div>
+  </div>
+
+  <!-- S38 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+</div>
+
+<div class="brand">nuMetrix</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = '\u00b7\u00b7\u00b7';
+    } else {
+      var title = slide.querySelector('h2');
+      var h1 = slide.querySelector('h1');
+      var logo = slide.querySelector('.logo');
+      if (h1) {
+        label.textContent = h1.textContent.trim();
+      } else if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var n = 0;
+    for (var j = 0; j <= index; j++) {
+      if (!slides[j].classList.contains('breathing')) n++;
+    }
+    counter.textContent = n + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

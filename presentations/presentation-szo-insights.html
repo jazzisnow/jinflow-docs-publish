@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix — SZO Oberwallis: Intelligence Brief</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+    --rose: #e11d48;
+    --rose-soft: #fff1f2;
+    --cyan: #0891b2;
+    --cyan-soft: #ecfeff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout { display: flex; width: 100%; height: 100%; }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area { flex: 1; position: relative; height: 100%; overflow: hidden; }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 5vh 6vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(0.85rem, 1.4vw, 1.15rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 1.5vh;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.2rem, 2.4vw, 2rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 1.5vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.82rem, 1.3vw, 1.1rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 1.5vh 0;
+  }
+
+  /* ── Section slides ── */
+  .section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+  }
+  .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .section-slide .logo { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.1rem, 2.2vw, 1.8rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Stat cards ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.5vw; max-width: 1000px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2vh 1.2vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.5rem, 2.5vw, 2.4rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.5vh;
+  }
+  .stat-num.red { color: var(--red); }
+  .stat-num.amber { color: var(--amber); }
+  .stat-num.green { color: var(--green); }
+  .stat-num.navy { color: var(--navy); }
+
+  .stat-label {
+    font-size: clamp(0.68rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Hypothesis badges ── */
+  .badge {
+    display: inline-block;
+    padding: 0.2em 0.6em;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    vertical-align: middle;
+  }
+  .badge-financial { background: #dbeafe; color: #1e40af; }
+  .badge-data { background: #fef3c7; color: #92400e; }
+  .badge-compliance { background: #fce7f3; color: #9d174d; }
+  .badge-operational { background: #d1fae5; color: #065f46; }
+  .badge-confirmed { background: var(--green-soft); color: var(--green); }
+  .badge-not-observed { background: var(--light-gray); color: var(--warm-gray); }
+
+  /* ── Impact list ── */
+  .impacts {
+    list-style: none; max-width: 800px; width: 100%; margin-top: 1vh;
+  }
+  .impacts li {
+    font-size: clamp(0.78rem, 1.15vw, 0.98rem);
+    line-height: 1.6; color: var(--navy);
+    padding: 0.5vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.08);
+    display: flex; align-items: baseline; gap: 0.7rem;
+  }
+  .impacts li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block; width: 7px; height: 7px; min-width: 7px;
+    border-radius: 50%; margin-top: 0.45em;
+  }
+  .bullet.teal { background: var(--teal); }
+  .bullet.red { background: var(--red); }
+  .bullet.amber { background: var(--amber); }
+  .bullet.green { background: var(--green); }
+  .bullet.purple { background: var(--purple); }
+  .bullet.indigo { background: var(--indigo); }
+
+  /* ── Comparison cards ── */
+  .compare {
+    display: flex; gap: 2vw; max-width: 960px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .compare-card {
+    flex: 1; border-radius: 12px; padding: 2vh 1.5vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+  .compare-card.brig { background: #eff6ff; border: 1px solid #bfdbfe; }
+  .compare-card.visp { background: #f0fdf4; border: 1px solid #bbf7d0; }
+  .compare-card.engine { background: var(--indigo-soft); border: 1px solid #c7d2fe; }
+  .compare-card.domain { background: var(--amber-soft); border: 1px solid #fde68a; }
+  .compare-card.warn { background: var(--red-soft); border: 1px solid #fecaca; }
+  .compare-card.neutral { background: var(--light-gray); border: 1px solid #cbd5e1; }
+  .compare-card.good { background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .compare-card.purple { background: var(--purple-soft); border: 1px solid #c4b5fd; }
+  .compare-card.cyan { background: var(--cyan-soft); border: 1px solid #a5f3fc; }
+
+  .compare-title {
+    font-size: clamp(0.82rem, 1.1vw, 0.98rem);
+    font-weight: 600; margin-bottom: 0.6vh;
+  }
+  .compare-card.brig .compare-title { color: #1e40af; }
+  .compare-card.visp .compare-title { color: #166534; }
+  .compare-card.engine .compare-title { color: #3730a3; }
+  .compare-card.domain .compare-title { color: #92400e; }
+  .compare-card.warn .compare-title { color: #991b1b; }
+  .compare-card.neutral .compare-title { color: var(--navy); }
+  .compare-card.good .compare-title { color: #166534; }
+  .compare-card.purple .compare-title { color: #5b21b6; }
+  .compare-card.cyan .compare-title { color: #155e75; }
+
+  .compare-text {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--slate); line-height: 1.5;
+  }
+  .compare-text strong { color: var(--navy); }
+
+  /* ── Data table ── */
+  .data-table {
+    width: 100%; max-width: 960px; margin-top: 1.5vh;
+    border-collapse: collapse;
+    font-size: clamp(0.68rem, 0.92vw, 0.84rem);
+  }
+  .data-table th {
+    background: var(--light-gray);
+    font-weight: 600; text-align: left;
+    padding: 0.8vh 1vw;
+    border-bottom: 2px solid #cbd5e1;
+    color: var(--navy); white-space: nowrap;
+  }
+  .data-table th.right, .data-table td.right { text-align: right; }
+  .data-table td {
+    padding: 0.6vh 1vw;
+    border-bottom: 1px solid var(--light-gray);
+    vertical-align: top;
+  }
+  .data-table td.mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9em;
+  }
+  .data-table tr:nth-child(even) { background: #f8fafc; }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 1.5vw; max-width: 960px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2vh 1.5vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-title {
+    font-size: clamp(0.78rem, 1.05vw, 0.92rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.3vh;
+  }
+  .card-desc {
+    font-size: clamp(0.68rem, 0.88vw, 0.8rem);
+    color: var(--warm-gray); line-height: 1.45;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.2vw; margin-top: 1.5vh;
+  }
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.2vh 1.5vw;
+    font-weight: 600; font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--navy); text-align: center; min-width: 90px;
+  }
+  .flow-box.filled { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .flow-box.teal-filled { background: var(--teal); border-color: var(--teal); color: var(--white); }
+  .flow-box.amber-border { border-color: var(--amber); }
+  .flow-box.red-border { border-color: var(--red); }
+  .flow-arrow {
+    font-size: clamp(1rem, 1.6vw, 1.4rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Horizontal bar chart ── */
+  .h-bar-chart {
+    width: 100%; max-width: 800px; margin-top: 1.5vh;
+  }
+  .h-bar-row {
+    display: flex; align-items: center; gap: 1vw;
+    margin-bottom: 0.8vh;
+  }
+  .h-bar-label {
+    font-size: clamp(0.68rem, 0.88vw, 0.8rem);
+    font-weight: 500; color: var(--navy);
+    min-width: 100px; text-align: right;
+  }
+  .h-bar-track {
+    flex: 1; height: 22px; background: var(--light-gray);
+    border-radius: 4px; overflow: hidden; position: relative;
+  }
+  .h-bar-fill {
+    height: 100%; border-radius: 4px;
+    transition: width 1.5s ease;
+  }
+  .h-bar-fill.teal { background: var(--teal); }
+  .h-bar-fill.navy { background: var(--navy); }
+  .h-bar-fill.amber { background: var(--amber); }
+  .h-bar-fill.red { background: var(--red); }
+  .h-bar-fill.green { background: var(--green); }
+  .h-bar-fill.slate { background: #94a3b8; }
+  .h-bar-value {
+    font-size: clamp(0.65rem, 0.82vw, 0.75rem);
+    color: var(--warm-gray); min-width: 90px;
+  }
+
+  /* ── Callout box ── */
+  .callout {
+    max-width: 800px; width: 100%;
+    padding: 1.8vh 2vw;
+    border-radius: 10px; margin-top: 1.5vh;
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    line-height: 1.55;
+  }
+  .callout.info { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af; }
+  .callout.warn { background: var(--amber-soft); border-left: 4px solid var(--amber); color: #92400e; }
+  .callout.danger { background: var(--red-soft); border-left: 4px solid var(--red); color: #991b1b; }
+  .callout.neutral { background: var(--light-gray); border-left: 4px solid #94a3b8; color: var(--slate); }
+
+  /* ── Priority action items ── */
+  .action-list {
+    list-style: none; max-width: 800px; width: 100%; margin-top: 1vh;
+  }
+  .action-list li {
+    display: flex; align-items: flex-start; gap: 0.8rem;
+    padding: 0.8vh 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+    font-size: clamp(0.75rem, 1.05vw, 0.92rem);
+    line-height: 1.5; color: var(--navy);
+  }
+  .action-list li:last-child { border-bottom: none; }
+  .action-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; min-width: 22px;
+    border-radius: 50%; font-size: 0.72rem; font-weight: 700;
+    color: white; margin-top: 0.15em;
+  }
+  .action-num.red { background: var(--red); }
+  .action-num.amber { background: var(--amber); }
+  .action-num.teal { background: var(--teal); }
+
+  /* ── Two-column layout ── */
+  .two-col {
+    display: flex; gap: 3vw; max-width: 960px; width: 100%; margin-top: 1.5vh;
+    align-items: flex-start;
+  }
+  .two-col .col { flex: 1; }
+  .two-col .col-narrow { flex: 0 0 220px; }
+
+  /* ── Hypothesis list (compact) ── */
+  .hyp-list {
+    list-style: none; width: 100%;
+  }
+  .hyp-list li {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.4vh 0;
+    font-size: clamp(0.72rem, 0.98vw, 0.88rem);
+    line-height: 1.5; color: var(--navy);
+  }
+
+  /* ── Small caps label ── */
+  .sc-label {
+    font-size: clamp(0.6rem, 0.75vw, 0.7rem);
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--warm-gray); margin-bottom: 0.5vh;
+  }
+
+  /* ── Branding + counter ── */
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 4vh 4vw; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .compare { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+    .two-col { flex-direction: column; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<div class="sidebar" id="sidebar"></div>
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- PROLOGUE                                                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S1 — Title -->
+  <div class="slide active">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">SZO Oberwallis:<br>Intelligence Brief</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Spitalzentrum Oberwallis &mdash; Brig &amp; Visp<br>
+      68,441 episodes &middot; 2.3M billing events &middot; CHF 33.2M &middot; 2023&ndash;2024
+    </p>
+    <p class="subtitle fade-in" style="margin-top: 2vh; opacity: 0.5; font-size: clamp(0.75rem, 1vw, 0.9rem);">
+      February 2026
+    </p>
+  </div>
+
+  <!-- S2 — The Hospital at a Glance -->
+  <div class="slide">
+    <div class="logo fade-in">Overview</div>
+    <h2 class="fade-in">The Hospital at a Glance</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num">2</div>
+        <div class="stat-label">sites<br>Brig &amp; Visp</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">498</div>
+        <div class="stat-label">cost centers</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">48,382</div>
+        <div class="stat-label">active materials</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">11,427</div>
+        <div class="stat-label">suppliers</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      <span class="highlight">70% outpatient</span> / 30% inpatient &mdash; 47,587 ambulatory episodes &middot; 20,839 stationary episodes
+    </p>
+  </div>
+
+  <!-- S3 — Two Sites, Two Economies -->
+  <div class="slide">
+    <div class="logo fade-in">Two Sites</div>
+    <h2 class="fade-in">Two Sites, Two Economies</h2>
+    <div class="compare fade-in">
+      <div class="compare-card brig">
+        <div class="compare-title">Brig</div>
+        <div class="compare-text">
+          <strong>702K</strong> events &middot; <strong>CHF 29.8M</strong> (90%)<br>
+          <strong>13,336</strong> cases<br><br>
+          Oncology: <strong>CHF 26.1M</strong> from one cost center.<br>
+          High-value, low-volume. Drug pricing dominates.
+        </div>
+      </div>
+      <div class="compare-card visp">
+        <div class="compare-title">Visp</div>
+        <div class="compare-text">
+          <strong>1,572K</strong> events &middot; <strong>CHF 3.4M</strong> (10%)<br>
+          <strong>55,105</strong> cases<br><br>
+          2.2&times; more rows at <strong>1/9th</strong> the CHF.<br>
+          High-volume ward consumables.
+        </div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Brig = high-value oncology concentration &middot; Visp = high-volume ward consumables
+    </p>
+  </div>
+
+  <!-- S4 — Nine Questions We Asked -->
+  <div class="slide">
+    <div class="logo fade-in">Hypotheses</div>
+    <h2 class="fade-in">Nine Questions We Asked</h2>
+    <div class="two-col fade-in">
+      <div class="col">
+        <ul class="hyp-list">
+          <li><span class="badge badge-financial">REVO</span> Materials used but not billed?</li>
+          <li><span class="badge badge-financial">DUPL</span> Same event billed twice?</li>
+          <li><span class="badge badge-data">PHAN</span> Billing for non-existent cases?</li>
+          <li><span class="badge badge-data">STAL</span> Catalogue out of date?</li>
+          <li><span class="badge badge-financial">COMA</span> Costs on the wrong desk?</li>
+          <li><span class="badge badge-compliance">COGA</span> Controlled substances traceable?</li>
+          <li><span class="badge badge-financial">XILE</span> Materials crossing sites untracked?</li>
+          <li><span class="badge badge-financial">GENO</span> Overpaying for generics?</li>
+          <li><span class="badge badge-operational">IOIM</span> More going in than coming out?</li>
+        </ul>
+      </div>
+      <div class="col-narrow" style="padding-top: 0.5vh;">
+        <div class="stat" style="margin-bottom: 1vh;">
+          <div class="stat-num" style="font-size: clamp(1.2rem, 2vw, 1.8rem);">9</div>
+          <div class="stat-label">hypotheses</div>
+        </div>
+        <div class="stat" style="margin-bottom: 1vh;">
+          <div class="stat-num" style="font-size: clamp(1.2rem, 2vw, 1.8rem);">25</div>
+          <div class="stat-label">probes<br><small>20 regular + 5 assessments</small></div>
+        </div>
+        <div class="stat">
+          <div class="stat-num" style="font-size: clamp(1.2rem, 2vw, 1.8rem);">6</div>
+          <div class="stat-label">root-cause diagnoses</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S5 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT I: REVENUE & BILLING                                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S6 — Section: Revenue & Billing -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act I</div>
+    <h2 class="fade-in">Revenue &amp; Billing</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Where money enters the system &mdash; and where it leaks out</p>
+  </div>
+
+  <!-- S7 — REVO: Revenue Leakage -->
+  <div class="slide">
+    <div class="logo fade-in"><span class="badge badge-financial">REVO</span> Revenue Leakage</div>
+    <h2 class="fade-in">Materials used but not billed</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num red">54,830</div>
+        <div class="stat-label">findings</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num red">CHF 17.3M</div>
+        <div class="stat-label">at risk</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num green">Confirmed</div>
+        <div class="stat-label">score 0.67</div>
+      </div>
+    </div>
+    <div class="callout info fade-in">
+      Usage events without matching billing. Under DRG inpatient rules, this is expected &mdash; materials are bundled into the case rate. But for ambulatory and high-cost items, it represents real revenue loss.
+    </div>
+  </div>
+
+  <!-- S8 — DUPL & PHAN -->
+  <div class="slide">
+    <div class="logo fade-in"><span class="badge badge-financial">DUPL</span> + <span class="badge badge-data">PHAN</span></div>
+    <h2 class="fade-in">Duplicate and Phantom Billing</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num red">10,268</div>
+        <div class="stat-label">duplicate findings</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num red">1,068</div>
+        <div class="stat-label">orphan billing rows</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num amber">CHF 33.3M</div>
+        <div class="stat-label">combined at risk</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num green">Both Confirmed</div>
+        <div class="stat-label">score 0.67 / 1.00</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      probe_duplicate_billing found <strong>10,268</strong> duplicates. probe_orphan_billing found <strong>1,068</strong> rows referencing non-existent cases. Same events often trigger both.
+    </p>
+  </div>
+
+  <!-- S9 — These Numbers Overlap -->
+  <div class="slide">
+    <div class="logo fade-in">Overlap</div>
+    <h2 class="fade-in">Why the Hypothesis Totals Don't Add Up</h2>
+    <div class="callout warn fade-in">
+      Each hypothesis aggregates multiple probes and assessments. A billing event flagged by 3 probes appears in 3 hypotheses.<br><br>
+      <strong>Gross sum across all hypotheses: ~CHF 376M.</strong> Real exposure is a fraction of that.
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      The probes identify <span class="highlight">overlapping symptoms</span> of the same underlying issues.<br>
+      The diagnosis system untangles which root causes drive which findings.
+    </p>
+  </div>
+
+  <!-- S10 — The 86% Pattern -->
+  <div class="slide">
+    <div class="logo fade-in">Distribution</div>
+    <h2 class="fade-in">The 86% Pattern</h2>
+    <div class="h-bar-chart fade-in">
+      <div class="h-bar-row">
+        <div class="h-bar-label">Zero-CHF</div>
+        <div class="h-bar-track"><div class="h-bar-fill slate" style="width: 86%;"></div></div>
+        <div class="h-bar-value">1,957,286 (86%)</div>
+      </div>
+      <div class="h-bar-row">
+        <div class="h-bar-label">&lt; CHF 10</div>
+        <div class="h-bar-track"><div class="h-bar-fill teal" style="width: 9.5%;"></div></div>
+        <div class="h-bar-value">216,000</div>
+      </div>
+      <div class="h-bar-row">
+        <div class="h-bar-label">CHF 10&ndash;100</div>
+        <div class="h-bar-track"><div class="h-bar-fill teal" style="width: 3.4%;"></div></div>
+        <div class="h-bar-value">77,000</div>
+      </div>
+      <div class="h-bar-row">
+        <div class="h-bar-label">CHF 100&ndash;1K</div>
+        <div class="h-bar-track"><div class="h-bar-fill amber" style="width: 0.66%;"></div></div>
+        <div class="h-bar-value">15,000</div>
+      </div>
+      <div class="h-bar-row">
+        <div class="h-bar-label">CHF 1K&ndash;10K</div>
+        <div class="h-bar-track"><div class="h-bar-fill red" style="width: 0.31%;"></div></div>
+        <div class="h-bar-value">7,114</div>
+      </div>
+      <div class="h-bar-row">
+        <div class="h-bar-label">CHF 10K+</div>
+        <div class="h-bar-track"><div class="h-bar-fill red" style="width: 0.01%;"></div></div>
+        <div class="h-bar-value">230</div>
+      </div>
+    </div>
+    <div class="callout info fade-in">
+      Only <strong>7,344 events (0.3%)</strong> carry <strong>CHF 26.1M &mdash; 79%</strong> of all billing.<br>
+      This is DRG billing: ward consumables bundled into the case rate.
+    </div>
+  </div>
+
+  <!-- S11 — B-Onkologie -->
+  <div class="slide">
+    <div class="logo fade-in">Concentration</div>
+    <h2 class="fade-in">B-Onkologie: CHF 26.1M from One Cost Center</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr><th>Material</th><th class="right">CHF</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Keytruda (Pembrolizumab)</td><td class="right mono">4,350,000</td></tr>
+        <tr><td>Darzalex (Daratumumab)</td><td class="right mono">1,800,000</td></tr>
+        <tr><td>PRIVIGEN (Immunoglobulin)</td><td class="right mono">1,080,000</td></tr>
+        <tr><td>Opdivo (Nivolumab)</td><td class="right mono">879,000</td></tr>
+        <tr><td>Perjeta (Pertuzumab)</td><td class="right mono">668,000</td></tr>
+        <tr><td>Ogivri (Trastuzumab)</td><td class="right mono">595,000</td></tr>
+        <tr><td>Bavencio (Avelumab)</td><td class="right mono">557,000</td></tr>
+        <tr><td>Imbruvica (Ibrutinib)</td><td class="right mono">557,000</td></tr>
+      </tbody>
+    </table>
+    <p class="subtitle fade-in" style="margin-top: 1vh;">
+      CC 17405 (B-Onkologie ambulant) accounts for <span class="highlight">79% of total hospital billing</span>.<br>
+      Oncology drug pricing dominates financial risk.
+    </p>
+  </div>
+
+  <!-- S12 — Root Causes: Revenue Cluster -->
+  <div class="slide">
+    <div class="logo fade-in">Root Causes</div>
+    <h2 class="fade-in">Revenue Cluster: What We Know</h2>
+    <div class="compare fade-in">
+      <div class="compare-card domain">
+        <div class="compare-title">Orphan Case Data Entry</div>
+        <div class="compare-text">
+          <span class="badge badge-data">PHAN</span> &rarr; <strong>data_quality</strong> &middot; 85% confidence<br><br>
+          Stale case IDs persist in the billing system after case merges or cancellations. Delayed master data sync between clinical and billing systems.
+        </div>
+      </div>
+      <div class="compare-card neutral">
+        <div class="compare-title">Investigation Pending</div>
+        <div class="compare-text">
+          <span class="badge badge-financial">REVO</span> Revenue leakage and <span class="badge badge-financial">DUPL</span> duplicate billing have no root-cause diagnosis yet.<br><br>
+          The billing workflow gap diagnosis exists but did not trigger for SZO. <strong>Further investigation needed.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S13 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT II: CATALOGUE & PRICING                                -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S14 — Section: Catalogue & Pricing -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act II</div>
+    <h2 class="fade-in">Catalogue &amp; Pricing</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Is the material master keeping up with reality?</p>
+  </div>
+
+  <!-- S15 — STAL: 963 Stale Articles -->
+  <div class="slide">
+    <div class="logo fade-in"><span class="badge badge-data">STAL</span> Stale Catalogue</div>
+    <h2 class="fade-in">963 Stale Articles, CHF 3.1M at Risk</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num red">963</div>
+        <div class="stat-label">findings</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num red">CHF 3.1M</div>
+        <div class="stat-label">at risk</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num green">Confirmed</div>
+        <div class="stat-label">score 1.00</div>
+      </div>
+    </div>
+    <table class="data-table fade-in" style="max-width: 700px;">
+      <thead>
+        <tr><th>Material</th><th class="right">CHF</th><th>Severity</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Opdivo (Nivolumab)</td><td class="right mono">879,000</td><td>high</td></tr>
+        <tr><td>Pelgraz (Pegfilgrastim)</td><td class="right mono">394,000</td><td>high</td></tr>
+        <tr><td>Zejula (Niraparib)</td><td class="right mono">237,000</td><td>medium</td></tr>
+        <tr><td>Ibrance (Palbociclib)</td><td class="right mono">220,000</td><td>high</td></tr>
+        <tr><td>Imnovid 4mg (Pomalidomide)</td><td class="right mono">206,000</td><td>high</td></tr>
+        <tr><td>Imnovid 3mg (Pomalidomide)</td><td class="right mono">118,000</td><td>high</td></tr>
+      </tbody>
+    </table>
+    <p class="subtitle fade-in" style="margin-top: 0.8vh;">
+      Active billing against expired validity dates. Almost all oncology drugs.
+    </p>
+  </div>
+
+  <!-- S16 — GENO: The Price Gap -->
+  <div class="slide">
+    <div class="logo fade-in"><span class="badge badge-financial">GENO</span> Overpriced Generics</div>
+    <h2 class="fade-in">The Price Gap</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num red">22,043</div>
+        <div class="stat-label">findings</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num red">CHF 30.4M</div>
+        <div class="stat-label">at risk</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num amber">967K</div>
+        <div class="stat-label">units affected</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num green">Confirmed</div>
+        <div class="stat-label">score 1.00</div>
+      </div>
+    </div>
+    <div class="callout info fade-in">
+      Materials where internal pricing exceeds generic equivalents. Structural gap &mdash; procurement contracts not renegotiated.
+    </div>
+  </div>
+
+  <!-- S17 — Below-Cost Billing -->
+  <div class="slide">
+    <div class="logo fade-in">Margin</div>
+    <h2 class="fade-in">Below-Cost Billing</h2>
+    <div class="compare fade-in">
+      <div class="compare-card warn">
+        <div class="compare-title">Negative Margin</div>
+        <div class="compare-text">
+          <strong>12,853</strong> findings<br>
+          <strong>CHF 4.2M</strong> at risk<br><br>
+          Materials sold below purchase price. PRIVIGEN (top-3 oncology drug) shows negative margin.
+        </div>
+      </div>
+      <div class="compare-card warn">
+        <div class="compare-title">Billing Below Internal Price</div>
+        <div class="compare-text">
+          <strong>56,738</strong> findings<br>
+          <strong>CHF 16.8M</strong> at risk<br><br>
+          Billing amount lower than the hospital's own internal price list.
+        </div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Combined: tens of thousands of events where the hospital sells below cost.
+    </p>
+  </div>
+
+  <!-- S18 — Data Quality Foundation -->
+  <div class="slide">
+    <div class="logo fade-in">Data Quality</div>
+    <h2 class="fade-in">The Foundation</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr><th>Entity</th><th class="right">Valid %</th><th class="right">Invalid Rows</th><th>Impact</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Cases</td><td class="right mono" style="color: var(--green);">100%</td><td class="right mono">0</td><td>&mdash;</td></tr>
+        <tr><td>Materials</td><td class="right mono" style="color: var(--red);">73.7%</td><td class="right mono">17,250</td><td>Zero-price cascade</td></tr>
+        <tr><td>Billing Events</td><td class="right mono" style="color: var(--amber);">95.7%</td><td class="right mono">&sim;98K</td><td>Orphan material refs</td></tr>
+        <tr><td>Usage Events</td><td class="right mono" style="color: var(--amber);">95.4%</td><td class="right mono">&sim;113K</td><td>Orphan material refs</td></tr>
+        <tr><td>Movements</td><td class="right mono" style="color: var(--amber);">90.2%</td><td class="right mono">&sim;87K</td><td>Invalid locations</td></tr>
+        <tr><td>Suppliers</td><td class="right mono" style="color: var(--green);">100%</td><td class="right mono">0</td><td>&mdash;</td></tr>
+        <tr><td>Article-Suppliers</td><td class="right mono" style="color: var(--red);">2.8%</td><td class="right mono">&sim;166K</td><td>Missing price/FK</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn fade-in">
+      17,250 zero-price materials cascade into 211K invalid billing + usage rows.<br>
+      <strong>CHF 1.24M</strong> invisible to Gold-layer analytics.
+    </div>
+  </div>
+
+  <!-- S19 — Root Causes: Catalogue Cluster -->
+  <div class="slide">
+    <div class="logo fade-in">Root Causes</div>
+    <h2 class="fade-in">Catalogue Cluster</h2>
+    <div class="compare fade-in">
+      <div class="compare-card domain">
+        <div class="compare-title">Catalogue Maintenance Lag</div>
+        <div class="compare-text">
+          <span class="badge badge-data">STAL</span> &rarr; <strong>process_failure</strong> &middot; 85% confidence<br><br>
+          Articles not reviewed or updated on schedule. Expired validity dates and missing standard prices accumulate over time.
+        </div>
+      </div>
+      <div class="compare-card engine">
+        <div class="compare-title">Procurement Pricing Mismatch</div>
+        <div class="compare-text">
+          <span class="badge badge-financial">GENO</span> &rarr; <strong>structural</strong> &middot; 85% confidence<br><br>
+          Supplier agreements outdated for high-volume generics. Gap between procurement contracts and internal pricing not reconciled.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S20 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT III: STRUCTURAL & OPERATIONAL                          -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S21 — Section: Structural & Operational -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act III</div>
+    <h2 class="fade-in">Structural &amp; Operational</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Cost centers, cross-site flows, and the I/O gap</p>
+  </div>
+
+  <!-- S22 — COMA: Cost Center Misallocation -->
+  <div class="slide">
+    <div class="logo fade-in"><span class="badge badge-financial">COMA</span> Cost Center Misallocation</div>
+    <h2 class="fade-in">Costs on the Wrong Desk</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num red">138,635</div>
+        <div class="stat-label">findings</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num red">CHF 66.7M</div>
+        <div class="stat-label">at risk</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num green">Confirmed</div>
+        <div class="stat-label">score 1.00</div>
+      </div>
+    </div>
+    <div class="callout info fade-in">
+      CC encoding: 5-digit billing (1xxxx=Brig, 2xxxx=Visp) vs 4-digit master data.<br>
+      <strong>148</strong> actual CC mismatches + <strong>66,720</strong> producteur mismatches.
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1vh;">
+      Root cause: <strong>CC master data drift</strong> (data_quality, 85%) &mdash; CC assignments drifting after organisational restructuring.
+    </p>
+  </div>
+
+  <!-- S23 — XILE: Cross-Site Leakage -->
+  <div class="slide">
+    <div class="logo fade-in"><span class="badge badge-financial">XILE</span> Cross-Site Leakage</div>
+    <h2 class="fade-in">Materials Crossing Sites Untracked</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num amber">5,030</div>
+        <div class="stat-label">cross-site findings</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num amber">CHF 393K</div>
+        <div class="stat-label">at risk</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num green">Confirmed</div>
+        <div class="stat-label">score 1.00</div>
+      </div>
+    </div>
+    <div class="callout info fade-in">
+      2.2% of billing crosses site boundaries. Financial tracking is opaque.
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1vh;">
+      Root cause: <strong>Cross-site routing error</strong> (process_failure, <span class="highlight">90% confidence</span> &mdash; highest of all diagnoses).<br>
+      Transfer orders not closed before billing.
+    </p>
+  </div>
+
+  <!-- S24 — COGA: The Hypothesis We Could Not Test -->
+  <div class="slide">
+    <div class="logo fade-in"><span class="badge badge-compliance">COGA</span> Controlled Substance Gap</div>
+    <h2 class="fade-in">The Hypothesis We Could Not Test</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num" style="color: var(--warm-gray);">Not Observed</div>
+        <div class="stat-label">score 0.53</div>
+      </div>
+    </div>
+    <div class="callout neutral fade-in">
+      <code>is_controlled_substance</code>: <strong>0%</strong> populated in OPALE export.<br>
+      <code>is_generic</code>: <strong>0%</strong> populated. MIGEL codes: <strong>0%</strong> populated.<br><br>
+      This hypothesis cannot be evaluated from current data.
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Not disproven &mdash; <span class="highlight">untestable</span>. Resolving this requires enriching the OPALE export or connecting to a reference database.
+    </p>
+  </div>
+
+  <!-- S25 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- S26 — IOIM: Two Supply Chains -->
+  <div class="slide">
+    <div class="logo fade-in"><span class="badge badge-operational">IOIM</span> I/O Imbalance</div>
+    <h2 class="fade-in">Two Supply Chains</h2>
+    <div class="flow fade-in">
+      <div class="flow-box filled"><strong>Warehouse</strong><br><small>TRANSFER</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>Ward Stock</strong></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>Scanned</strong><br><small>coeff &thickapprox; 1.0</small></div>
+    </div>
+    <div class="flow fade-in" style="margin-top: 1vh;">
+      <div class="flow-box filled"><strong>Pharmacy</strong><br><small>Direct</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>Usage Only</strong><br><small>no transfer</small></div>
+    </div>
+    <div class="flow fade-in" style="margin-top: 1vh;">
+      <div class="flow-box filled"><strong>Ward Stock</strong></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box red-border"><strong>Not Scanned</strong><br><small>transfer-only</small></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Overall I/O coefficient: <strong>0.47</strong> &mdash; but this is not a single number. It's three populations.
+    </p>
+  </div>
+
+  <!-- S27 — Three Populations -->
+  <div class="slide">
+    <div class="logo fade-in">Populations</div>
+    <h2 class="fade-in">Three Populations</h2>
+    <div class="h-bar-chart fade-in" style="max-width: 700px;">
+      <div class="h-bar-row">
+        <div class="h-bar-label">Transfer-only</div>
+        <div class="h-bar-track"><div class="h-bar-fill red" style="width: 25%;"></div></div>
+        <div class="h-bar-value">1,323 (25%) &middot; CHF 15.1M</div>
+      </div>
+      <div class="h-bar-row">
+        <div class="h-bar-label">Both-present</div>
+        <div class="h-bar-track"><div class="h-bar-fill teal" style="width: 43%;"></div></div>
+        <div class="h-bar-value">2,343 (43%) &middot; CHF 9.5M xfer</div>
+      </div>
+      <div class="h-bar-row">
+        <div class="h-bar-label">Usage-only</div>
+        <div class="h-bar-track"><div class="h-bar-fill navy" style="width: 32%;"></div></div>
+        <div class="h-bar-value">1,727 (32%) &middot; CHF 6.5M</div>
+      </div>
+    </div>
+    <div class="compare fade-in" style="margin-top: 1.5vh;">
+      <div class="compare-card warn">
+        <div class="compare-title">Transfer-only</div>
+        <div class="compare-text">CHF 15.1M in warehouse moves with no patient attribution. Ward consumables.</div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">Both-present</div>
+        <div class="compare-text">CHF 9.5M xfer vs CHF 7.7M usage. The analytically meaningful segment.</div>
+      </div>
+      <div class="compare-card engine">
+        <div class="compare-title">Usage-only</div>
+        <div class="compare-text">CHF 6.5M pharmacy dispensing. Oncology drugs, regulated items.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S28 — The Actionable Gap -->
+  <div class="slide">
+    <div class="logo fade-in">Actionable</div>
+    <h2 class="fade-in">The Actionable Gap</h2>
+    <p class="sc-label fade-in">Both-present materials, min 100 transfers</p>
+    <table class="data-table fade-in" style="max-width: 750px;">
+      <thead>
+        <tr><th>Segment</th><th class="right">Materials</th><th class="right">%</th><th class="right">CHF Delta</th></tr>
+      </thead>
+      <tbody>
+        <tr style="color: var(--red);"><td>Under-recorded (&lt; 0.80)</td><td class="right mono">731</td><td class="right">67.5%</td><td class="right mono">3,000,000</td></tr>
+        <tr style="color: var(--green);"><td>Balanced (0.80 &ndash; 1.20)</td><td class="right mono">273</td><td class="right">25.2%</td><td class="right mono">1,000,000</td></tr>
+        <tr style="color: var(--amber);"><td>Over-recorded (&gt; 1.20)</td><td class="right mono">79</td><td class="right">7.3%</td><td class="right mono">615,000</td></tr>
+      </tbody>
+    </table>
+    <div class="callout info fade-in">
+      Balanced segment proves accurate tracking <strong>is possible</strong>.<br>
+      Total actionable delta: <strong>CHF 4.6M</strong>.
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1vh;">
+      Root cause: <strong>Inventory process gap</strong> (process_failure, 85%) &mdash; disconnect between ward receipt and patient-level documentation.
+    </p>
+  </div>
+
+  <!-- S29 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- ACT IV: THE FULL PICTURE                                   -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+
+  <!-- S30 — Section: The Full Picture -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Act IV</div>
+    <h2 class="fade-in">The Full Picture</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Verdicts, assessments, and what comes next</p>
+  </div>
+
+  <!-- S31 — 8 of 9 Confirmed -->
+  <div class="slide">
+    <div class="logo fade-in">Verdicts</div>
+    <h2 class="fade-in">8 of 9 Confirmed</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr><th>Code</th><th>Hypothesis</th><th>Status</th><th class="right">Findings</th><th class="right">Score</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="badge badge-financial">REVO</span></td><td>Revenue leakage</td><td><span class="badge badge-confirmed">Confirmed</span></td><td class="right mono">109,740</td><td class="right mono">0.67</td></tr>
+        <tr><td><span class="badge badge-financial">DUPL</span></td><td>Duplicate billing</td><td><span class="badge badge-confirmed">Confirmed</span></td><td class="right mono">77,005</td><td class="right mono">0.67</td></tr>
+        <tr><td><span class="badge badge-data">PHAN</span></td><td>Phantom cases</td><td><span class="badge badge-confirmed">Confirmed</span></td><td class="right mono">78,073</td><td class="right mono">1.00</td></tr>
+        <tr><td><span class="badge badge-data">STAL</span></td><td>Stale catalogue</td><td><span class="badge badge-confirmed">Confirmed</span></td><td class="right mono">10,397</td><td class="right mono">1.00</td></tr>
+        <tr><td><span class="badge badge-financial">COMA</span></td><td>CC misallocation</td><td><span class="badge badge-confirmed">Confirmed</span></td><td class="right mono">138,635</td><td class="right mono">1.00</td></tr>
+        <tr><td><span class="badge badge-financial">XILE</span></td><td>Cross-site leakage</td><td><span class="badge badge-confirmed">Confirmed</span></td><td class="right mono">138,487</td><td class="right mono">1.00</td></tr>
+        <tr><td><span class="badge badge-financial">GENO</span></td><td>Overpriced generics</td><td><span class="badge badge-confirmed">Confirmed</span></td><td class="right mono">22,043</td><td class="right mono">1.00</td></tr>
+        <tr><td><span class="badge badge-operational">IOIM</span></td><td>I/O imbalance</td><td><span class="badge badge-confirmed">Confirmed</span></td><td class="right mono">12,400</td><td class="right mono">1.00</td></tr>
+        <tr><td><span class="badge badge-compliance">COGA</span></td><td>Controlled substance gap</td><td><span class="badge badge-not-observed">Not observed</span></td><td class="right mono">8,421</td><td class="right mono">0.53</td></tr>
+      </tbody>
+    </table>
+    <p class="subtitle fade-in" style="margin-top: 0.8vh;">
+      CHF values overlap &mdash; same events trigger multiple hypotheses.
+    </p>
+  </div>
+
+  <!-- S32 — Five Assessment Scorecards -->
+  <div class="slide">
+    <div class="logo fade-in">Assessments</div>
+    <h2 class="fade-in">Five Assessment Scorecards</h2>
+    <div class="card-grid fade-in">
+      <div class="card">
+        <div class="card-title">Material Overall</div>
+        <div class="card-desc">
+          <span style="color: var(--red); font-weight: 600;">722</span> high<br>
+          <span style="color: var(--amber); font-weight: 600;">1,922</span> medium<br>
+          <span style="color: var(--green); font-weight: 600;">6,215</span> low
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Material Compliance</div>
+        <div class="card-desc">
+          <span style="color: var(--red); font-weight: 600;">49</span> high<br>
+          <span style="color: var(--amber); font-weight: 600;">881</span> medium<br>
+          <span style="color: var(--green); font-weight: 600;">7,436</span> low
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Billing Quality</div>
+        <div class="card-desc">
+          <span style="color: var(--red); font-weight: 600;">15</span> high<br>
+          <span style="color: var(--amber); font-weight: 600;">2,302</span> medium<br>
+          <span style="color: var(--green); font-weight: 600;">64,420</span> low
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Material Health</div>
+        <div class="card-desc">
+          <span style="color: var(--red); font-weight: 600;">181</span> high<br>
+          <span style="color: var(--amber); font-weight: 600;">2,061</span> medium<br>
+          <span style="color: var(--green); font-weight: 600;">5,880</span> low
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Case Financial Integrity</div>
+        <div class="card-desc">
+          <span style="color: var(--red); font-weight: 600;">0</span> high<br>
+          <span style="color: var(--amber); font-weight: 600;">6,661</span> medium<br>
+          <span style="color: var(--green); font-weight: 600;">48,249</span> low
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- S33 — Six Root Causes -->
+  <div class="slide">
+    <div class="logo fade-in">Diagnoses</div>
+    <h2 class="fade-in">Six Root Causes</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr><th>#</th><th>Root Cause</th><th>Category</th><th>Conf.</th><th>Hypothesis</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>Cross-site routing error</td><td>process_failure</td><td class="mono" style="color: var(--green);">90%</td><td><span class="badge badge-financial">XILE</span></td></tr>
+        <tr><td>2</td><td>Catalogue maintenance lag</td><td>process_failure</td><td class="mono">85%</td><td><span class="badge badge-data">STAL</span></td></tr>
+        <tr><td>3</td><td>Procurement pricing mismatch</td><td>structural</td><td class="mono">85%</td><td><span class="badge badge-financial">GENO</span></td></tr>
+        <tr><td>4</td><td>Orphan case data entry</td><td>data_quality</td><td class="mono">85%</td><td><span class="badge badge-data">PHAN</span></td></tr>
+        <tr><td>5</td><td>CC master data drift</td><td>data_quality</td><td class="mono">85%</td><td><span class="badge badge-financial">COMA</span></td></tr>
+        <tr><td>6</td><td>Inventory process gap</td><td>process_failure</td><td class="mono">85%</td><td><span class="badge badge-operational">IOIM</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn fade-in">
+      <span class="badge badge-financial">REVO</span> Revenue leakage and <span class="badge badge-financial">DUPL</span> duplicate billing have no diagnosis yet &mdash; root cause investigation pending.
+    </div>
+  </div>
+
+  <!-- S34 — Breathing -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- S35 — Six Things in 90 Days -->
+  <div class="slide">
+    <div class="logo fade-in">Actions</div>
+    <h2 class="fade-in">Six Things in 90 Days</h2>
+    <ol class="action-list fade-in">
+      <li>
+        <span class="action-num red">1</span>
+        <span><strong>Quarterly catalogue review</strong> &mdash; 963 stale oncology articles with expired validity. Procurement + Pharmacy.</span>
+      </li>
+      <li>
+        <span class="action-num red">2</span>
+        <span><strong>CC master data reconciliation</strong> &mdash; 5-digit vs 4-digit mapping against current org chart. Finance, 1 week.</span>
+      </li>
+      <li>
+        <span class="action-num amber">3</span>
+        <span><strong>Top-20 negative margin materials</strong> &mdash; Cross-reference against supplier contracts. Procurement.</span>
+      </li>
+      <li>
+        <span class="action-num amber">4</span>
+        <span><strong>Billing interface audit</strong> &mdash; Check for duplicate transmission and orphan case IDs. IT.</span>
+      </li>
+      <li>
+        <span class="action-num teal">5</span>
+        <span><strong>Cross-site transfer workflow</strong> &mdash; Verify transfer orders close before billing. Logistics.</span>
+      </li>
+      <li>
+        <span class="action-num teal">6</span>
+        <span><strong>Ward scanning pilot</strong> &mdash; 5 high-value materials with I/O &lt; 0.5 on one ward. Nursing + IT.</span>
+      </li>
+    </ol>
+  </div>
+
+  <!-- S36 — What We Need From You -->
+  <div class="slide">
+    <div class="logo fade-in">Data Gaps</div>
+    <h2 class="fade-in">What We Need From You</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet red"></span><span><strong>Controlled substance flags</strong> &mdash; is_controlled, is_generic, MIGEL codes. Enriched export or reference database.</span></li>
+      <li><span class="bullet red"></span><span><strong>Procedure data</strong> &mdash; 0 rows in current export. Required for implant traceability and DRG analysis.</span></li>
+      <li><span class="bullet amber"></span><span><strong>Org chart</strong> &mdash; For cost center master data verification and restructuring timeline.</span></li>
+      <li><span class="bullet amber"></span><span><strong>Supplier contract terms</strong> &mdash; For negative-margin audit and procurement renegotiation.</span></li>
+    </ul>
+    <div class="callout info fade-in">
+      These gaps are <strong>data availability</strong>, not system limitations.<br>
+      The analytics pipeline is ready &mdash; the fields exist, they just need to be populated.
+    </div>
+  </div>
+
+  <!-- S37 — Closing -->
+  <div class="slide">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in" style="line-height: 1.3;">From Data<br>to Decisions</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      25 probes &middot; 9 hypotheses &middot; 5 assessments &middot; 6 diagnoses
+    </p>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      Every finding is traceable. Every number is queryable.<br>
+      Every root cause has a recommendation.
+    </p>
+    <p class="subtitle fade-in" style="margin-top: 2vh; opacity: 0.5;">
+      nuMetrix &mdash; February 2026
+    </p>
+  </div>
+
+  <!-- S38 — Breathing (end) -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+</div>
+
+<div class="brand">nuMetrix</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = '\u00b7\u00b7\u00b7';
+    } else {
+      var title = slide.querySelector('h2');
+      var h1 = slide.querySelector('h1');
+      var logo = slide.querySelector('.logo');
+      if (h1) {
+        label.textContent = h1.textContent.trim();
+      } else if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var n = 0;
+    for (var j = 0; j <= index; j++) {
+      if (!slides[j].classList.contains('breathing')) n++;
+    }
+    counter.textContent = n + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>
