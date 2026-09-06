@@ -1,0 +1,833 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Sense 61, Part 2 realized: The Reservoir — the spec | docs</title><link rel="canonical" href="https://docs.jinflow.io/senses/sense-61-the-reservoir/"/><link rel="alternate" hreflang="en" href="https://docs.jinflow.io/senses/sense-61-the-reservoir/"/><link rel="alternate" hreflang="de" href="https://docs.jinflow.io/de/senses/sense-61-the-reservoir/"/><link rel="alternate" hreflang="fr" href="https://docs.jinflow.io/fr/senses/sense-61-the-reservoir/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&#38;display=swap"/><script type="module">
+						// Mermaid diagram lightbox — click to zoom, scroll to scale, drag to pan
+						document.addEventListener('click', e => {
+							const img = e.target.closest('img[id^="mermaid"]');
+							if (!img) return;
+
+							let scale = 1, tx = 0, ty = 0, dragging = false, sx, sy;
+
+							const overlay = document.createElement('div');
+							overlay.className = 'mermaid-lightbox';
+							const clone = img.cloneNode();
+							clone.removeAttribute('width');
+							clone.removeAttribute('height');
+							clone.style.cssText = 'max-width:90vw; max-height:90vh; cursor:grab;';
+							overlay.appendChild(clone);
+							document.body.appendChild(overlay);
+
+							const apply = () => { clone.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')'; };
+
+							overlay.addEventListener('wheel', e => {
+								e.preventDefault();
+								scale = Math.max(0.2, Math.min(10, scale * (e.deltaY < 0 ? 1.15 : 0.87)));
+								apply();
+							}, { passive: false });
+
+							clone.addEventListener('pointerdown', e => {
+								dragging = true; sx = e.clientX - tx; sy = e.clientY - ty;
+								clone.style.cursor = 'grabbing'; clone.setPointerCapture(e.pointerId);
+							});
+							clone.addEventListener('pointermove', e => {
+								if (!dragging) return; tx = e.clientX - sx; ty = e.clientY - sy; apply();
+							});
+							clone.addEventListener('pointerup', () => { dragging = false; clone.style.cursor = 'grab'; });
+
+							overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+							document.addEventListener('keydown', function esc(e) {
+								if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', esc); }
+							});
+						});
+					</script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.0.8"/><meta name="generator" content="Starlight v0.38.2"/><meta property="og:title" content="Sense 61, Part 2 realized: The Reservoir — the spec"/><meta property="og:type" content="article"/><meta property="og:url" content="https://docs.jinflow.io/senses/sense-61-the-reservoir/"/><meta property="og:locale" content="en"/><meta property="og:description" content="Sense 61 · Vitality: In bloom · last touched 2026-08-20"/><meta property="og:site_name" content="docs"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="Sense 61 · Vitality: In bloom · last touched 2026-08-20"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.BAwZ3SRq.css">
+<link rel="stylesheet" href="/_astro/Code.BcHZMqfA.css"><script type="module" src="/_astro/page.BIhdncjw.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <div class="page sl-flex astro-vrdttmbt"> <header class="header astro-vrdttmbt"><div class="header astro-kmkmnagf"> <div class="title-wrapper sl-flex astro-kmkmnagf"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <img class="astro-m46x6ez3" alt src="/_astro/jinflow-logo-dark.DoSSnADc.svg" width="1024" height="1024">  <span class="astro-m46x6ez3" translate="no"> docs </span> </a> </div> <div class="sl-flex print:hidden astro-kmkmnagf"> <site-search class="astro-kmkmnagf astro-v37mnknz" data-translations="{&#34;placeholder&#34;:&#34;Search&#34;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.BdDgbKxW.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-kmkmnagf"> <div class="sl-flex social-icons astro-kmkmnagf"> <a href="https://jinflow.io" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">jinflow.io</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M19.33 10.18a1 1 0 0 1-.77 0 1 1 0 0 1-.62-.93l.01-1.83-8.2 8.2a1 1 0 0 1-1.41-1.42l8.2-8.2H14.7a1 1 0 0 1 0-2h4.25a1 1 0 0 1 1 1v4.25a1 1 0 0 1-.62.93Z"/><path d="M11 4a1 1 0 1 1 0 2H7a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-4a1 1 0 1 1 2 0v4a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h4Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select language</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/senses/sense-61-the-reservoir/" class="astro-4yphtoen">English</option><option value="/de/senses/sense-61-the-reservoir/" class="astro-4yphtoen">Deutsch</option><option value="/fr/senses/sense-61-the-reservoir/" class="astro-4yphtoen">Français</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select><script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-vrdttmbt" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-vrdttmbt"> <div class="sidebar-content sl-flex astro-vrdttmbt"> <sl-sidebar-state-persist data-hash="0d3optw" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/big-picture/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">The Big Picture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/glossary/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Glossary</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/diagrams/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Diagrams</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Getting Started</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/operations/quick-start/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Quick Start</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorials — overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/first-build/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Your First Build</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/finding-to-verdict/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: From Finding to Verdict</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/expert-knowledge/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Capturing Expert Knowledge</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/evolve/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Exploring with evolve</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/onboarding/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Onboarding a Tenant</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/the-first-weeks-with-a-new-tenant/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: The first weeks with a new tenant</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/publishing-a-pack/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Publishing a Pack</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/showcase-inspire/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Case to Verdict (Inspire)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/showcase-vai/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Person to Verdict (Val d&#39;Oria)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/showcase-delta/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Reading to Verdict (Delta Basin)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/setup/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Setup</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Concepts</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/concepts/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Reading order</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">The jinflow</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/concepts/the-jinflow/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/concepts/from-evolution/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Elaborating the diamond, stage by stage</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/concepts/noun-topology/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Noun Topology</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/concepts/the-cycle/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Cycle — make, explore, evolve, publish</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/concepts/setup-is-the-analysis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Setup is the analysis</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/concepts/three-vocabularies/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Words</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/concepts/four-convictions/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Four Convictions</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/concepts/p2p2p/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">P2P2P — Data Sovereignty</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">The Senses</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/senses/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Index · all senses</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">In bloom</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/senses/sense-14-the-signal/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 14 — The Signal</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-14-2/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 14.2 — Typed Signals</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-15/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 15 — Observation, Explanation, Contributing Factor</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-18-the-ledger/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 18 — The Ledger</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-19-the-simulation/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 19 — The Simulation</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-21-the-heartbeat/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 21 — The Heartbeat</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-25-the-pass/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 25 — The Pass</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-29-the-atelier/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 29 — The Atelier</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-33-the-bell/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 33 — The Bell</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-36-the-lineage/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 36 — The Lineage</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-38-the-scribe/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 38 — The Scribe</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-42-the-landscape/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 42 — The Landscape</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-43-the-cascade/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 43 — The Cascade</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Steady</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/senses/sense-16-p2p2p/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 16 — P2P2P</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-19-1-simulation-prerequisites/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 19.1 — Simulation Prerequisites</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-20-the-seam/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 20 — The Seam</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-26-the-workshop/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 26 — The Workshop</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-27-the-funnel/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 27 — The Funnel</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-31-the-inlet/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 31 — The Inlet</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-32-the-chores/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 32 — The Chores</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-34-the-breeze/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 34 — The Breeze</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-35-the-drift/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 35 — The Drift</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Folded in</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="6"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/senses/sense-13-the-canvas/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 13 — The Canvas (room metaphors folded into 13.1)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-17-the-house/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 17 — The House</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-27-lever-2/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 27 — Lever 2 (folded into Sense 27 The Funnel)</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Guides</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="7"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/guide/make/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Make (Build)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/diagnostics/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Diagnostics</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/playworks/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Playworks</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/explorer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">JinDesk</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/two-rails/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The two rails</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/inspecting/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Inspecting — Portraits &amp; Passports</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/search/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Search Grammar</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/tenants/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tenants</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/extraction/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Extraction</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/instruments/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Instruments</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/collaboration/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Collaboration</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/deploy/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Deploy</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/ai/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">AI</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/sme/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Expert Knowledge Capture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/notes/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Notes</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/bell/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Inbox (Bell)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/simulation/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Simulation — Suggestion → Scenario</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/findings/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Findings — filter &amp; navigate</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/finding-explainer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Finding Explainer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Reference</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="8"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/reference/cli/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CLI</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/contracts/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Contracts</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/typology/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Typology — column types &amp; roll-up</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/explorer-api/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">JinDesk API</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">YAML Formats</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="9"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/reference/yaml-signal/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Signal</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-thesis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Thesis</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-verdict/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Verdict</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-smebit/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">SMEbit</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-bitbundle/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">BitBundle</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-report/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Report</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-entity/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Entity</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-lineage/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lineage</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-suggestion/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Suggestion</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-intervention/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Intervention</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Cheatsheets</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="10"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/cheatsheets/commands/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CLI Commands</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/analyst/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Analysts</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/data-engineer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Data Engineers</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/instrument-author/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Instrument Authors</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/operator/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Operators</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/presentations/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Presentations</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/advanced/domain-packs/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Domain Packs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/releases/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Release Notes</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">The DDD Book</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="11"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/ddd/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Foundations</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Chapters</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="12"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/ddd/chapters/01-the-verb-and-the-run/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">01 — The Verb and the Run</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/ddd/chapters/02-the-marked-language/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">02 — The Marked Language</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/ddd/chapters/03-the-compare-exception/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">03 — The Compare Exception</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">The EDA Book</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="13"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/eda/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Foundations</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Stories</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="14"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/eda/stories/coastal-bend/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">01 — The Silent Optic of Coastal Bend</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Journal</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="15"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/journal/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Overview</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">nuMetrix — Lessons</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="16"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/journal/numetrix/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/01-the-long-tail-is-not-waste/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">01 — The long tail is not waste</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/02-the-pareto-is-sharper-than-you-think/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">02 — The Pareto is sharper than you think</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/03-the-morning-batch/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">03 — The morning batch</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/04-three-suppliers-in-twelve-disguises/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">04 — Three suppliers in twelve disguises</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/05-the-week-is-the-cycle/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">05 — The week is the cycle</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/06-the-or-is-a-temporal-black-box/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">06 — The OR is a temporal black box</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/07-ward-base-consumables/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">07 — Ward base consumables</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/08-the-30-percent-discount-is-not-a-deal/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">08 — The 30-percent discount is not a deal</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/09-concentration-is-the-shape/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">09 — Concentration is the shape</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/10-the-catalogue-quotes-the-highest/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">10 — The catalogue quotes the highest</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/11-surgeons-do-not-mix-vendors/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">11 — Surgeons do not mix vendors</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/12-implants-skew-old/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">12 — Implants skew old</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/13-billing-does-not-pass-the-audit/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">13 — Billing does not pass the audit</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/14-the-silent-source-of-most-price-bugs/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">14 — The silent source of most price bugs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/15-one-channel-cannot-balance/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">15 — One channel cannot balance</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">hrcentral — Genesis</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="17"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/journal/hrcentral/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/hrcentral/genesis/01-week-1/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">01 — Week 1: A domain learns itself</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/hrcentral/genesis/02-when-a-person-is-not-atomic/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">02 — When a person is not atomic</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/hrcentral/genesis/03-the-synthetic-cast-and-the-career-arc/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">03 — The synthetic cast and the career arc</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Monthly</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="18"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/journal/monthly/2026-02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">February 2026 — From bootstrap to pyramid</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/monthly/2026-03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">March 2026 — The month the architecture grew language for itself</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/monthly/2026-04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">April 2026 — The month of the Senses</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/monthly/2026-05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">May 2026 — Twenty-four senses, the Atelier shipped, the pipeline got its voice</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/monthly/2026-06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">June 2026 — The Stage, the Ledger, the sentence</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Weekly</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="19"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w07/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W07 — Origins</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w08/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W08 — The first vocabulary</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w09/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W09 — The roof goes on</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w10/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W10 — The pack era begins</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w11/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W11 — Shippable</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w12/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W12 — The Second User</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w13/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W13 — The Config Engine</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w14/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W14 — The Signal paradigm</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w15/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W15 — Sense 14 closeout, identity, P2P2P</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w16/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W16 — DuckDB migration, monolith drain begins</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w17/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W17 — Search v3, Sense 20, extraction discipline</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w18/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W18 — Foundations week</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w19/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W19 — hrcentral lands, the Lens arrives</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w20/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W20 — the Explorer learns to write back</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w21/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W21 — three threads cross the working line</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w22/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W22 — the pipeline settles into shape</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w23/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W23 — what signs and what remembers</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w24/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W24 — the picture arrives</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w25/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W25 — the worktrees agree</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w26/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W26 — the diamond, said in one sentence</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w27/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W27 — the identity source moves to Clerk</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w28/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W28 — truth: the system describes itself</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w29/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W29 — selection: the system learns to be pointed at</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w30/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W30 — the house: a front, and a foundation</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w31/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W31 — the instrument, and the ground</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w32/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W32 — the store: travels light, learns custody</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Architecture</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="20"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/architecture/design_principles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Design Principles</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/terminology/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Terminology</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/two_worlds/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Two Worlds</span> <span class="sl-badge caution small  astro-3ii7xxms astro-avdet4wd">proposal</span> </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/probe_system/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Probe System</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/the_bell/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Bell</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/the_simulation/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Simulation</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/entity_registry/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Entity Registry</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/pipeline_overview/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Pipeline Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/dlz_and_generations/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">DLZ &amp; Three Generations</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/operating_modes/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Operating Modes</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/supply_org_pricing/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Supply-Org Pricing</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/ecosystem/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Ecosystem</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/documentation_process/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Documentation Process</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://jinflow.io" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">jinflow.io</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M19.33 10.18a1 1 0 0 1-.77 0 1 1 0 0 1-.62-.93l.01-1.83-8.2 8.2a1 1 0 0 1-1.41-1.42l8.2-8.2H14.7a1 1 0 0 1 0-2h4.25a1 1 0 0 1 1 1v4.25a1 1 0 0 1-.62.93Z"/><path d="M11 4a1 1 0 1 1 0 2H7a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-4a1 1 0 1 1 2 0v4a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h4Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>  <starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select language</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/senses/sense-61-the-reservoir/" class="astro-4yphtoen">English</option><option value="/de/senses/sense-61-the-reservoir/" class="astro-4yphtoen">Deutsch</option><option value="/fr/senses/sense-61-the-reservoir/" class="astro-4yphtoen">Français</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select> </div> </div> </div> </div> </nav> <div class="main-frame astro-vrdttmbt">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script><div class="lg:sl-hidden astro-pb3aqygn"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#claim" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Claim</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#principles-argued-and-settled-before-any-layout" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Principles (argued and settled before any layout)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-scope-table--the-citizens" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The scope table — the citizens</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#scope--sharing--the-two-axes-over-the-citizens" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Scope &amp; sharing — the two axes over the citizens</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#identity--roster-sections-s3" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Identity &amp; roster sections ⟨s3⟩</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-assignment-row" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The assignment row</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-tree-is-authored-the-assignments-are-operational-revised-2026-07-23-mig" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The tree is authored; the assignments are operational (revised 2026-07-23, Mig)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#invite-lifecycle-issue--accept--bind--revoke" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Invite lifecycle (issue → accept → bind → revoke)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-display-path" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The display path</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-offline-level-3-story" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The offline Level-3 story</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-reconcile-sweep-sync-principals-successor" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The reconcile sweep (sync-principals successor)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#wave-2-cutover-concretely" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Wave-2 cutover, concretely</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#write-path" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Write path</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#read-path" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Read path</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#distributed-ops--merge" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Distributed OPS &amp; merge</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#r2-layout--filled-last-from-the-citizen-shapes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">R2 layout — filled LAST, from the citizen shapes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#migration-order" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Migration order</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#open-questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Open questions</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-pb3aqygn"><div class="sl-container astro-pb3aqygn"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#claim" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Claim</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#principles-argued-and-settled-before-any-layout" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Principles (argued and settled before any layout)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-scope-table--the-citizens" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The scope table — the citizens</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#scope--sharing--the-two-axes-over-the-citizens" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Scope &amp; sharing — the two axes over the citizens</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#identity--roster-sections-s3" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Identity &amp; roster sections ⟨s3⟩</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-assignment-row" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The assignment row</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-tree-is-authored-the-assignments-are-operational-revised-2026-07-23-mig" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The tree is authored; the assignments are operational (revised 2026-07-23, Mig)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#invite-lifecycle-issue--accept--bind--revoke" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Invite lifecycle (issue → accept → bind → revoke)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-display-path" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The display path</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-offline-level-3-story" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The offline Level-3 story</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-reconcile-sweep-sync-principals-successor" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The reconcile sweep (sync-principals successor)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#wave-2-cutover-concretely" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Wave-2 cutover, concretely</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#write-path" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Write path</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#read-path" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Read path</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#distributed-ops--merge" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Distributed OPS &amp; merge</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#r2-layout--filled-last-from-the-citizen-shapes" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">R2 layout — filled LAST, from the citizen shapes</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#migration-order" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Migration order</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#open-questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Open questions</span> </a>  </li> </ul></nav></starlight-toc></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Sense 61, Part 2 realized: The Reservoir — the spec</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <div class="sl-markdown-content"> <p><strong>Sense 61</strong> · <strong>In bloom</strong> · <span class="last-touched">Last touched 2026-08-20</span></p>
+<ul>
+<li><strong>last_verified:</strong> 2026-07-27</li>
+</ul>
+<blockquote>
+<p>Synced from <a href="https://github.com/jazzisnow/jinflow/blob/main/docs/design/sense_61_the_reservoir.md"><code dir="auto">docs/design/sense_61_the_reservoir.md</code></a> in the engine repo — that’s the source; this page is a build-time mirror.</p>
+</blockquote>
+<p><strong>Status:</strong> skeleton draft for co-authoring — sister-5 (persistence, runs) + sister-3 (identity, roster; her sections marked ⟨s3⟩) · sister-1 reviews as run-record implementer · Mig arbitrates scope and names
+<strong>Date:</strong> 2026-07-18
+<strong>Parent:</strong> <a href="/senses/sense-61-the-strata/">Sense 61 The Strata</a> — the position paper this spec makes buildable. Strata names the three strata (Authored / Built / Operational); this spec designs the Operational stratum’s home.
+<strong>Companions:</strong> <a href="run_registry_sis.md">Run registry in the SIS</a> (ADOPTED — the interim host this spec supersedes for run rows) · <a href="/senses/sense-56-the-run/">Sense 56 The Run</a> · Sense 62 The Fleet (internal) · <a href="/senses/sense-25-the-pass/">Sense 25 The Pass</a></p>
+<div class="sl-heading-wrapper level-h2"><h2 id="claim">Claim</h2><a class="sl-anchor-link" href="#claim"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Claim”</span></a></div>
+<p>The <strong>Reservoir</strong> is the tenant’s state-of-record for everything that is
+neither Authored nor Built: the operational stratum — run records,
+roster assignments, ledgers, attestations. One store per tenant,
+locally resident, optionally synced behind the scenes, never in any hot
+path. SIS and the sys DB are today’s partial views of it; both converge
+here and retire as separate concepts.</p>
+<p><strong>Substrate honesty (Mig’s correction, 2026-07-18):</strong> the Authored
+stratum’s substrate is the <strong>filesystem</strong> — the AFS is files first. Git
+is one <em>optional</em> history/transport overlay; R2 tarballs are another
+(the cloud runner already treats the bucket as the substrate, no git
+assumption); others may come. Strata Part 1 said it — “love git, don’t
+depend on git” — and this spec inherits it: nothing below may assume a
+git repo exists.</p>
+<p>What the Reservoir is <strong>not</strong>: a second authorization authority, a
+cross-tenant channel, a cache of anything rebuildable, or a dependency
+of <code dir="auto">make</code>.</p>
+<p><strong>Name (Q5, resolved 2026-07-22, Mig).</strong> The store is the <strong>OPS</strong> — the
+Operational Store — the concrete per-tenant file, peer of AFS and KLS.
+<em>The Reservoir</em> stays this Sense’s name for the concept, exactly as KLS
+is the file and “the Knowledge Store” is the idea. This spec uses
+<strong>OPS</strong> for the store/file and “the Reservoir” for the Sense.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="principles-argued-and-settled-before-any-layout">Principles (argued and settled before any layout)</h2><a class="sl-anchor-link" href="#principles-argued-and-settled-before-any-layout"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Principles (argued and settled before any layout)”</span></a></div>
+<p>These are constraints, not options. Each earned its place by a scar.</p>
+<ol start="0">
+<li>
+<p><strong>Local-first; every sync layer optional.</strong> The Reservoir must work
+in all five operating topologies — a pure-Local tenant runs a
+Reservoir with <em>no</em> R2 behind it at all; P2P2P serves it through the
+tunnel; Cloud/MaaS replicate it via R2. Sync (R2 or whatever
+succeeds it) is an overlay on a local store, exactly as git is an
+overlay on the AFS — never a requirement.</p>
+</li>
+<li>
+<p><strong>Definitions vs assignments.</strong> ⟨s3⟩ The identity <em>tree</em> (identities,
+roles, groups, passes) is <strong>Authored</strong> — pack/system YAML,
+git-reviewed, rebuildable — but <em>tenant-scoped</em>, so it bakes to the
+<strong>OPS, not the KLS</strong> (the scope axis — see Strata; refined 2026-07-23
+with sister-5). Only <em>assignments</em> and roster state (who is bound,
+membership, invites, acceptance) are Operational. <strong>The tree lives in
+the OPS but is not <em>of</em> the operational rows: it is overwrite-on-bake,
+and a bake is the only thing that changes it</strong> — the Reservoir holds
+it without swallowing it. Overwrite-on-bake stays coherent only if, at
+every scope, <strong>exactly one authored source produces the bake</strong>; so
+when identity promotes above the tenant (Part 6), promotion
+<strong>re-homes the authoring source</strong> (a distinct org-scoped AFS) — it
+never merges N tenant trees, which would reintroduce “which tenant
+owns identity?” one scope up. (Scar: the clerk-pin retirement.)</p>
+</li>
+<li>
+<p><strong>No shadow authority.</strong> ⟨s3⟩ Clerk stays the sole online authorizer.
+Reservoir roster rows are state-of-record for <em>display and
+operations</em>, never a second authorization path. Offline Level-3
+fallback reads the local Reservoir where one exists; cloud-offline
+has no fallback, by design. (Scar: the pin-resurrection bug.)</p>
+</li>
+<li>
+<p><strong>No R2 in the request path.</strong> ⟨s3⟩ Capability resolution stays local
+and request-cached; the Reservoir syncs behind it.</p>
+</li>
+<li>
+<p><strong>No R2 in the run path.</strong> (s1’s twin of #3.) <code dir="auto">run.py</code>’s writes stay
+local and best-effort; a make must never slow down or fail because a
+bucket hiccuped. The Reservoir syncs behind, never in front.</p>
+</li>
+<li>
+<p><strong>Write discipline: best-effort write-through + healing sweep.</strong>
+Producers write the Reservoir opportunistically at the moment of
+truth (lifecycle transition, roster change); a reconcile sweep heals
+gaps from the filesystem/source-of-truth artifacts. Proven by
+<code dir="auto">run_registry</code> + <code dir="auto">jin runs reconcile</code> — the pattern generalizes.</p>
+</li>
+<li>
+<p><strong>Rows index, objects carry.</strong> Bulky artifacts (run event streams)
+archive as R2 <em>objects</em>; the Reservoir <em>row</em> is the durable index
+that says where. The registry is never the payload.</p>
+</li>
+<li>
+<p><strong>Facets classify, never connect <em>implicitly</em>.</strong> (S62 discipline.) A
+shared facet value — two tenants grouped under one org-taxonomy node
+in an operator’s map — never <em>auto-opens</em> a channel between them;
+isolation is the floor. Connection is possible, but only ever a
+<strong>deliberate, audited act through the window</strong> (principle 12) — never
+a side effect of classification. So the Reservoir is not barred from
+being a connection point; a <em>facet</em> is barred from being one. Fleet-
+level records may live as records; org-level Reservoirs stay two
+flight levels below (Strata Part 6) — operational identity stays
+<em>addressable</em>, never hard-welded, but nothing here builds the org
+store.</p>
+</li>
+<li>
+<p><strong><code dir="auto">make</code> neither reads nor writes the Reservoir as a build input.</strong>
+The Built stratum remains reproducible from (AFS + source) alone.
+Bakes that today copy operational state into the KLS meta schema
+(recents, bell resolutions) become <em>publishes</em> — explicit,
+Phase-1d-style — or retire.</p>
+</li>
+<li>
+<p><strong>A KLS alone must suffice — and the default posture is generous</strong>
+(Mig, 2026-07-18). JinDesk stays fully operational with only a
+KLS — a packaged .dmg, a published showcase copy, a cloud KLS with
+no Reservoir replica. This and principle 8 reconcile through the
+<strong>publish seam</strong> (Phase-1d publish into the AFS, baked from there —
+today’s recents and bell-resolutions path, generalized). The
+default is to bake <em>much</em>, not little: notes, selections, and —
+the closure rule — <strong>everything a note references</strong> bakes into the
+KLS on every run where possible, so no citation arrives broken.
+Sometimes it isn’t possible; the aspiration stands. Yes, this is
+redundant — deliberately, with precedent: the KLS already carries
+the entire zipped AFS (<code dir="auto">_jinflow_afs_archive</code>). Self-containment
+outranks normalization; the Reservoir remains the state-of-record;
+make’s inputs stay (AFS + source).</p>
+</li>
+<li>
+<p><strong>Ownership is first-class; visibility is a distraction filter —
+“no secrets in the family”</strong> (Mig, 2026-07-18, thrice refined).
+This is team software, not a security system. Every personal-scope
+citizen carries an <code dir="auto">owner</code> (a Sense 25 identity): attribution and
+edit-control — who wrote it, who may change it. <em>Visibility</em> is a
+separate axis whose purpose is <strong>attention, not concealment</strong>:
+filters that lower every participant’s distraction level. Nothing
+in the Reservoir is a secret from the team.</p>
+</li>
+</ol>
+<ul>
+<li><strong>Utility-shaped</strong> (bookmarks, selections, saved views, journal):
+default to their owner’s view — not because they’re secret, but
+because they’re noise to everyone else. Reachable when wanted.</li>
+<li><strong>Contribution-shaped</strong> (notes foremost — notes are special):
+exist to inform the tenant; their natural state is visible, and
+they bake into the KLS with their reference closure (9).</li>
+<li><strong>Participation view:</strong> the tenant admin sees who contributes
+and how much — trivially consistent with no-secrets; it’s an
+oversight lens, not surveillance.</li>
+</ul>
+<p>What remains for the working session (open question 6) is the
+<em>attention model</em>, not a privacy model: per-citizen visibility
+defaults, filter UX, and whether visibility wants more granularity
+than owner-view/tenant-view.</p>
+<ol start="11">
+<li>
+<p><strong>Tenant-scoped; the Reservoir outlives every KLS.</strong> One Reservoir
+per tenant. A tenant has <em>many</em> KLSes — the working copy, each
+snapshot, every rebuild — but <em>one</em> Reservoir, stable across all of
+them. The KLS is disposable and plural; the Reservoir is singular
+and durable. Operational state is never pinned to a KLS’s lifecycle
+— that pinning is the exact bug the strata split exists to end.</p>
+</li>
+<li>
+<p><strong>The Reservoir is the tenant’s window to the world.</strong> It is the
+single, governed membrane for every outward interaction — sync (R2),
+fleet presence, inviting people (the roster is how someone <em>enters</em>
+the tenant), and any deliberate cross-tenant connection (the S62
+“explicit instance-to-instance API — the API is the membrane”). The
+window is <strong>closed by default</strong> (principle 7); only an explicit,
+audited act opens it. <strong>No Reservoir, no window:</strong> a bare KLS is a
+<em>sealed island</em> — no sync, no presence, no invites, no connection.
+That sealedness is precisely why a KLS alone (principle 9) is the
+safe distribution unit — the packaged <code dir="auto">.dmg</code>, the published showcase
+copy. P9 stops being a mere convenience and becomes a <em>security
+property</em>: the KLS suffices <strong>and</strong> it is sealed, because it has no
+window.</p>
+</li>
+<li>
+<p><strong>Recovery is restore-from-backup, not rebuild.</strong> The defining
+property of the Operational stratum, and the reason it needed
+naming: it is not derivable, so it cannot be regenerated. The KLS
+you <em>rebuild</em> (from AFS + source); the Reservoir you <em>restore</em>. Every
+deployment mode owes the Reservoir a backup story; losing it is data
+loss, not a cache miss.</p>
+</li>
+<li>
+<p><strong>The Reservoir is authoritative; any KLS copy is a derived cache.</strong>
+Where operational state also appears in the KLS (the P9 self-
+containment cache — baked notes, a roster snapshot), the Reservoir is
+the source of truth and the KLS copy is a possibly-stale mirror.
+Readers key on the Reservoir; the bake serves KLS-only mode, never
+the authority. This inverts today’s world, where the KLS bake <em>is</em>
+the display source — the SHIPPED-but-not-LIVE lag class.</p>
+</li>
+<li>
+<p><strong>Citizens are versioned for migration — logical schema, not
+dialect.</strong> Each citizen carries a <code dir="auto">schema_version</code>; the freeze is of
+the <em>logical</em> schema (columns + semantics), so the SIS-DuckDB →
+SQLite move is a table move, not a redesign. Migration is a
+citizen-by-citizen, engine-portable operation. (sister-1, review R1.)</p>
+</li>
+<li>
+<p><strong>Staleness is honest.</strong> Every citizen carries <code dir="auto">recorded_at</code>. A local
+reader is current; a cloud replica may be minutes behind and <em>says
+so</em> rather than pretending to be live. Don’t let the freshness
+contract re-engineer what the live event-feed already provides — the
+history pages can be honestly stale. (sister-1, review R3.)</p>
+</li>
+<li>
+<p><strong>The KLS is overwritten; the OPS is merged — sync must know the
+difference.</strong> A KLS is a rebuildable cache: last-build-wins, safe to
+overwrite anywhere. The OPS is non-rebuildable state-of-record: a
+blind overwrite-push from one location destroys operational writes
+made in another. So the OPS is <em>excluded from the KLS-overwrite sync
+path</em> and reconciled by a merge-sync instead. Getting this wrong is
+silent operational-data loss — the one failure this whole stratum
+exists to prevent. (See <em>Distributed OPS &#x26; merge</em>.)</p>
+</li>
+<li>
+<p><strong>Structure is the engine’s; rows are the consumer’s.</strong> The OPS
+schema is defined in exactly one place — <code dir="auto">scripts/opsdb.py</code>
+(<code dir="auto">OPS_TABLES</code>) — and applied only by the engine: <code dir="auto">jin init</code> at a
+tenant’s birth, <code dir="auto">jin ops migrate</code> on upgrade. Consumers (the
+JinDesk, any future client) read and write <em>rows</em>; they never
+<code dir="auto">CREATE</code> a table. This is the boundary that keeps the schema
+single-sourced: the moment a second process defines the same table,
+the two definitions drift silently under <code dir="auto">CREATE TABLE IF NOT EXISTS</code> (which is a no-op on an already-present table, so a diverged
+column is never reported). A consumer that meets a missing table
+degrades exactly like the sealed island (P12) — writes no-op, reads
+return empty — and the fix is <code dir="auto">jin ops migrate</code>, never a create in
+the consumer. (Scar: the second citizen — <code dir="auto">saved_selectors</code> —
+briefly self-healed its table in JinDesk, duplicating the DDL
+across Python and TypeScript; backed out the moment a second copy
+existed. See <em>Schema ownership</em> / <code dir="auto">docs/design/ops_schema_ownership.md</code>.)</p>
+</li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="the-scope-table--the-citizens">The scope table — the citizens</h2><a class="sl-anchor-link" href="#the-scope-table--the-citizens"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The scope table — the citizens”</span></a></div>
+<p>Start here; the R2 layout falls out of the citizen shapes. Legend for
+<strong>shape</strong>: <code dir="auto">rows</code> (relational, UPSERTed), <code dir="auto">ledger</code> (append-only lines),
+<code dir="auto">object</code> (opaque blob, row-indexed).</p>
+<p><strong>Scope · Sharing</strong> (principle 11 / principle 10): <code dir="auto">tenant</code> = survives
+every rebuild; <code dir="auto">KLS-ref</code> = points at a specific build; <code dir="auto">user</code> /
+<code dir="auto">tenant</code> = default visibility. See <em>Scope &#x26; sharing</em> below the table.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Citizen</th><th>Scope · Sharing</th><th>Today</th><th>Shape</th><th>Writer</th><th>Wave</th></tr></thead><tbody><tr><td><strong>Run records</strong> (<code dir="auto">run_registry</code> v1)</td><td>tenant · tenant (KLS-ref)</td><td>SIS table, schema frozen for this move</td><td>rows</td><td>engine (<code dir="auto">run.py</code>)</td><td><strong>1 — first citizen</strong></td></tr><tr><td><strong>Archived run directories</strong> (<code dir="auto">events.jsonl</code> + manifest + dag)</td><td>tenant · tenant (object per-run)</td><td>filesystem <code dir="auto">runs/&#x3C;id>/</code></td><td>object (row-indexed)</td><td>worker at run-terminal</td><td>1</td></tr><tr><td><strong>Roster assignments + invites</strong> ⟨s3⟩</td><td>tenant · tenant</td><td>Clerk publicMetadata + KLS-baked caps display</td><td>rows</td><td>intermediary endpoints</td><td>2</td></tr><tr><td><strong>Error reports / contact submissions</strong></td><td>instance · tenant</td><td><code dir="auto">state/*.jsonl</code> (homeless)</td><td>ledger</td><td>JinDesk server</td><td>2</td></tr><tr><td><strong>Smoke attestation ledger</strong></td><td>instance · operator</td><td><code dir="auto">state/smoke_log.jsonl</code></td><td>ledger</td><td>smoke runner</td><td>2</td></tr><tr><td><strong>Tenant-creation / fleet-level records</strong></td><td>fleet · operator</td><td>nowhere (DDD ch. 01 excluded init from tenant runs)</td><td>rows</td><td>engine (<code dir="auto">init</code>)</td><td>2</td></tr><tr><td><strong>Instrument states / build journal / compilation log</strong></td><td>tenant · tenant</td><td>sys DB (retiring, Strata Part 4)</td><td>rows</td><td>compilers</td><td>3</td></tr><tr><td><strong>Navigation journal, bookmarks, saved views</strong></td><td>tenant · user</td><td>SIS</td><td>rows (owned)</td><td>JinDesk</td><td>3 (later — SIS-resident works today)</td></tr><tr><td><strong>Selections</strong> (EDA Selector — saved named filters)</td><td>tenant · user</td><td>SIS</td><td>rows (owned)</td><td>JinDesk</td><td>3 — new citizen, born with owner+visibility</td></tr><tr><td><strong>Bell snoozes</strong></td><td>tenant · user</td><td>SIS (deliberately unflushed tier)</td><td>rows</td><td>JinDesk</td><td>3</td></tr><tr><td><strong>Notes / conversations</strong></td><td>tenant · <strong>tenant</strong></td><td>SIS, publishable to AFS</td><td>rows + publish path</td><td>JinDesk</td><td>3 — keep workspace→publish, internal to the Reservoir</td></tr><tr><td><strong>Compare / diff session</strong></td><td><strong>KLS-ref</strong> (spans 2) · user</td><td>transient (URL/session)</td><td>rows (owned)</td><td>JinDesk</td><td>later — the only genuinely KLS-scoped citizen</td></tr></tbody></table>
+<p>Explicitly <strong>not</strong> citizens: signal/thesis/tile registries (Built),
+bell <em>resolutions</em> (published to AFS — Authored once flushed), config
+resolution (Built), anything <code dir="auto">jin make</code> can regenerate.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="scope--sharing--the-two-axes-over-the-citizens">Scope &#x26; sharing — the two axes over the citizens</h3><a class="sl-anchor-link" href="#scope--sharing--the-two-axes-over-the-citizens"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Scope &#x26; sharing — the two axes over the citizens”</span></a></div>
+<p>Two reframes decide the <code dir="auto">Scope · Sharing</code> column, and one cost falls out
+of them:</p>
+<ol>
+<li>
+<p><strong>“KLS-scoped” is almost never a <em>home</em> — it is a <em>reference</em>.</strong>
+Nearly every citizen is <em>tenant</em>-scoped: a bookmark to <code dir="auto">materials</code>, a
+recent, a note, a saved filter — all about the tenant’s world, which
+survives every rebuild (principle 11). The KLS enters only as a
+foreign key: a run <em>produced</em> that KLS; a diff <em>spans</em> two; a bookmark
+may <em>pin</em> a snapshot. Only the <strong>Compare / diff session</strong> is genuinely
+KLS-scoped. Everything else lives at tenant scope in the one
+Reservoir, with at most a pointer at a build.</p>
+</li>
+<li>
+<p><strong>Sharing is a column, not a store.</strong> User-default and tenant-default
+citizens live in the <em>same</em> tenant Reservoir; <code dir="auto">owner</code> + a visibility
+flag decide the default view (principle 10) — there is no separate
+“personal DB.” Utility-shaped citizens (bookmarks, recents,
+selections, snoozes) default to their owner’s view — noise to others,
+never secrets. Contribution-shaped citizens (notes foremost) default
+to <strong>tenant-visible</strong>.</p>
+</li>
+</ol>
+<p><strong>Reference stability is the price of tenant scope.</strong> A tenant-scoped
+citizen that points at a <em>build-derived</em> id — a bookmark to a
+<code dir="auto">finding_id</code>, a note’s citation — can dangle when the next <code dir="auto">make</code>
+regenerates those rows. Stable ids (or a re-resolution pass on read) are
+a <em>requirement</em>, not an afterthought — the cost of surviving rebuilds,
+owed by every citizen that cites built content. KLS-references (run →
+KLS, diff → two KLSes) follow a <strong>dangling-but-honest</strong> rule: when the
+referenced build is pruned, the row survives (the tenant timeline is the
+record) and the pointer reads as <em>gone</em>, never as broken state.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="identity--roster-sections-s3">Identity &#x26; roster sections ⟨s3⟩</h2><a class="sl-anchor-link" href="#identity--roster-sections-s3"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Identity &#x26; roster sections ⟨s3⟩”</span></a></div>
+<p><em>Constrained by principles 1–3; where a design choice repeats a scar,
+the scar is cited.</em></p>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-assignment-row">The assignment row</h3><a class="sl-anchor-link" href="#the-assignment-row"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The assignment row”</span></a></div>
+<p>One row per (tenant, principal). UPSERTed, never deleted — lifecycle is
+recorded in <code dir="auto">status</code> + timestamps, so the roster’s history survives
+revocation (a ledger’s memory with a row’s ergonomics).</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Column</th><th>Meaning</th></tr></thead><tbody><tr><td><code dir="auto">tenant</code></td><td>tenant key — rows are tenant-scoped, per principle 7</td></tr><tr><td><code dir="auto">principal_id</code></td><td>stable principal identifier (today’s roster id)</td></tr><tr><td><code dir="auto">kind</code></td><td><code dir="auto">user</code> / <code dir="auto">service</code> (mirrors today’s principal registry)</td></tr><tr><td><code dir="auto">identity</code></td><td>assigned identity NAME — a <em>reference into</em> the authored tree (AFS-authored, now OPS-baked), never a definition (principle 1)</td></tr><tr><td><code dir="auto">extra_roles</code></td><td>capability-grained additions, same reference discipline</td></tr><tr><td><code dir="auto">status</code></td><td><code dir="auto">invited</code> → <code dir="auto">active</code> → <code dir="auto">revoked</code> / <code dir="auto">left</code></td></tr><tr><td><code dir="auto">clerk_user_id</code></td><td>nullable — set at bind; the <em>record</em> of the binding, never an authorization input online (principle 2)</td></tr><tr><td><code dir="auto">label</code>, <code dir="auto">email</code></td><td>display fields — what the cockpit renders</td></tr><tr><td><code dir="auto">invited_by</code>, <code dir="auto">invited_at</code>, <code dir="auto">accepted_at</code>, <code dir="auto">revoked_at</code></td><td>lifecycle provenance</td></tr><tr><td><code dir="auto">bound_by</code></td><td><code dir="auto">public_metadata</code> / <code dir="auto">offline_pin</code> / <code dir="auto">declared</code> — how this row last learned its binding</td></tr><tr><td><code dir="auto">recorded_at</code></td><td>staleness contract — surfaced wherever the row is displayed</td></tr><tr><td><code dir="auto">schema_version</code></td><td>frozen at v1 on adoption, the run-registry discipline</td></tr></tbody></table>
+<p>What is deliberately <strong>absent</strong>: any capability column (capabilities
+resolve from the tree at request time), and the fleet marker
+(<code dir="auto">system_admin</code> is a fleet-level fact — it lives with the fleet-level
+records citizen, never in a tenant roster row; principle 7).</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-tree-is-authored-the-assignments-are-operational-revised-2026-07-23-mig">The tree is authored; the assignments are operational (revised 2026-07-23, Mig)</h3><a class="sl-anchor-link" href="#the-tree-is-authored-the-assignments-are-operational-revised-2026-07-23-mig"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The tree is authored; the assignments are operational (revised 2026-07-23, Mig)”</span></a></div>
+<p>Today’s <code dir="auto">principals/*.yaml</code> conflates two things the strata split finally
+separates — and the separation is by <em>kind</em>, not by a “declared roster”
+of who-should-exist:</p>
+<ul>
+<li><strong>The tree</strong> — <code dir="auto">role_*</code> / <code dir="auto">group_*</code> (and any non-Clerk <code dir="auto">service</code>
+principal): the identity <em>definitions</em>. <strong>Authored</strong> (AFS YAML,
+git-reviewed, pack-shippable) and rebuildable — but <em>tenant-scoped</em>:
+identical across a tenant’s base KLS, its generations, and its
+variations. So it bakes into the <strong>OPS, not the KLS</strong> (the scope axis
+— see Strata), as an <strong>overwrite-on-bake</strong> table (<code dir="auto">principalcompile</code>
+retargets KLS→OPS). The Reservoir <em>holds</em> the tree; it does not
+<em>swallow</em> it — the YAML stays the source of record and git stays its
+review surface (P1’s spirit intact; only the built home moves).</li>
+<li><strong>The assignments</strong> — every <code dir="auto">user_*</code>: the <em>bindings</em> (which identity,
+which Clerk invitation, invited / accepted / revoked). Purely
+<strong>operational</strong>. There is <strong>no “declared user”</strong> — a user’s existence
+is Clerk’s to know (the authority) and the OPS’s to record; the
+reconcile sweep re-derives it. This is <strong>Option 1</strong>: no <code dir="auto">user_*.yaml</code>,
+ever.</li>
+</ul>
+<p><strong>Why no declared-user YAML.</strong> On the ground, every <code dir="auto">user_*.yaml</code> that
+exists today already carries lifecycle fields (<code dir="auto">clerk_invitation_id</code>,
+<code dir="auto">invited_by</code>, <code dir="auto">invited_at</code>) — it is <em>living state persisted as authored
+YAML</em>, which is exactly what let the playworks canary litter one tenant’s
+AFS with 45 files. Retiring the concept kills that class at the root: the
+invite flow writes an OPS row + Clerk, never a YAML.</p>
+<p>Lifecycle fields <strong>never write back into any authored file</strong> — retiring
+the <code dir="auto">stamp_acceptance</code> write-back (the machine editing authored files
+that pin-retirement Phase 3 flagged as a lie waiting to happen) and
+completing Phase 3b’s “true strip” as a side effect: the sidecar that
+phase wanted for the derived pin <em>is</em> the OPS.</p>
+<p><strong>Two table disciplines in one store.</strong> The OPS now holds the tree
+(<strong>authored-baked</strong> — overwritten from AFS each bake, like the KLS) beside
+the assignments (<strong>operational-merged</strong> — restore-not-rebuild, merged on
+sync). Each OPS table is marked with its kind; that is P17’s
+overwrite-vs-merge distinction turned inward.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="invite-lifecycle-issue--accept--bind--revoke">Invite lifecycle (issue → accept → bind → revoke)</h3><a class="sl-anchor-link" href="#invite-lifecycle-issue--accept--bind--revoke"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Invite lifecycle (issue → accept → bind → revoke)”</span></a></div>
+<p>The CLI proposes, the intermediary disposes — unchanged. What changes
+is where the <em>record</em> lands:</p>
+<ol>
+<li><strong>Issue.</strong> The intermediary endpoint (<code dir="auto">requireTenantOwner</code>-gated)
+creates the Clerk invitation and writes through an <code dir="auto">invited</code> row
+(principle 5). No git, no make.</li>
+<li><strong>Accept.</strong> Clerk fires; on the user’s first bound request the
+intermediary stamps <code dir="auto">accepted_at</code> + <code dir="auto">clerk_user_id</code> write-through.
+Missed stamps heal in the sweep — acceptance is re-derivable from
+Clerk, so best-effort is safe.</li>
+<li><strong>Bind.</strong> The intermediary writes the assignment into
+<code dir="auto">publicMetadata</code> (the <em>authority</em>, principle 2) and flips the row
+<code dir="auto">active</code> (the <em>record</em>). Order matters: authority first, record
+after — a crash between the two leaves a healable gap, never a
+phantom grant.</li>
+<li><strong>Revoke.</strong> Authority cleared in Clerk first, row goes <code dir="auto">revoked</code>
+after, <code dir="auto">revoked_at</code> stamped. The row remains — the cockpit’s
+history view is the Reservoir, not Clerk’s audit log.</li>
+</ol>
+<p>At no step does anything <em>read</em> the Reservoir to decide authorization.
+The rows are consequences, not causes.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-display-path">The display path</h3><a class="sl-anchor-link" href="#the-display-path"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The display path”</span></a></div>
+<p>Cockpit, roster, and principals pages read <strong>Reservoir rows only</strong> —
+never Clerk-live, never the KLS bake:</p>
+<ul>
+<li>Not Clerk-live: a Clerk API call in a page load is a request-path
+network dependency (principle 3’s spirit) and rate-limit bait.</li>
+<li>Not the KLS bake: that is the SHIPPED-but-not-LIVE lag class — the
+engineer-no-admin change sat correct-in-source and wrong-on-RMC for
+days because caps display rode a <code dir="auto">make</code>. Reservoir rows are current
+the moment the endpoint writes through.</li>
+</ul>
+<p><code dir="auto">recorded_at</code> renders as the staleness badge on cloud replicas (read
+path section). The <em>session</em> identity (SignedInBadge, <code dir="auto">whoami</code>)
+remains what it is today — resolved from the live Clerk session per
+request — because that is authorization surface, not roster display.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-offline-level-3-story">The offline Level-3 story</h3><a class="sl-anchor-link" href="#the-offline-level-3-story"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The offline Level-3 story”</span></a></div>
+<ul>
+<li><strong>Local / P2P2P instances:</strong> the offline fallback reads the local
+Reservoir row (<code dir="auto">bound_by</code> recorded honestly as <code dir="auto">offline_pin</code> when it
+fires). Same narrow semantics as today’s KLS pin — fires only when
+Clerk is unreachable, never resurrects a binding Clerk has dropped
+(scar: the pin-resurrection bug) — but fresher, because the row
+updates at write-through instead of at the last <code dir="auto">make</code>. The KLS
+<code dir="auto">clerk_user_id</code> pin bake retires in wave 2.</li>
+<li><strong>Cloud instances with Clerk unreachable:</strong> no fallback, by design.
+Reads degrade to the anonymous/demo surface; writes fail closed.
+Unchanged from today, restated here so nobody “fixes” it later.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-reconcile-sweep-sync-principals-successor">The reconcile sweep (<code dir="auto">sync-principals</code> successor)</h3><a class="sl-anchor-link" href="#the-reconcile-sweep-sync-principals-successor"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The reconcile sweep (sync-principals successor)”</span></a></div>
+<p>Principle 5 applied to identity. One sweep, <strong>two</strong> healing sources
+(Option 1 removed the third — there is no declared-user YAML to heal
+from), one direction of authority:</p>
+<ul>
+<li><strong>Clerk</strong> heals existence and authorization-adjacent fields (a bound
+user with no row gets one; assignment, binding, acceptance) — Clerk
+always wins on these, and is now the <em>sole</em> source of <em>who exists</em>.</li>
+<li><strong>The OPS itself</strong> carries what no other source knows (lifecycle
+timestamps, invitation provenance, display labels) and is never
+overwritten by a source that lacks the field.</li>
+</ul>
+<p>The <em>tree</em> is <strong>not</strong> reconciled — it is <strong>baked</strong> from AFS by
+<code dir="auto">principalcompile</code> into the OPS (overwrite-on-bake). Reconcile is the
+<em>assignment</em> sweep only.</p>
+<p>Runs at verb boundaries (after invite/revoke), on the sync timer, and
+explicitly as <code dir="auto">jin roster reconcile</code> — the citizen-vocabulary rename of
+<code dir="auto">sync-principals</code>, which retires with the write-back it existed to
+perform.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="wave-2-cutover-concretely">Wave-2 cutover, concretely</h3><a class="sl-anchor-link" href="#wave-2-cutover-concretely"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Wave-2 cutover, concretely”</span></a></div>
+<ol>
+<li><code dir="auto">principalcompile</code> retargets the <code dir="auto">role</code>/<code dir="auto">group</code> bake KLS→OPS
+(overwrite table); the <code dir="auto">user_*</code> assignment bake is dropped.</li>
+<li>Endpoints (invite/revoke) gain OPS write-through (+ Clerk) and stop
+writing <code dir="auto">user_*.yaml</code>.</li>
+<li>Cockpit/roster/principals pages switch reads to OPS rows — tree and
+assignments now both read from the OPS.</li>
+<li><code dir="auto">jin roster reconcile</code> ships (Clerk + OPS, two sources); the KLS
+<code dir="auto">principal_registry</code> and <code dir="auto">clerk_user_id</code> pin retire from the KLS meta
+schema.</li>
+<li>The <code dir="auto">user_*.yaml</code> retire from every tenant’s AFS (vai carries 51:
+45 canary + 6 real); <code dir="auto">stamp_acceptance</code> and <code dir="auto">sync-principals</code> retire.</li>
+<li><code dir="auto">principal_overlay.ts</code> collapses into the OPS roster read (no more
+SIS overlay).</li>
+</ol>
+<p>Each step is independently shippable and reversible; the bake keeps
+working until step 3, so a failed cutover is a revert, not an outage.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="write-path">Write path</h2><a class="sl-anchor-link" href="#write-path"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Write path”</span></a></div>
+<ul>
+<li>Local Reservoir file per tenant: <code dir="auto">&#x3C;live>/&#x3C;pack>/&#x3C;tenant>/reservoir/…</code>
+engine <strong>decided</strong> (Q1): SQLite (WAL) for row-shaped citizens, JSONL
+for event-shaped ledgers, no DuckDB. The name stays open (Q5).</li>
+<li>Producers write through best-effort (principle 5); every citizen
+declares its healing source (manifests on disk, Clerk, state/ files).</li>
+<li>Sync (when a layer is configured — principle 0): per-citizen cadence —
+rows sweep on a timer / at verb boundaries; objects upload at terminal
+events (principle 6). A Local-topology tenant simply has no sync layer
+and loses nothing but multi-machine durability.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="read-path">Read path</h2><a class="sl-anchor-link" href="#read-path"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Read path”</span></a></div>
+<ul>
+<li>Local readers (JinDesk on the owner’s machine, CLI) read the local
+Reservoir directly.</li>
+<li>Cloud JinDesks read a Reservoir replica hydrated from R2 —
+eventually-consistent, staleness surfaced honestly in the UI
+(<code dir="auto">recorded_at</code> is part of every citizen’s schema).</li>
+<li>Nothing in a request path blocks on R2 (principles 3–4).</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="distributed-ops--merge">Distributed OPS &#x26; merge</h2><a class="sl-anchor-link" href="#distributed-ops--merge"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Distributed OPS &#x26; merge”</span></a></div>
+<p>When a tenant is operated in more than one location — a laptop and a
+cloud instance, two clouds — the <em>KLSes</em> are identical rebuildable
+caches (AFS + source → the same KLS; overwrite freely). The <em>OPSes</em>
+diverge: each accumulates its own notes, bookmarks, invites, runs. That
+divergence cannot be rebuilt away (P13), so it must be <strong>merged, never
+overwritten</strong> (P17).</p>
+<p><strong><code dir="auto">ship</code> and sync.</strong> <code dir="auto">ship</code> stays a Built-stratum operation — rebuild
+the KLS, push it to R2 with last-writer-wins. The OPS is <strong>excluded</strong>
+from that overwrite path (not for privacy, the way the publication
+blacklist excludes a tenant — but because it needs merge, not
+overwrite) and rides its own merge-aware sync track, decoupled from
+<code dir="auto">ship</code>.</p>
+<p><strong>Merge is union-mostly — the citizen shapes were chosen for it.</strong> Each
+shape carries a trivial merge rule:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Shape</th><th>Merge rule</th></tr></thead><tbody><tr><td><strong>Append-only ledger</strong> (runs, error/smoke, run archives)</td><td><strong>union + dedup by id</strong> — two locations each ran a build → both rows valid, keep both. No conflict, ever. (This is <em>why</em> Q1 put ledgers in JSONL: “sync as dumb objects” <strong>is</strong> union merge.)</td></tr><tr><td><strong>Per-owner row</strong> (bookmarks, recents, selections, snoozes)</td><td><strong>union per owner</strong> — two people never touch the same row</td></tr><tr><td><strong>Identity / roster</strong></td><td>no OPS-merge at all: <strong>Clerk is the authority</strong> (P2); the reconcile sweep heals every location from Clerk</td></tr><tr><td><strong>Contribution row</strong> (notes)</td><td><strong>union of distinct notes</strong> (the common case); the rare same-note edit resolves <strong>last-writer-wins by <code dir="auto">recorded_at</code></strong></td></tr></tbody></table>
+<p>The tiebreaker for the one real conflict — LWW by <code dir="auto">recorded_at</code> — is
+already <strong>P16</strong>; safe cross-version merge is already <strong>P15</strong>. The
+principles carry the merge machinery; this section only names it. So
+OPS-merge is <strong>union-mostly, LWW-on-conflict</strong> — not a general merge
+engine, not CRDTs.</p>
+<p><strong>Default topology (open question 7):</strong> <em>single-home</em> (one authoritative
+OPS per tenant — the owner’s machine in P2P2P, the cloud instance in
+cloud mode; everywhere else a read-only replica — no merge needed)
+versus <em>multi-master</em> (every location writes locally and merges on
+sync). Leaning: <strong>ship single-home as the default, but design every
+citizen merge-clean from day one</strong> (the rules above baked into each
+shape), so multi-master is a config flip, not a re-architecture.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="r2-layout--filled-last-from-the-citizen-shapes">R2 layout — filled LAST, from the citizen shapes</h2><a class="sl-anchor-link" href="#r2-layout--filled-last-from-the-citizen-shapes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “R2 layout — filled LAST, from the citizen shapes”</span></a></div>
+<p><em>(Deliberately empty until the scope table stabilizes. Constraints
+already known: EU-jurisdiction endpoints; content-addressed objects for
+run archives; per-tenant prefixes mirroring the live-root layout;
+the versioning registry from Strata Part 3.)</em></p>
+<div class="sl-heading-wrapper level-h2"><h2 id="migration-order">Migration order</h2><a class="sl-anchor-link" href="#migration-order"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Migration order”</span></a></div>
+<ol>
+<li><strong>Wave 1 — runs.</strong> <code dir="auto">run_registry</code> rows move table-for-table (schema
+frozen for exactly this); run-directory archival begins. Validates
+write-through + sweep + row-indexes-object end to end.</li>
+<li><strong>Wave 2 — identity + ledgers.</strong> Roster display cut over from
+KLS-baked caps ⟨s3⟩; homeless <code dir="auto">state/</code> JSONLs adopted.</li>
+<li><strong>Wave 3 — SIS convergence + sys-DB retirement.</strong> SIS tables migrate
+citizen-by-citizen; the standalone sys DB retires (Strata Part 4).
+SIS-the-file dies last, after its final tenant table moves. <strong>The
+note-migration slice</strong> (<code dir="auto">docs/design/ops_note_migration.md</code>, internal)
+is the proving vertical of this wave: it stands up the OPS on SQLite,
+migrates notes as the first user-visible citizen, provides the
+AFS→OPS import, retires the SIS/flush path, and adds the seal-time
+blend for standalone KLSes.</li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="open-questions">Open questions</h2><a class="sl-anchor-link" href="#open-questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Open questions”</span></a></div>
+<ol>
+<li><strong>Store engine — RESOLVED (2026-07-21, Mig).</strong> The workload is
+row-shaped (tiny UPSERTs, point lookups — never analytical scans),
+which is SQLite’s home turf, not DuckDB’s. DuckDB’s cross-process
+model (one read-write process OR many read-only processes, never
+both) is the documented scar — three W010-failed bakes in one
+afternoon while JinDesk held handles, plus the journal SIGBUS.
+SQLite in WAL mode gives one writer + many readers <em>concurrently
+across processes</em>; DuckDB can still ATTACH the file read-only via
+its sqlite scanner when a page wants to join.
+<strong>Decision:</strong> the per-citizen split is <strong>SQLite (WAL) for
+state-shaped citizens (rows), JSONL for event-shaped ledgers</strong>
+(appends are lock-free, corruption-resistant, sync as dumb objects).
+<strong>No DuckDB in the Reservoir.</strong></li>
+<li><strong>Replica freshness contract</strong> for cloud reads — sync interval,
+staleness badge, and whether verbs can force a push.</li>
+<li><strong>Publish seams:</strong> which citizens keep an AFS publish path (notes,
+bell resolutions do today) and does publishing move engine-side?</li>
+<li><strong>The borderline objects</strong> from Strata’s open question 2 (narratives,
+bell, config resolution) — default Built until argued otherwise.</li>
+<li><strong>Names — RESOLVED (2026-07-22, Mig).</strong> The store is <strong>OPS</strong>
+(Operational Store) — the per-tenant file, peer of AFS/KLS; <em>the
+Reservoir</em> stays the Sense’s name for the concept (see the Claim).
+Whether this ships as Sense 61 Part 2 or its own Sense stays Mig’s
+to set.</li>
+<li><strong>The attention model</strong> — its own working session (Mig + sister-3 +
+sister-5), not settled here. Framing fixed by principle 10: no
+secrets in the family; visibility is a distraction filter, not
+access control. On the table: per-citizen visibility defaults
+(utility vs contribution shapes), the filter UX (how a participant
+tunes what they see), whether visibility wants more granularity
+than owner-view/tenant-view (topic? role?), and the shape of the
+admin participation view. Principle 10 fixes what is certain:
+owner on every row, visibility as a separate attention axis,
+participation visible to governance, contributions visible by
+nature.</li>
+<li><strong>Default OPS topology:</strong> single-home (one authoritative OPS, others
+read replicas — no merge) vs multi-master (merge always). Leaning:
+single-home default, every citizen merge-clean from day one so
+multi-master is a config flip. See <em>Distributed OPS &#x26; merge</em>.</li>
+</ol>
+<hr>
+<p><em>Numerical neighbors:</em> ← <a href="/senses/sense-61-the-private-ops/">Sense 61 — The Private OPS (bring your own operational store)</a> · <a href="/senses/sense-61-the-strata/">Sense 61: The Strata</a> →</p> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n">   </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr">   </div>  </footer> <div style="text-align: center; padding: 1.5rem 0 0.5rem; opacity: 0.5; font-size: 0.8rem; border-top: 1px solid var(--sl-color-gray-6);"> <a href="https://jazzisnow.com" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.4rem;"> <img src="/jazzisnow-logo.svg" alt="jazzisnow" style="height: 1.4em;">
+jinflow is a jazzisnow product
+</a> <div style="margin-top: 0.3rem; font-family: monospace; font-size: 0.7rem; opacity: 0.7;">
+v0.63.41 · built 2026-09-06 19:39 UTC </div> </div> </div> </div>  </main> </div> </div> </div> </div> </body></html>

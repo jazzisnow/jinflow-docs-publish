@@ -1,0 +1,1036 @@
+<!DOCTYPE html><html lang="de" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Sense 43: The Cascade — Configuration as Layered Authority | docs</title><link rel="canonical" href="https://docs.jinflow.io/de/senses/sense-43-the-cascade/"/><link rel="alternate" hreflang="en" href="https://docs.jinflow.io/senses/sense-43-the-cascade/"/><link rel="alternate" hreflang="de" href="https://docs.jinflow.io/de/senses/sense-43-the-cascade/"/><link rel="alternate" hreflang="fr" href="https://docs.jinflow.io/fr/senses/sense-43-the-cascade/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&#38;display=swap"/><script type="module">
+						// Mermaid diagram lightbox — click to zoom, scroll to scale, drag to pan
+						document.addEventListener('click', e => {
+							const img = e.target.closest('img[id^="mermaid"]');
+							if (!img) return;
+
+							let scale = 1, tx = 0, ty = 0, dragging = false, sx, sy;
+
+							const overlay = document.createElement('div');
+							overlay.className = 'mermaid-lightbox';
+							const clone = img.cloneNode();
+							clone.removeAttribute('width');
+							clone.removeAttribute('height');
+							clone.style.cssText = 'max-width:90vw; max-height:90vh; cursor:grab;';
+							overlay.appendChild(clone);
+							document.body.appendChild(overlay);
+
+							const apply = () => { clone.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')'; };
+
+							overlay.addEventListener('wheel', e => {
+								e.preventDefault();
+								scale = Math.max(0.2, Math.min(10, scale * (e.deltaY < 0 ? 1.15 : 0.87)));
+								apply();
+							}, { passive: false });
+
+							clone.addEventListener('pointerdown', e => {
+								dragging = true; sx = e.clientX - tx; sy = e.clientY - ty;
+								clone.style.cursor = 'grabbing'; clone.setPointerCapture(e.pointerId);
+							});
+							clone.addEventListener('pointermove', e => {
+								if (!dragging) return; tx = e.clientX - sx; ty = e.clientY - sy; apply();
+							});
+							clone.addEventListener('pointerup', () => { dragging = false; clone.style.cursor = 'grab'; });
+
+							overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+							document.addEventListener('keydown', function esc(e) {
+								if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', esc); }
+							});
+						});
+					</script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.0.8"/><meta name="generator" content="Starlight v0.38.2"/><meta property="og:title" content="Sense 43: The Cascade — Configuration as Layered Authority"/><meta property="og:type" content="article"/><meta property="og:url" content="https://docs.jinflow.io/de/senses/sense-43-the-cascade/"/><meta property="og:locale" content="de"/><meta property="og:description" content="Sense 43 · Vitality: In bloom · last touched 2026-08-20"/><meta property="og:site_name" content="docs"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="Sense 43 · Vitality: In bloom · last touched 2026-08-20"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.BAwZ3SRq.css">
+<link rel="stylesheet" href="/_astro/Code.BcHZMqfA.css"><script type="module" src="/_astro/page.BIhdncjw.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Zum Inhalt springen</a> <div class="page sl-flex astro-vrdttmbt"> <header class="header astro-vrdttmbt"><div class="header astro-kmkmnagf"> <div class="title-wrapper sl-flex astro-kmkmnagf"> <a href="/de" class="site-title sl-flex astro-m46x6ez3">  <img class="astro-m46x6ez3" alt src="/_astro/jinflow-logo-dark.DoSSnADc.svg" width="1024" height="1024">  <span class="astro-m46x6ez3" translate="no"> docs </span> </a> </div> <div class="sl-flex print:hidden astro-kmkmnagf"> <site-search class="astro-kmkmnagf astro-v37mnknz" data-translations="{&#34;placeholder&#34;:&#34;Suchen&#34;}"> <button data-open-modal disabled aria-label="Suchen" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Suchen</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Strg</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Suchen" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Abbrechen </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.BdDgbKxW.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-kmkmnagf"> <div class="sl-flex social-icons astro-kmkmnagf"> <a href="https://jinflow.io" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">jinflow.io</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M19.33 10.18a1 1 0 0 1-.77 0 1 1 0 0 1-.62-.93l.01-1.83-8.2 8.2a1 1 0 0 1-1.41-1.42l8.2-8.2H14.7a1 1 0 0 1 0-2h4.25a1 1 0 0 1 1 1v4.25a1 1 0 0 1-.62.93Z"/><path d="M11 4a1 1 0 1 1 0 2H7a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-4a1 1 0 1 1 2 0v4a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h4Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Farbschema wählen</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dunkel</option><option value="light" class="astro-4yphtoen">Hell</option><option value="auto" selected class="astro-4yphtoen">System</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Sprache wählen</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/senses/sense-43-the-cascade/" class="astro-4yphtoen">English</option><option value="/de/senses/sense-43-the-cascade/" selected class="astro-4yphtoen">Deutsch</option><option value="/fr/senses/sense-43-the-cascade/" class="astro-4yphtoen">Français</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select><script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-vrdttmbt" aria-label="Hauptnavigation"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menü" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-vrdttmbt"> <div class="sidebar-content sl-flex astro-vrdttmbt"> <sl-sidebar-state-persist data-hash="0f4xr6i" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/big-picture/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">The Big Picture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/glossary/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Glossary</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/diagrams/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Diagrams</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Getting Started</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/operations/quick-start/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Quick Start</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/tutorials/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorials — overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/tutorials/first-build/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Your First Build</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/tutorials/finding-to-verdict/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: From Finding to Verdict</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/tutorials/expert-knowledge/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Capturing Expert Knowledge</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/tutorials/evolve/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Exploring with evolve</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/tutorials/onboarding/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Onboarding a Tenant</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/tutorials/the-first-weeks-with-a-new-tenant/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: The first weeks with a new tenant</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/tutorials/publishing-a-pack/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Publishing a Pack</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/tutorials/showcase-inspire/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Case to Verdict (Inspire)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/tutorials/showcase-vai/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Person to Verdict (Val d&#39;Oria)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/tutorials/showcase-delta/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Reading to Verdict (Delta Basin)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/setup/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Setup</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Concepts</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/concepts/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Reading order</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">The jinflow</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/concepts/the-jinflow/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/concepts/from-evolution/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Elaborating the diamond, stage by stage</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/concepts/noun-topology/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Noun Topology</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/de/concepts/the-cycle/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Cycle — make, explore, evolve, publish</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/concepts/setup-is-the-analysis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Setup is the analysis</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/concepts/three-vocabularies/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Words</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/concepts/four-convictions/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Four Convictions</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/concepts/p2p2p/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">P2P2P — Data Sovereignty</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">The Senses</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/senses/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Index · all senses</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">In bloom</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/senses/sense-14-the-signal/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 14 — The Signal</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-14-2/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 14.2 — Typed Signals</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-15/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 15 — Observation, Explanation, Contributing Factor</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-18-the-ledger/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 18 — The Ledger</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-19-the-simulation/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 19 — The Simulation</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-21-the-heartbeat/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 21 — The Heartbeat</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-25-the-pass/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 25 — The Pass</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-29-the-atelier/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 29 — The Atelier</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-33-the-bell/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 33 — The Bell</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-36-the-lineage/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 36 — The Lineage</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-38-the-scribe/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 38 — The Scribe</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-42-the-landscape/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 42 — The Landscape</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-43-the-cascade/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 43 — The Cascade</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Steady</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/senses/sense-16-p2p2p/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 16 — P2P2P</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-19-1-simulation-prerequisites/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 19.1 — Simulation Prerequisites</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-20-the-seam/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 20 — The Seam</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-26-the-workshop/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 26 — The Workshop</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-27-the-funnel/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 27 — The Funnel</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-31-the-inlet/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 31 — The Inlet</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-32-the-chores/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 32 — The Chores</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-34-the-breeze/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 34 — The Breeze</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-35-the-drift/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 35 — The Drift</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Folded in</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="6"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/senses/sense-13-the-canvas/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 13 — The Canvas (room metaphors folded into 13.1)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-17-the-house/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 17 — The House</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/senses/sense-27-lever-2/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 27 — Lever 2 (folded into Sense 27 The Funnel)</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Guides</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="7"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/guide/make/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Make (Build)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/diagnostics/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Diagnostics</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/playworks/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Playworks</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/explorer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">JinDesk</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/two-rails/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The two rails</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/inspecting/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Inspecting — Portraits &amp; Passports</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/search/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Search Grammar</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/tenants/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tenants</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/extraction/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Extraction</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/instruments/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Instruments</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/collaboration/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Collaboration</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/deploy/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Deploy</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/ai/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">AI</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/sme/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Expert Knowledge Capture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/notes/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Notes</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/bell/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Inbox (Bell)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/simulation/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Simulation — Suggestion → Scenario</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/findings/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Findings — filter &amp; navigate</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/guide/finding-explainer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Finding Explainer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Reference</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="8"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/reference/cli/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CLI</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/reference/contracts/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Contracts</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/reference/typology/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Typology — column types &amp; roll-up</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/reference/explorer-api/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">JinDesk API</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">YAML Formats</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="9"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/reference/yaml-signal/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Signal</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/reference/yaml-thesis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Thesis</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/reference/yaml-verdict/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Verdict</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/reference/yaml-smebit/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">SMEbit</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/reference/yaml-bitbundle/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">BitBundle</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/reference/yaml-report/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Report</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/reference/yaml-entity/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Entity</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/reference/yaml-lineage/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lineage</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/reference/yaml-suggestion/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Suggestion</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/reference/yaml-intervention/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Intervention</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Cheatsheets</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="10"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/cheatsheets/commands/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CLI Commands</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/cheatsheets/analyst/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Analysts</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/cheatsheets/data-engineer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Data Engineers</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/cheatsheets/instrument-author/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Instrument Authors</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/cheatsheets/operator/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Operators</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/de/presentations/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Presentations</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/advanced/domain-packs/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Domain Packs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/releases/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Release Notes</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">The DDD Book</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="11"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/ddd/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Foundations</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Chapters</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="12"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/ddd/chapters/01-the-verb-and-the-run/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">01 — The Verb and the Run</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/ddd/chapters/02-the-marked-language/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">02 — The Marked Language</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/ddd/chapters/03-the-compare-exception/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">03 — The Compare Exception</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">The EDA Book</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="13"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/eda/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Foundations</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Stories</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="14"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/eda/stories/coastal-bend/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">01 — The Silent Optic of Coastal Bend</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Journal</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="15"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/journal/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Overview</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">nuMetrix — Lessons</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="16"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/01-the-long-tail-is-not-waste/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">01 — The long tail is not waste</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/02-the-pareto-is-sharper-than-you-think/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">02 — The Pareto is sharper than you think</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/03-the-morning-batch/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">03 — The morning batch</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/04-three-suppliers-in-twelve-disguises/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">04 — Three suppliers in twelve disguises</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/05-the-week-is-the-cycle/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">05 — The week is the cycle</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/06-the-or-is-a-temporal-black-box/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">06 — The OR is a temporal black box</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/07-ward-base-consumables/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">07 — Ward base consumables</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/08-the-30-percent-discount-is-not-a-deal/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">08 — The 30-percent discount is not a deal</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/09-concentration-is-the-shape/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">09 — Concentration is the shape</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/10-the-catalogue-quotes-the-highest/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">10 — The catalogue quotes the highest</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/11-surgeons-do-not-mix-vendors/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">11 — Surgeons do not mix vendors</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/12-implants-skew-old/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">12 — Implants skew old</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/13-billing-does-not-pass-the-audit/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">13 — Billing does not pass the audit</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/14-the-silent-source-of-most-price-bugs/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">14 — The silent source of most price bugs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/numetrix/lessons/15-one-channel-cannot-balance/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">15 — One channel cannot balance</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">hrcentral — Genesis</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="17"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/journal/hrcentral/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/hrcentral/genesis/01-week-1/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">01 — Week 1: A domain learns itself</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/hrcentral/genesis/02-when-a-person-is-not-atomic/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">02 — When a person is not atomic</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/hrcentral/genesis/03-the-synthetic-cast-and-the-career-arc/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">03 — The synthetic cast and the career arc</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Monthly</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="18"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/journal/monthly/2026-02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">February 2026 — From bootstrap to pyramid</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/monthly/2026-03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">March 2026 — The month the architecture grew language for itself</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/monthly/2026-04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">April 2026 — The month of the Senses</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/monthly/2026-05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">May 2026 — Twenty-four senses, the Atelier shipped, the pipeline got its voice</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/monthly/2026-06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">June 2026 — The Stage, the Ledger, the sentence</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Weekly</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="19"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w07/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W07 — Origins</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w08/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W08 — The first vocabulary</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w09/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W09 — The roof goes on</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w10/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W10 — The pack era begins</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w11/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W11 — Shippable</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w12/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W12 — The Second User</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w13/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W13 — The Config Engine</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w14/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W14 — The Signal paradigm</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w15/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W15 — Sense 14 closeout, identity, P2P2P</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w16/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W16 — DuckDB migration, monolith drain begins</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w17/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W17 — Search v3, Sense 20, extraction discipline</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w18/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W18 — Foundations week</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w19/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W19 — hrcentral lands, the Lens arrives</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w20/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W20 — the Explorer learns to write back</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w21/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W21 — three threads cross the working line</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w22/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W22 — the pipeline settles into shape</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w23/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W23 — what signs and what remembers</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w24/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W24 — the picture arrives</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w25/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W25 — the worktrees agree</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w26/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W26 — the diamond, said in one sentence</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w27/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W27 — the identity source moves to Clerk</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w28/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W28 — truth: the system describes itself</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w29/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W29 — selection: the system learns to be pointed at</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w30/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W30 — the house: a front, and a foundation</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w31/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W31 — the instrument, and the ground</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/journal/weekly/2026-w32/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W32 — the store: travels light, learns custody</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Architecture</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="20"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/de/architecture/design_principles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Design Principles</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/architecture/terminology/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Terminology</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/architecture/two_worlds/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Two Worlds</span> <span class="sl-badge caution small  astro-3ii7xxms astro-avdet4wd">proposal</span> </a> </li><li class="astro-3ii7xxms"> <a href="/de/architecture/probe_system/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Probe System</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/architecture/the_bell/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Bell</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/architecture/the_simulation/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Simulation</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/architecture/entity_registry/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Entity Registry</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/architecture/pipeline_overview/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Pipeline Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/architecture/dlz_and_generations/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">DLZ &amp; Three Generations</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/architecture/operating_modes/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Operating Modes</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/architecture/supply_org_pricing/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Supply-Org Pricing</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/architecture/ecosystem/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Ecosystem</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/de/architecture/documentation_process/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Documentation Process</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://jinflow.io" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">jinflow.io</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M19.33 10.18a1 1 0 0 1-.77 0 1 1 0 0 1-.62-.93l.01-1.83-8.2 8.2a1 1 0 0 1-1.41-1.42l8.2-8.2H14.7a1 1 0 0 1 0-2h4.25a1 1 0 0 1 1 1v4.25a1 1 0 0 1-.62.93Z"/><path d="M11 4a1 1 0 1 1 0 2H7a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-4a1 1 0 1 1 2 0v4a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h4Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Farbschema wählen</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dunkel</option><option value="light" class="astro-4yphtoen">Hell</option><option value="auto" selected class="astro-4yphtoen">System</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>  <starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Sprache wählen</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/senses/sense-43-the-cascade/" class="astro-4yphtoen">English</option><option value="/de/senses/sense-43-the-cascade/" selected class="astro-4yphtoen">Deutsch</option><option value="/fr/senses/sense-43-the-cascade/" class="astro-4yphtoen">Français</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select> </div> </div> </div> </div> </nav> <div class="main-frame astro-vrdttmbt">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script><div class="lg:sl-hidden astro-pb3aqygn"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">Auf dieser Seite<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Überblick</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#what-pulled-us-in" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What pulled us in</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-principle" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The Principle</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-namespaces" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The Namespaces</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#1-display-configuration--display" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">1. Display configuration — display:</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#2-analytical-defaults--analytical_defaults" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">2. Analytical defaults — analytical_defaults:</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#3-future-namespaces-open-door" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">3. Future namespaces (open door)</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-namespaces-not-one-bag" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why namespaces, not one bag</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#compile-time-and-runtime-behavior" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Compile-time and runtime behavior</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#at-jinflow-make-time" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">At jinflow make time</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#at-jindesk-runtime" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">At JinDesk runtime</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#board-lab-and-the-l4-contract" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Board, Lab, and the L4 contract</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#narrated-by-the-ledger" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Narrated by the Ledger</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#what-this-sense-does-not-do" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What this Sense does NOT do</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#phasing" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Phasing</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-1--schema--resolver--first-analytical-key--shipped-2026-05-24" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase 1 — Schema + resolver + first analytical key ✅ SHIPPED 2026-05-24</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-2--proactive-sweep-of-the-analytical-defaults-inventory" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase 2 — Proactive sweep of the analytical-defaults inventory</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-3--l4-instant-overrides" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase 3 — L4 instant overrides</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-4--ledger-integration" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase 4 — Ledger integration</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-5--diff-loupe-extension-future" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase 5 — Diff Loupe extension (future)</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#how-this-manifests-in-jinflow" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">How this manifests in jinflow</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#connection-to-other-senses" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Connection to other Senses</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-one-sentence-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The one-sentence summary</span> </a>  </li> </ul></div></details></nav></mobile-starlight-toc></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-pb3aqygn"><div class="sl-container astro-pb3aqygn"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">Auf dieser Seite</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Überblick</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#what-pulled-us-in" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What pulled us in</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-principle" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The Principle</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-namespaces" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The Namespaces</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#1-display-configuration--display" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">1. Display configuration — display:</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#2-analytical-defaults--analytical_defaults" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">2. Analytical defaults — analytical_defaults:</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#3-future-namespaces-open-door" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">3. Future namespaces (open door)</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#why-namespaces-not-one-bag" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Why namespaces, not one bag</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#compile-time-and-runtime-behavior" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Compile-time and runtime behavior</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#at-jinflow-make-time" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">At jinflow make time</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#at-jindesk-runtime" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">At JinDesk runtime</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#board-lab-and-the-l4-contract" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Board, Lab, and the L4 contract</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#narrated-by-the-ledger" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Narrated by the Ledger</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#what-this-sense-does-not-do" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What this Sense does NOT do</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#phasing" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Phasing</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-1--schema--resolver--first-analytical-key--shipped-2026-05-24" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase 1 — Schema + resolver + first analytical key ✅ SHIPPED 2026-05-24</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-2--proactive-sweep-of-the-analytical-defaults-inventory" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase 2 — Proactive sweep of the analytical-defaults inventory</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-3--l4-instant-overrides" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase 3 — L4 instant overrides</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-4--ledger-integration" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase 4 — Ledger integration</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-5--diff-loupe-extension-future" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase 5 — Diff Loupe extension (future)</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#how-this-manifests-in-jinflow" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">How this manifests in jinflow</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#connection-to-other-senses" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Connection to other Senses</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-one-sentence-summary" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The one-sentence summary</span> </a>  </li> </ul></nav></starlight-toc></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Sense 43: The Cascade — Configuration as Layered Authority</h1> <p class="sl-flex astro-opzsrvew"> <svg aria-hidden="true" class="astro-opzsrvew astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-color: var(--sl-color-orange-high);--sl-icon-size: 1.5em;"><path d="M12 16a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm10.67 1.47-8.05-14a3 3 0 0 0-5.24 0l-8 14A3 3 0 0 0 3.94 22h16.12a3 3 0 0 0 2.61-4.53Zm-1.73 2a1 1 0 0 1-.88.51H3.94a1 1 0 0 1-.88-.51 1 1 0 0 1 0-1l8-14a1 1 0 0 1 1.78 0l8.05 14a1 1 0 0 1 .05 1.02v-.02ZM12 8a1 1 0 0 0-1 1v4a1 1 0 0 0 2 0V9a1 1 0 0 0-1-1Z"/></svg> <span class="astro-opzsrvew">Dieser Inhalt ist noch nicht in deiner Sprache verfügbar.</span> </p></div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <div class="sl-markdown-content"> <p><strong>Sense 43</strong> · <strong>In bloom</strong> · <span class="last-touched">Last touched 2026-08-20</span></p>
+<ul>
+<li><strong>last_verified:</strong> 2026-06-05</li>
+</ul>
+<blockquote>
+<p>Synced from <a href="https://github.com/jazzisnow/jinflow/blob/main/docs/design/sense_43_the_cascade.md"><code dir="auto">docs/design/sense_43_the_cascade.md</code></a> in the engine repo — that’s the source; this page is a build-time mirror.</p>
+</blockquote>
+<blockquote>
+<p>One mechanism. Multiple namespaces.</p>
+<p>Configuration in jinflow is layered. Each authority — engine,
+pack, tenant, entity, explorer — can speak on any key. The
+resolver consults them top-down at the latest possible moment,
+and the chosen value carries its provenance. The KLS bakes the
+resolution so every snapshot is self-describing.</p>
+</blockquote>
+<p><strong>Status</strong>: Proposed
+<strong>Date</strong>: 2026-05-24
+<strong>Author</strong>: the owner + Claude (in conversation, during Sense 14.2 Phase 3 design)
+<strong>Family</strong>: principle for <a href="./config_engine.md">Configuration Engine</a>
+(the implementation reference); piloted by
+<a href="./sense_14_2.md">Sense 14.2 Typed Signals</a>;
+narrated by <a href="./sense_18_the_ledger.md">Sense 18 The Ledger</a>;
+Lab-room overrides per <a href="./sense_13_the_canvas.md">Sense 13 The Canvas</a>.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="what-pulled-us-in">What pulled us in</h2><a class="sl-anchor-link" href="#what-pulled-us-in"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “What pulled us in”</span></a></div>
+<p>Configuration in jinflow has historically been scattered across many
+homes — some YAML, some Python constants, some Svelte hardcodes, some
+TypeScript identity literals. Adding a new configurable dimension has
+meant touching several files across several layers, each with its own
+loading path and override mechanism. The Configuration Engine
+(2026-03) solved this for display config. But the same shape applies
+beyond display — wherever there are <em>defaults that can vary by pack,
+by tenant, by entity, or by exploration</em>.</p>
+<p>There are two related failures of the pre-cascade world:</p>
+<p><strong>Hidden authority.</strong> When a default lives in code, no one outside
+the engine team knows it exists. The pack author cannot override it;
+the tenant owner cannot pin it; the explorer cannot temporarily
+overrule it for a what-if. The default is silently authoritative
+because it has no challenger.</p>
+<p><strong>Hidden provenance.</strong> When the value finally arrives at a render or
+a SQL query, there is no record of <em>which layer chose it.</em> If a
+number surprises, you cannot ask “whose decision was this?” — the
+answer is hidden behind a stack of imports.</p>
+<p>The Cascade names the architectural answer: <strong>configuration is a
+typed inheritance chain, namespaced by concern, resolved at the
+latest possible moment, with provenance recorded in the artifact it
+produces.</strong></p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="the-principle">The Principle</h2><a class="sl-anchor-link" href="#the-principle"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The Principle”</span></a></div>
+<p><strong>Any setting whose value can legitimately differ across packs,
+tenants, entities, or exploration moments belongs in the cascade —
+not in code.</strong></p>
+<p>The cascade has one shape that all namespaces share:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Level</th><th>Owner</th><th>Persistence</th></tr></thead><tbody><tr><td><strong>L0 — engine</strong></td><td>jinflow code</td><td>Hardcoded fallback only</td></tr><tr><td><strong>L1 — pack</strong></td><td><code dir="auto">packs/&#x3C;pack>/config.yml</code></td><td>Pack git</td></tr><tr><td><strong>L2 — tenant</strong></td><td><code dir="auto">tenants/&#x3C;tenant>/config.yml</code></td><td>Tenant AFS git</td></tr><tr><td><strong>L3 — entity / perspective</strong></td><td>YAML in <code dir="auto">entities/</code>, <code dir="auto">signals/</code>, <code dir="auto">perspectives/</code></td><td>Tenant AFS git</td></tr><tr><td><strong>L4 — transient</strong></td><td>URL params, REPL state</td><td>None — single view only</td></tr></tbody></table>
+<p>L0 through L3 are <strong>persistent</strong>. They bake into the KLS via
+<code dir="auto">jinflow make</code>, get committed to git via the AFS round-trip, and the
+artifact’s <code dir="auto">_jinflow_*</code> metadata tables record the resolved value
+along with the level that supplied it.</p>
+<p>L4 is <strong>transient</strong>. It changes what the explorer sees, never what
+is stored. <em>Which rooms admit L4 depends on the namespace, not on
+the room itself</em> — see the <a href="#board-lab-and-the-l4-contract">Board, Lab, and the L4 contract</a>
+section below for the namespace-axis breakdown. The short version:
+display L4 applies everywhere; analytical L4 is Lab-only.</p>
+<p>The full mechanism — resolver algorithm, file structure, baked
+tables, CLI surface — is documented in the
+<a href="./config_engine.md">Configuration Engine reference</a>. This Sense
+holds the principle and the namespaces; that doc holds the wiring.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="the-namespaces">The Namespaces</h2><a class="sl-anchor-link" href="#the-namespaces"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The Namespaces”</span></a></div>
+<p>The cascade governs more than one kind of configuration. Each
+<strong>namespace</strong> is a top-level block in <code dir="auto">config.yml</code> with its own
+schema and its own stakes. New namespaces are added only when a
+concrete need surfaces — each one introduces a new region of
+governance.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="1-display-configuration--display">1. Display configuration — <code dir="auto">display:</code></h3><a class="sl-anchor-link" href="#1-display-configuration--display"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “1. Display configuration — display:”</span></a></div>
+<p>How things <strong>look</strong> and how JinDesk <strong>behaves at runtime</strong>. The
+scope is broader than the name suggests: it covers presentation
+(precision, locale, branding), pagination behavior, search defaults,
+column visibility, recents, and other runtime UI choices. The block
+name was chosen early (when “display” covered most of what was in
+it); the scope grew. Renaming the block to something like
+<code dir="auto">presentation:</code> is a future migration if the undersell ever becomes
+noisy in practice.</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="yaml"><code><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">display</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">paging</span><span style="--0:#D6DEEB;--1:#403F53">: { </span><span style="--0:#7FDBCA;--1:#111111">default</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#F78C6C;--1:#AA0982">50</span><span style="--0:#D6DEEB;--1:#403F53">, </span><span style="--0:#7FDBCA;--1:#111111">options</span><span style="--0:#D6DEEB;--1:#403F53">: [</span><span style="--0:#F78C6C;--1:#AA0982">25</span><span style="--0:#D6DEEB;--1:#403F53">, </span><span style="--0:#F78C6C;--1:#AA0982">50</span><span style="--0:#D6DEEB;--1:#403F53">, </span><span style="--0:#F78C6C;--1:#AA0982">100</span><span style="--0:#D6DEEB;--1:#403F53">] }</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">pagination</span><span style="--0:#D6DEEB;--1:#403F53">: { </span><span style="--0:#7FDBCA;--1:#111111">position</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">bottom</span><span style="--0:#D6DEEB;--1:#403F53">, </span><span style="--0:#7FDBCA;--1:#111111">align</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">center</span><span style="--0:#D6DEEB;--1:#403F53"> }</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">precision</span><span style="--0:#D6DEEB;--1:#403F53">: { </span><span style="--0:#F78C6C;--1:#AA0982">...</span><span style="--0:#D6DEEB;--1:#403F53"> }</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">columns</span><span style="--0:#D6DEEB;--1:#403F53">: { </span><span style="--0:#7FDBCA;--1:#111111">hide_patterns</span><span style="--0:#D6DEEB;--1:#403F53">: [</span><span style="--0:#F78C6C;--1:#AA0982">...</span><span style="--0:#D6DEEB;--1:#403F53">] }</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">recents</span><span style="--0:#D6DEEB;--1:#403F53">: { </span><span style="--0:#F78C6C;--1:#AA0982">...</span><span style="--0:#D6DEEB;--1:#403F53"> }</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">nav_labels</span><span style="--0:#D6DEEB;--1:#403F53">: { </span><span style="--0:#F78C6C;--1:#AA0982">...</span><span style="--0:#D6DEEB;--1:#403F53"> }</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="display:  paging: { default: 50, options: [25, 50, 100] }  pagination: { position: bottom, align: center }  precision: { ... }  columns: { hide_patterns: [...] }  recents: { ... }  nav_labels: { ... }"><div></div></button></div></figure></div>
+<p>This namespace has been shipping since March 2026 and is the
+original use case for the Configuration Engine. It covers
+presentation, pagination, search behavior, formatting locale,
+column visibility, branding, and JinDesk UI defaults.</p>
+<p><strong>The risk it manages:</strong> wrong values <em>mislead the eye</em> — a price
+shown to one decimal when three are needed, a column hidden when it
+should be visible. The number itself is correct; only its
+presentation is off.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="2-analytical-defaults--analytical_defaults">2. Analytical defaults — <code dir="auto">analytical_defaults:</code></h3><a class="sl-anchor-link" href="#2-analytical-defaults--analytical_defaults"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “2. Analytical defaults — analytical_defaults:”</span></a></div>
+<p>How numbers are <strong>computed</strong> when the YAML does not pin the answer.</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="yaml"><code><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">analytical_defaults</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">currency</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">anchor</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">transaction_date</span><span style="--0:#D6DEEB;--1:#403F53">     </span><span style="--0:#919F9F;--1:#5F636F"># transaction_date | reporting_date | period_end</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">gap_policy</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">nearest_prior</span><span style="--0:#D6DEEB;--1:#403F53">    </span><span style="--0:#919F9F;--1:#5F636F"># for weekends/holidays</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">time</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">window_anchor_resolution</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">max_observation_date</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">gap_policy</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">nearest_prior</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">quality</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">min_observations_for_aggregate</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#F78C6C;--1:#AA0982">12</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="analytical_defaults:  currency:    anchor: transaction_date     # transaction_date | reporting_date | period_end    gap_policy: nearest_prior    # for weekends/holidays  time:    window_anchor_resolution: max_observation_date    gap_policy: nearest_prior  quality:    min_observations_for_aggregate: 12"><div></div></button></div></figure></div>
+<p>This namespace is <strong>proposed here</strong> and lands with
+<a href="./sense_14_2.md">Sense 14.2 Phase 3</a> — currency conversion is the
+forcing case. The pilot key is <code dir="auto">currency.anchor</code>: do retroactive
+conversions anchor at the transaction date (audit truth), the
+reporting date (comparability), or period-end (accounting
+convention)? All three are legitimate. The choice belongs in AFS,
+not in a Python constant.</p>
+<p><strong>The risk it manages:</strong> wrong values <em>mislead the mind</em> — the same
+data produces different numbers depending on which default applied.
+A signal could be flagged “confirmed” under one anchor and
+“not_observed” under another. The presentation is fine; the answer
+itself has shifted.</p>
+<p><strong>Migration policy — proactive inventory, deliberate sweep.</strong> The
+current set of code-resident defaults that change numbers is finite
+and surveyable. As of this Sense, the surveyed candidates are:
+<code dir="auto">currency.anchor</code> (Phase 1 pilot), <code dir="auto">currency.gap_policy</code>,
+<code dir="auto">time.window_anchor_resolution</code>, <code dir="auto">time.gap_policy</code>,
+<code dir="auto">rounding.aggregation</code>, and <code dir="auto">quality.min_observations_for_aggregate</code>.
+Phase 1 lands the pilot; Phase 2 is a deliberate sweep of the rest —
+each key surveyed for its current code location, migration risk, and
+review owner. From Phase 2 onward, new analytical defaults go
+straight into the cascade. Never into code.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="3-future-namespaces-open-door">3. Future namespaces (open door)</h3><a class="sl-anchor-link" href="#3-future-namespaces-open-door"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “3. Future namespaces (open door)”</span></a></div>
+<p>The cascade scales to additional sibling blocks when new classes of
+configuration warrant their own region of authority — for example,
+<code dir="auto">identity:</code> if/when <a href="./sense_25_the_pass.md">Sense 25</a> migrates its
+config from TypeScript into the cascade. Each addition is a
+deliberate decision; this Sense does not pre-commit to any of them.
+The principle: new namespaces join <code dir="auto">display:</code> and
+<code dir="auto">analytical_defaults:</code> as siblings under the same cascade, with the
+same baking strategy and the same L4 mechanics.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="why-namespaces-not-one-bag">Why namespaces, not one bag</h2><a class="sl-anchor-link" href="#why-namespaces-not-one-bag"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Why namespaces, not one bag”</span></a></div>
+<p>A pack author editing display precision and a tenant owner deciding
+how historical conversions anchor are doing <strong>different kinds of
+work</strong>. They have different reviewers, different audit
+implications, different blast radius. Putting both choices in a
+single undifferentiated <code dir="auto">config:</code> blob would erase that distinction
+at the schema level.</p>
+<p>Sibling top-level blocks make the distinction <em>visible in the file</em>.
+The schema mirrors the governance: each namespace is a separate
+region of authority, with its own validation rules, its own bake
+strategy, and its own provenance trail.</p>
+<p>It also leaves room for namespaces to evolve independently. The
+display cascade has been stable since March; the analytical cascade
+is still finding its keys. Forcing them through one schema would
+slow both down.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="compile-time-and-runtime-behavior">Compile-time and runtime behavior</h2><a class="sl-anchor-link" href="#compile-time-and-runtime-behavior"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Compile-time and runtime behavior”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="at-jinflow-make-time">At <code dir="auto">jinflow make</code> time</h3><a class="sl-anchor-link" href="#at-jinflow-make-time"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “At jinflow make time”</span></a></div>
+<ol>
+<li>The resolver reads each namespace’s blocks from L1, L2, and any
+relevant L3 YAMLs.</li>
+<li>Compilers that emit SQL consume resolved values via the resolver
+interface.</li>
+<li>The KLS bakes one metadata table per namespace:
+<ul>
+<li><code dir="auto">_jinflow_config</code> — the existing display-config bake.</li>
+<li><code dir="auto">_jinflow_analytical_defaults</code> — new, lands with Phase 3.</li>
+<li>(Future namespaces get their own tables in the same shape:
+<code dir="auto">key</code>, <code dir="auto">value</code>, <code dir="auto">level</code>, <code dir="auto">source_file</code>, <code dir="auto">resolved_at</code>.)</li>
+</ul>
+</li>
+</ol>
+<div class="sl-heading-wrapper level-h3"><h3 id="at-jindesk-runtime">At JinDesk runtime</h3><a class="sl-anchor-link" href="#at-jindesk-runtime"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “At JinDesk runtime”</span></a></div>
+<ol>
+<li>JinDesk reads from the baked tables when it needs to display
+<em>“this number was conversion-anchored at transaction date”</em> or
+<em>“this column’s precision was set at the tenant level.”</em></li>
+<li>URL params apply L4 overrides, namespaced to match the config
+block:
+<ul>
+<li><code dir="auto">?display.precision.price=4</code> — single-view display override.</li>
+<li><code dir="auto">?ad.currency.anchor=reporting_date</code> — single-view analytical
+override.</li>
+</ul>
+</li>
+<li>A “posture chip” renders wherever an override is in effect,
+making the override visible to the eye.</li>
+</ol>
+<div class="sl-heading-wrapper level-h3"><h3 id="board-lab-and-the-l4-contract">Board, Lab, and the L4 contract</h3><a class="sl-anchor-link" href="#board-lab-and-the-l4-contract"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Board, Lab, and the L4 contract”</span></a></div>
+<p>The Board is the URL idiom for authored truth (<code dir="auto">/board/&#x3C;instance></code>
+— the Lens-browser room from Sense 27). The Lab is the URL idiom
+for exploration (<code dir="auto">/lab/&#x3C;instance></code> — chart-based, supports
+exploratory what-ifs). Studio composes authored views, like the
+Board.</p>
+<p><strong>Which L4 overrides each room admits is decided by the namespace,
+not the room.</strong> The original framing of “Lab admits L4, Board does
+not” forced a single principle to do work it couldn’t carry. The
+honest axis is the kind of override:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Namespace</th><th>Where L4 applies</th><th>Why</th></tr></thead><tbody><tr><td><code dir="auto">display:</code></td><td>Board + Lab + Studio (everywhere)</td><td>Render-time only. Precision, locale, column visibility — overriding these doesn’t change <em>what</em> the number is, only <em>how it is shown</em>. No authored-truth claim is violated; the override is equivalent to resizing a column.</td></tr><tr><td><code dir="auto">analytical_defaults:</code></td><td>Lab only</td><td>Changing <code dir="auto">currency.anchor</code> shifts <em>what the number means</em>. On a Board or Studio (authored-truth rooms), that’s epistemically dishonest — the viewer thought they were looking at the authored picture, now they’re not. Lab is the room where what-ifs belong.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h4"><h4 id="display-l4--applies-everywhere">Display L4 — applies everywhere</h4><a class="sl-anchor-link" href="#display-l4--applies-everywhere"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Display L4 — applies everywhere”</span></a></div>
+<p><code dir="auto">?display.&#x3C;key>=&#x3C;value></code> is honored on Board, Lab, and Studio
+alike. The posture chip appears; the override applies; the URL is
+shareable. Same nature as any per-view display setting users
+already control (sort, filter, pagination).</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="analytical-l4--lab-only-with-a-board-fallback">Analytical L4 — Lab only, with a Board fallback</h4><a class="sl-anchor-link" href="#analytical-l4--lab-only-with-a-board-fallback"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Analytical L4 — Lab only, with a Board fallback”</span></a></div>
+<p><code dir="auto">?ad.&#x3C;key>=&#x3C;value></code> is honored in Lab. On Board (and Studio), a
+non-blocking banner appears instead of silent rejection:</p>
+<blockquote>
+<p><em>ℹ Override <code dir="auto">?ad.currency.anchor=reporting_date</code> isn’t applied
+here. Board shows authored truth only.</em> <strong>[Open in Lab →]</strong>
+<em>[Why?]</em> <em>[✕]</em></p>
+</blockquote>
+<p>The CTA routes to <code dir="auto">/lab/&#x3C;same-instance>?&#x3C;all-params></code> — same Lab
+counterpart with all URL params preserved (filters, sort,
+pagination, AND the analytical L4 override). Where no Lab
+counterpart exists, the fallback CTA opens the default Lab with
+the params attached. The “Why?” link expands a short inline
+explanation of the namespace-axis distinction.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="common-rules">Common rules</h4><a class="sl-anchor-link" href="#common-rules"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Common rules”</span></a></div>
+<p>Only <strong>recognized</strong> L4 keys trigger the banner or chip. The
+resolver knows the schema of <code dir="auto">display.*</code> and <code dir="auto">ad.*</code> keys;
+arbitrary URL noise (<code dir="auto">?utm_source=…</code>, <code dir="auto">?ref=…</code>) is ignored.</p>
+<p>L4 overrides live in the URL. URLs are shareable and bookmarkable
+— so a pasted-to-Slack L4 URL renders the override for any
+recipient who opens it. <em>“Transient”</em> means <strong>never persists to the
+cascade</strong> (never becomes a new L1/L2/L3 default). It does <em>not</em>
+mean the URL itself is one-shot.</p>
+<p><strong>Why a visible banner instead of silent rejection (for analytical
+on Board):</strong> silent operations are exactly the <em>hidden authority</em>
+failure mode this Sense is fighting. The banner is informational
+(does not block Board rendering), teachable (the “Why?” link
+explains the mechanism on first encounter), and recoverable (one
+click opens the view that honors the override).</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="narrated-by-the-ledger">Narrated by the Ledger</h3><a class="sl-anchor-link" href="#narrated-by-the-ledger"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Narrated by the Ledger”</span></a></div>
+<p>When <a href="./sense_18_the_ledger.md">Sense 18</a> lands, every Validation
+panel can quote the resolved cascade:</p>
+<blockquote>
+<p><em>Margin: CHF −5.80 per item.</em>
+<em>Window: P12M ending 2026-04-30 (latest delivery),
+<code dir="auto">analytical_defaults.time.window_anchor_resolution</code> resolved from
+tenant.yml.</em>
+<em>Currency: anchored at transaction date,
+<code dir="auto">analytical_defaults.currency.anchor</code> resolved from pack default.</em></p>
+</blockquote>
+<p>Every assumption traceable. Every assumption changeable. None hidden.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="what-this-sense-does-not-do">What this Sense does NOT do</h2><a class="sl-anchor-link" href="#what-this-sense-does-not-do"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “What this Sense does NOT do”</span></a></div>
+<ul>
+<li>It does <strong>not</strong> redefine display configuration. The Configuration
+Engine has been shipping the <code dir="auto">display:</code> cascade since March 2026
+and continues unchanged. This Sense names the principle the
+engine already realises and opens it to additional namespaces.</li>
+<li>It does <strong>not</strong> absorb every constant in the codebase. Only
+defaults whose value changes a <em>number</em> (analytical) or a
+<em>presentation</em> (display) belong here. Implementation constants,
+algorithm parameters that aren’t user-meaningful, and internal
+thresholds stay in code.</li>
+<li>It does <strong>not</strong> govern Subject Matter. Subject Matter declares
+<em>facts about the world</em>; analytical defaults declare <em>how to
+compute facts about the world</em>. Adjacent and complementary; not
+the same.</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="phasing">Phasing</h2><a class="sl-anchor-link" href="#phasing"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Phasing”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="phase-1--schema--resolver--first-analytical-key--shipped-2026-05-24">Phase 1 — Schema + resolver + first analytical key ✅ SHIPPED 2026-05-24</h3><a class="sl-anchor-link" href="#phase-1--schema--resolver--first-analytical-key--shipped-2026-05-24"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Phase 1 — Schema + resolver + first analytical key ✅ SHIPPED 2026-05-24”</span></a></div>
+<p>Engine commit <code dir="auto">6f19e059</code> (under the “Sense 14.2 sub-phase 3.0” label —
+the currency arc was the forcing function).</p>
+<ul>
+<li><code dir="auto">jinflow/config.py</code> resolver with <code dir="auto">ENGINE_DEFAULTS</code> (L0 fallbacks),
+<code dir="auto">Resolved</code> dataclass, <code dir="auto">resolve()</code> / <code dir="auto">resolve_all()</code>. Reads
+<code dir="auto">&#x3C;afs_root>/config.yml</code> for the <code dir="auto">analytical_defaults:</code> block.</li>
+<li><code dir="auto">bake_analytical_defaults()</code> in <code dir="auto">jinflow/cli/commands/baking.py</code>
+writes <code dir="auto">_{tenant}.analytical_defaults</code> (<code dir="auto">key</code>, <code dir="auto">value</code>, <code dir="auto">level</code>,
+<code dir="auto">source_file</code>, <code dir="auto">resolved_at</code>) per tenant.</li>
+<li>Wired into <code dir="auto">jinflow/cli/commands/make.py</code> next to <code dir="auto">bake_metadata</code>.</li>
+<li>Pilot key <code dir="auto">currency.anchor</code> consumed end-to-end by the perspective
+compiler (Sense 14.2 sub-phases 3.2.b + 3.2.c).</li>
+<li>17 unit + bake tests in <code dir="auto">tests/test_config_resolver.py</code>.</li>
+</ul>
+<p>Currently collapses pack (L1) and tenant (L2) into a single <code dir="auto">afs</code>
+level because tenant AFSes are file-copies of the pack at init;
+disentangling waits for <a href="./sense_36_the_lineage.md">Sense 36 The Lineage</a>
+birth-manifest consultation.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="phase-2--proactive-sweep-of-the-analytical-defaults-inventory">Phase 2 — Proactive sweep of the analytical-defaults inventory</h3><a class="sl-anchor-link" href="#phase-2--proactive-sweep-of-the-analytical-defaults-inventory"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Phase 2 — Proactive sweep of the analytical-defaults inventory”</span></a></div>
+<p><strong>Partially shipped — survey revealed the inventory was over-specced.</strong></p>
+<p>A 2026-05-28 audit of the five candidates the original Sense draft
+listed found that only one was a real, in-code constant ready to
+migrate:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Candidate</th><th>Verdict</th></tr></thead><tbody><tr><td><code dir="auto">currency.gap_policy</code></td><td>✅ shipped 2026-05-28 — was hardcoded <code dir="auto">nearest_prior</code> in the <code dir="auto">convert_currency</code> macro; now read from the cascade.</td></tr><tr><td><code dir="auto">time.window_anchor_resolution</code></td><td>Deferred — no signal currently relies on a default (every signal declares <code dir="auto">anchor:</code> explicitly). Add when a real driver appears.</td></tr><tr><td><code dir="auto">time.gap_policy</code></td><td>Deferred — lives implicitly in pack-authored SQL (<code dir="auto">asof left join</code> in <code dir="auto">gold_io_metering</code>, <code dir="auto">gold_price_series</code>). Making it cascade-aware is a cross-repo lift; wait for a forcing case.</td></tr><tr><td><code dir="auto">rounding.aggregation</code></td><td>Deferred — speculative. Doesn’t exist in code yet.</td></tr><tr><td><code dir="auto">quality.min_observations_for_aggregate</code></td><td>Deferred — speculative. Doesn’t exist in code yet.</td></tr><tr><td><code dir="auto">display.*</code> (every <code dir="auto">display.…</code> key)</td><td><strong>Spec’d 2026-05-30, implementation pending.</strong> The <code dir="auto">display:</code> namespace claims to cascade but the runtime path is single-layer. Design choice (a) — bake-time deep-merge — adopted. Full spec in the next section below.</td></tr></tbody></table>
+<p><strong><code dir="auto">currency.gap_policy</code> migration details (commit-shipped 2026-05-28):</strong></p>
+<ul>
+<li>Added to <code dir="auto">ENGINE_DEFAULTS</code> with value <code dir="auto">nearest_prior</code>.
+Valid values: <code dir="auto">nearest_prior</code> (default), <code dir="auto">skip</code>. <code dir="auto">interpolate</code>
+reserved for future.</li>
+<li><code dir="auto">convert_currency</code> macro reads <code dir="auto">{{ var('currency_gap_policy', 'nearest_prior') }}</code> and gates the rate lookup accordingly.
+<code dir="auto">nearest_prior</code> keeps the original ASOF semantics; <code dir="auto">skip</code>
+requires exact-date match and returns NULL otherwise — paired
+with the perspective compiler’s <code dir="auto">not_null</code> test (Sense 14.2
+sub-phase 3.2.c), <code dir="auto">skip</code> turns missing rates into a hard build
+failure.</li>
+<li><code dir="auto">jinflow make</code> now injects <strong>every</strong> resolved analytical_defaults
+key as a dbt var automatically. Convention: cascade key <code dir="auto">a.b.c</code>
+becomes dbt var <code dir="auto">a_b_c</code>. Future cascade keys ride the same wire
+with no per-key plumbing.</li>
+</ul>
+<p><strong>Future Phase 2 keys</strong> join the cascade one at a time, <em>when a
+real driver arrives</em>. The Sense doesn’t pre-commit beyond the keys
+the migration audit has already identified as real.</p>
+<div class="sl-heading-wrapper level-h4"><h4 id="phase-2-sub-task-display-cascade-fix-spec-2026-05-30">Phase 2 sub-task: <code dir="auto">display:</code> cascade fix (spec, 2026-05-30)</h4><a class="sl-anchor-link" href="#phase-2-sub-task-display-cascade-fix-spec-2026-05-30"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Phase 2 sub-task: display: cascade fix (spec, 2026-05-30)”</span></a></div>
+<p>The <code dir="auto">display:</code> namespace cascade was documented but never
+implemented at the bake/runtime path. This spec defines the fix.
+The implementation lands as a follow-up commit, against this spec
+verbatim.</p>
+<p><strong>Background — the gap, recapped.</strong> <code dir="auto">bake_metadata</code> reads only the
+tenant’s <code dir="auto">afs/config.yml</code> and stores it as a single YAML blob in
+<code dir="auto">_&#x3C;tenant>.config.config_yaml</code>. JinDesk (<code dir="auto">configEngine.ts</code>)
+reads that blob, parses it, and uses it. The pack’s <code dir="auto">config.yml</code>
+is never consulted at bake time and there are no engine fallbacks.
+Tenants who want their pack’s defaults to apply must copy-paste
+them into their own <code dir="auto">config.yml</code> (which numetrix tenants do); a
+pack that omits a key has no way to set a default for its tenants
+(hrcentral.vai has no <code dir="auto">display.grouping</code> because the hrcentral
+pack didn’t ship one). Both failure modes hide the fact that the
+cascade doesn’t work.</p>
+<p><strong>Choice adopted: (a) bake-time deep-merge.</strong> Engine fallbacks ⊕
+pack <code dir="auto">config.yml</code> ⊕ tenant <code dir="auto">config.yml</code>, merged at <code dir="auto">jin make</code>, the
+result baked into the existing <code dir="auto">_&#x3C;tenant>.config.config_yaml</code>.
+JinDesk’s read path stays single-blob. Per-key provenance lands
+in a sibling table.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="merger-semantics">Merger semantics</h5><a class="sl-anchor-link" href="#merger-semantics"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Merger semantics”</span></a></div>
+<p>Deep merge with the following rules, applied recursively:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Shape</th><th>Behavior</th></tr></thead><tbody><tr><td>Two maps</td><td>Keys union; conflicting keys recurse.</td></tr><tr><td>Two scalars</td><td>Right-side wins.</td></tr><tr><td>Two lists</td><td>Right-side fully replaces (no append, no element-wise merge).</td></tr><tr><td>Map vs scalar / list vs map</td><td>Right-side fully replaces. Type mismatch is a warning during bake.</td></tr></tbody></table>
+<p>“Right side” means <em>the higher-precedence side</em> — tenant beats pack beats engine.</p>
+<p><strong>Worked example:</strong></p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="yaml"><code><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># engine fallback (L0 — built into jinflow.config)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">display</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">grouping</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">patterns</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#ECC48D;--1:#984E4D">_type|_status|_year</span><span style="--0:#D9F5DD;--1:#111111">"</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">pagination</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">page_input</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">true</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># pack config.yml (L1 — numetrix)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">display</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">grouping</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">patterns</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#ECC48D;--1:#984E4D">_type|_group|_source|_status|_year|_category|_code</span><span style="--0:#D9F5DD;--1:#111111">"</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">pagination</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">begin_end</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">true</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">align</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">right</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># tenant config.yml (L2 — rmc)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">display</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">pagination</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">align</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">left</span></div></div><div class="ec-line"><div class="code">
+</div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># resolved (baked into _&#x3C;tenant>.config.config_yaml)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">display</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">grouping</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">patterns</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#ECC48D;--1:#984E4D">_type|_group|_source|_status|_year|_category|_code</span><span style="--0:#D9F5DD;--1:#111111">"</span></div></div><div class="ec-line"><div class="code"><span class="indent">  </span><span style="--0:#7FDBCA;--1:#111111">pagination</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">page_input</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">true</span><span style="--0:#D6DEEB;--1:#403F53">   </span><span style="--0:#919F9F;--1:#5F636F"># from engine</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">begin_end</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#FF6A83;--1:#A24848">true</span><span style="--0:#D6DEEB;--1:#403F53">    </span><span style="--0:#919F9F;--1:#5F636F"># from pack</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#7FDBCA;--1:#111111">align</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">left</span><span style="--0:#D6DEEB;--1:#403F53">        </span><span style="--0:#919F9F;--1:#5F636F"># from tenant (overrode pack's `right`)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="# engine fallback (L0 — built into jinflow.config)display:  grouping:    patterns: &#x22;_type|_status|_year&#x22;  pagination:    page_input: true# pack config.yml (L1 — numetrix)display:  grouping:    patterns: &#x22;_type|_group|_source|_status|_year|_category|_code&#x22;  pagination:    begin_end: true    align: right# tenant config.yml (L2 — rmc)display:  pagination:    align: left# resolved (baked into _<tenant>.config.config_yaml)display:  grouping:    patterns: &#x22;_type|_group|_source|_status|_year|_category|_code&#x22;  pagination:    page_input: true   # from engine    begin_end: true    # from pack    align: left        # from tenant (overrode pack&#x27;s &#x60;right&#x60;)"><div></div></button></div></figure></div>
+<p>The <code dir="auto">display.grouping.patterns</code> string at L1 fully replaces L0’s
+shorter list (string replace, not pattern concatenation). The
+tenant didn’t touch <code dir="auto">grouping</code> so the pack value carries through.
+<code dir="auto">pagination.align</code> cascades L0 → L1 → L2 by full replacement; the
+last writer wins.</p>
+<p><strong>List replacement rationale:</strong> the existing pack/tenant
+<code dir="auto">display.recents.dimensions</code> and <code dir="auto">display.grouping.patterns</code> are
+authored as full specifications, not as fragments to extend.
+Append semantics would require pack authors to write <em>delta lists</em>
+which is a new authoring concept. Replace keeps current YAML files
+working untouched.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="aggregation-semantics-gap-acknowledged-deferred">Aggregation semantics (gap acknowledged, deferred)</h5><a class="sl-anchor-link" href="#aggregation-semantics-gap-acknowledged-deferred"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Aggregation semantics (gap acknowledged, deferred)”</span></a></div>
+<p>The merger rules above are <strong>uniform</strong> — every non-map value
+replaces, full stop. V1 ships with this rule because the forcing
+case (vai missing <code dir="auto">grouping.patterns</code>) is solved by the L0 engine
+fallback, not by aggregation between levels.</p>
+<p>But uniform replacement is not the whole picture, and a future
+spec will need to address it deliberately. Three gaps the V1 rule
+papers over:</p>
+<p><strong>Gap 1 — Per-key aggregation policy.</strong> Some keys want replace
+semantics (the last <code dir="auto">pagination.align</code> writer wins, period).
+Others want aggregation (a tenant adding <code dir="auto">_orgcode</code> to the pack’s
+existing <code dir="auto">_type|_status|_year</code> grouping patterns shouldn’t have
+to copy-paste the whole alternation). The right answer is <em>per-key
+policy</em>, not a uniform rule. Candidate policies:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Policy</th><th>Behavior</th><th>Likely keys</th></tr></thead><tbody><tr><td><code dir="auto">replace</code></td><td>Right-side wins (V1 default)</td><td><code dir="auto">pagination.align</code>, <code dir="auto">paging</code>, <code dir="auto">table.sticky_header</code></td></tr><tr><td><code dir="auto">union</code></td><td>Set-union of unique elements</td><td><code dir="auto">display.locales</code>, list of dossier categories</td></tr><tr><td><code dir="auto">append</code></td><td>Left then right, dedupe preserved</td><td>recents templates if ever made list-valued</td></tr><tr><td><code dir="auto">concat</code></td><td>String join with separator (e.g. <code dir="auto">|</code> for regex alternation)</td><td><code dir="auto">grouping.patterns</code>, <code dir="auto">columns.hide</code></td></tr><tr><td><code dir="auto">deep_merge_special</code></td><td>Custom per-key merger</td><td>rare, escape hatch</td></tr></tbody></table>
+<p><strong>Gap 2 — Value-shape sensitivity.</strong> Aggregation rules depend on
+the value’s shape. <code dir="auto">grouping.patterns</code> is a <em>string</em> containing a
+regex alternation, not a YAML list — appending two patterns means
+<em>string concatenation with a separator</em>, not list append. Three
+shape categories the future merger has to handle distinctly:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Shape</th><th>Aggregation candidate</th></tr></thead><tbody><tr><td>Scalar (number, bool)</td><td>replace only</td></tr><tr><td>String</td><td>replace, or <code dir="auto">concat</code> with separator</td></tr><tr><td>YAML list</td><td>replace, <code dir="auto">append</code>, or <code dir="auto">union</code></td></tr><tr><td>YAML map</td><td>already recursive (V1 deep-merge)</td></tr></tbody></table>
+<p><strong>Gap 3 — Axis-dependent aggregation.</strong> Per the [Outlook](#outlook
+---additional-resolution-axes), future role/identity/ruleset axes
+will compose on top of the layer cascade. A role adding patterns
+will <em>almost certainly</em> want aggregation (not replacement) over
+the layer-merged result — otherwise a role overlay would have to
+re-state the pack’s full set. The aggregation policy may also
+<em>differ by axis</em>: layer cascade replaces, role overlay appends.</p>
+<p><strong>Why V1 still ships as-is:</strong></p>
+<p>The vai case — the immediate forcing function — needs <strong>L0
+engine fallback</strong>, not inter-level aggregation. The grouping
+patterns aren’t being added to anything; they’re absent and need
+a baseline. The engine catalog (line 512) covers this.</p>
+<p>Tenants who <em>want</em> to extend a pack’s regex string today still
+have only one path: copy-paste-extend. That was true before this
+spec and remains true after. <strong>The V1 fix does not make this
+worse.</strong> It does not preclude a future fix either — the per-key
+policy can be introduced later by adding an <code dir="auto">AGGREGATION_POLICY</code>
+catalog in <code dir="auto">jinflow.config</code> and consulting it inside the merger,
+with the V1 uniform-replace as the default policy when a key
+isn’t listed.</p>
+<p><strong>Forcing cases that will trigger the future Aggregation Sense
+sub-task</strong> (when one shows up — none has yet):</p>
+<ul>
+<li>A tenant author asks: <em>“How do I add <code dir="auto">_orgcode</code> to my pack’s
+grouping patterns without restating the whole string?”</em></li>
+<li>A role overlay needs to additively widen a pack’s pattern set
+without erasing it.</li>
+<li>A new namespace (e.g. <code dir="auto">governance:</code>) ships a list of required
+reviewers, where pack + tenant should <em>both</em> contribute, not
+override.</li>
+</ul>
+<p>The V1 spec records the gap so future-Claude or future-sister
+doesn’t have to re-discover it.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="provenance-shape">Provenance shape</h5><a class="sl-anchor-link" href="#provenance-shape"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Provenance shape”</span></a></div>
+<p>A sibling per-tenant table, mirroring <code dir="auto">analytical_defaults</code>:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="sql"><code><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">CREATE</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">TABLE</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#ECC48D;--1:#984E4D">_&#x3C;tenant></span><span style="--0:#D9F5DD;--1:#111111">"</span><span style="--0:#D6DEEB;--1:#403F53">.config_resolved (</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">key</span><span style="--0:#D6DEEB;--1:#403F53">          </span><span style="--0:#C792EA;--1:#8844AE">VARCHAR</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">PRIMARY KEY</span><span style="--0:#D6DEEB;--1:#403F53">,  </span><span style="--0:#919F9F;--1:#5F636F">-- dot-path, e.g. 'display.grouping.patterns'</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">value</span><span style="--0:#D6DEEB;--1:#403F53">        </span><span style="--0:#C792EA;--1:#8844AE">VARCHAR</span><span style="--0:#D6DEEB;--1:#403F53">,              </span><span style="--0:#919F9F;--1:#5F636F">-- JSON-encoded scalar/list/map</span></div></div><div class="ec-line"><div class="code"><span class="indent">    </span><span style="--0:#C792EA;--1:#8844AE">level</span><span style="--0:#D6DEEB;--1:#403F53">        </span><span style="--0:#C792EA;--1:#8844AE">VARCHAR</span><span style="--0:#D6DEEB;--1:#403F53">,              </span><span style="--0:#919F9F;--1:#5F636F">-- 'engine' | 'pack' | 'tenant'</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">source_file  </span><span style="--0:#C792EA;--1:#8844AE">VARCHAR</span><span style="--0:#D6DEEB;--1:#403F53">,              </span><span style="--0:#919F9F;--1:#5F636F">-- relative path; NULL when level='engine'</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">    </span></span><span style="--0:#D6DEEB;--1:#403F53">resolved_at  </span><span style="--0:#C792EA;--1:#8844AE">TIMESTAMP</span></div></div><div class="ec-line"><div class="code"><span style="--0:#D6DEEB;--1:#403F53">)</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="CREATE TABLE &#x22;_<tenant>&#x22;.config_resolved (    key          VARCHAR PRIMARY KEY,  -- dot-path, e.g. &#x27;display.grouping.patterns&#x27;    value        VARCHAR,              -- JSON-encoded scalar/list/map    level        VARCHAR,              -- &#x27;engine&#x27; | &#x27;pack&#x27; | &#x27;tenant&#x27;    source_file  VARCHAR,              -- relative path; NULL when level=&#x27;engine&#x27;    resolved_at  TIMESTAMP)"><div></div></button></div></figure></div>
+<p>One row per <em>leaf path</em> in the merged tree. For the worked example,
+five rows:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>key</th><th>value</th><th>level</th><th>source_file</th></tr></thead><tbody><tr><td><code dir="auto">display.grouping.patterns</code></td><td><code dir="auto">"_type|_group|…"</code></td><td>pack</td><td><code dir="auto">config.yml</code></td></tr><tr><td><code dir="auto">display.pagination.page_input</code></td><td><code dir="auto">true</code></td><td>engine</td><td>NULL</td></tr><tr><td><code dir="auto">display.pagination.begin_end</code></td><td><code dir="auto">true</code></td><td>pack</td><td><code dir="auto">config.yml</code></td></tr><tr><td><code dir="auto">display.pagination.align</code></td><td><code dir="auto">"left"</code></td><td>tenant</td><td><code dir="auto">config.yml</code></td></tr><tr><td><code dir="auto">display.pagination</code> (parent)</td><td><em>not emitted</em></td><td>n/a</td><td>n/a</td></tr></tbody></table>
+<p>Only leaf keys get rows. Parent maps are reconstructable from the
+flat key paths if JinDesk ever wants to render a tree view.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="bake-vs-runtime-contract">Bake-vs-runtime contract</h5><a class="sl-anchor-link" href="#bake-vs-runtime-contract"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Bake-vs-runtime contract”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Phase</th><th>Surface</th><th>Behavior</th></tr></thead><tbody><tr><td><strong>Bake time</strong> (<code dir="auto">jin make</code>)</td><td><code dir="auto">bake_metadata</code> in <code dir="auto">baking.py</code></td><td>Reads engine fallbacks (from a new <code dir="auto">jinflow.config.DISPLAY_DEFAULTS</code> map), pack <code dir="auto">config.yml</code> (located via <code dir="auto">afs.pack_root()</code> or the Sense 36 birth-manifest lookup; see open question below), tenant <code dir="auto">config.yml</code>. Deep-merges. Writes the merged YAML to <code dir="auto">_&#x3C;tenant>.config.config_yaml</code> (existing table — no schema change). Writes per-key provenance to <code dir="auto">_&#x3C;tenant>.config_resolved</code> (new table).</td></tr><tr><td><strong>Runtime</strong> (JinDesk)</td><td><code dir="auto">configEngine.ts</code> <code dir="auto">loadConfig()</code></td><td>Unchanged. Continues to read <code dir="auto">_&#x3C;tenant>.config.config_yaml</code> as one blob.</td></tr><tr><td><strong>Runtime</strong> (JinDesk, optional, future)</td><td><code dir="auto">loadConfigProvenance(tenant, key)</code></td><td>New helper that reads <code dir="auto">_&#x3C;tenant>.config_resolved</code>. UI surfaces “who provided what” when a viewer asks “why is this column hidden?” Not part of the V1 cut — ship the merge first.</td></tr></tbody></table>
+<p>JinDesk change for V1 is <em>zero</em>. The fix is invisible to
+runtime code except that values that used to be missing (vai
+grouping) now appear, and tenants who delete their copy-pasted
+pack defaults still get them at bake time.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="engine-fallback-catalog-for-display">Engine fallback catalog for <code dir="auto">display:</code></h5><a class="sl-anchor-link" href="#engine-fallback-catalog-for-display"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Engine fallback catalog for display:”</span></a></div>
+<p>These keys ship with engine-level L0 defaults. A pack omitting
+them still gets a working baseline; a tenant adopting a pack that
+doesn’t ship them (hrcentral.vai today) gets the engine value
+instead of nothing.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Key</th><th>Engine default</th><th>Rationale</th></tr></thead><tbody><tr><td><code dir="auto">display.grouping.patterns</code></td><td><code dir="auto">"_type|_status|_year"</code></td><td>A bare minimum that catches the common axis columns. Packs override with their domain set. Closes the vai gap.</td></tr><tr><td><code dir="auto">display.pagination.page_input</code></td><td><code dir="auto">true</code></td><td>Page-number input is universally useful; no reason to hide it by default.</td></tr><tr><td><code dir="auto">display.pagination.align</code></td><td><code dir="auto">"right"</code></td><td>Convention.</td></tr><tr><td><code dir="auto">display.sort.nulls</code></td><td><code dir="auto">"standard"</code></td><td>SQL standard: ASC → NULLS LAST, DESC → NULLS FIRST. Matches current pack behaviour.</td></tr><tr><td><code dir="auto">display.columns.locale_filter</code></td><td><code dir="auto">true</code></td><td>Locale columns hidden by default; packs can opt out.</td></tr><tr><td><code dir="auto">display.table.sticky_header</code></td><td><code dir="auto">true</code></td><td>Universal JinDesk convention.</td></tr><tr><td><code dir="auto">display.table.max_height</code></td><td><code dir="auto">"auto"</code></td><td>Universal JinDesk convention.</td></tr><tr><td><code dir="auto">display.search.case_sensitive</code></td><td><code dir="auto">false</code></td><td>ILIKE default (matches numetrix pack).</td></tr><tr><td><code dir="auto">display.search.default_mode</code></td><td><code dir="auto">"startswith"</code></td><td>Matches numetrix pack.</td></tr></tbody></table>
+<p>Keys <em>without</em> engine defaults (purely pack/tenant concerns):</p>
+<ul>
+<li><code dir="auto">display.paging</code> (the numeric breakdown is pack-specific)</li>
+<li><code dir="auto">display.recents.*</code> (templates depend on pack entity vocabulary)</li>
+<li><code dir="auto">display.column_actions.*</code> (entity-specific routing)</li>
+<li><code dir="auto">display.layout.*</code> (per-pack visual identity)</li>
+</ul>
+<div class="sl-heading-wrapper level-h5"><h5 id="migration-story--no-breakage">Migration story — no breakage</h5><a class="sl-anchor-link" href="#migration-story--no-breakage"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Migration story — no breakage”</span></a></div>
+<p>Existing tenants with copy-pasted pack values: those values land
+at L2 (tenant) and override the same key at L1 (pack). The merged
+result is identical to today’s. <strong>Nothing breaks.</strong></p>
+<p>After the fix lands, a tenant author can delete the duplicated
+section from their <code dir="auto">config.yml</code>. On the next <code dir="auto">jin make</code>, the same
+values flow in from L1 (pack). The KLS is byte-identical.</p>
+<p>For vai: the engine <code dir="auto">display.grouping.patterns</code> default lands at
+L0 immediately. The first <code dir="auto">make</code> after the fix produces a KLS with
+a working grouping config. No manual tenant edit required.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="implementation-surface">Implementation surface</h5><a class="sl-anchor-link" href="#implementation-surface"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Implementation surface”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>File</th><th>Change</th></tr></thead><tbody><tr><td><code dir="auto">jinflow/config.py</code></td><td>Add <code dir="auto">DISPLAY_DEFAULTS</code> dict (the engine catalog above). Add <code dir="auto">resolve_display(*, pack_config_path, tenant_config_path) -> tuple[dict, list[Resolved]]</code> returning the merged YAML + per-key provenance. Reuses the <code dir="auto">Resolved</code> dataclass.</td></tr><tr><td><code dir="auto">jinflow/cli/commands/baking.py</code></td><td><code dir="auto">bake_metadata</code> calls <code dir="auto">resolve_display</code>, writes merged YAML to <code dir="auto">_&#x3C;tenant>.config.config_yaml</code> (existing path), provenance to <code dir="auto">_&#x3C;tenant>.config_resolved</code> (new table). The current line that reads only <code dir="auto">afs_root / "config.yml"</code> is replaced.</td></tr><tr><td><code dir="auto">tests/test_config_resolver.py</code></td><td>Add <code dir="auto">resolve_display</code> tests: pack-only, tenant-only, both, conflict (tenant wins), list replacement, engine fallback for missing key, vai-grouping case (pack and tenant both missing → engine wins).</td></tr><tr><td><code dir="auto">tests/test_config_resolver.py</code></td><td>Add bake table tests for <code dir="auto">_&#x3C;tenant>.config_resolved</code> mirroring the existing <code dir="auto">analytical_defaults</code> tests.</td></tr><tr><td><code dir="auto">docs/design/config_engine.md</code></td><td>Update the implementation reference to mention the merger + provenance table.</td></tr><tr><td><code dir="auto">tests/packs/testpack/</code></td><td>Add a <code dir="auto">config.yml</code> at the pack root with a <code dir="auto">display:</code> section the tests can exercise. Currently testpack has no <code dir="auto">config.yml</code>.</td></tr></tbody></table>
+<p>No JinDesk changes for V1. The provenance read helper is a
+future-3.b-or-later concern.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="open-question">Open question</h5><a class="sl-anchor-link" href="#open-question"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Open question”</span></a></div>
+<p><strong>Where does the bake step find the pack’s <code dir="auto">config.yml</code>?</strong></p>
+<p>Two paths:</p>
+<ol>
+<li><strong>Via <code dir="auto">afs.pack_root()</code></strong> — already used by <code dir="auto">bake_metadata</code> for
+the brand-cascade case (<code dir="auto">baking.py:981</code>). Returns the path to
+the pack repo on disk. Works for live-tenant builds where the
+packhub repos sit at <code dir="auto">~/jinflow-packhub/jinflow-pack-&#x3C;name>/</code>.</li>
+<li><strong>Via the Sense 36 birth manifest</strong> (<code dir="auto">.pack-init.yml</code>) — already
+in the AFS. Records <code dir="auto">pack_origin</code>, but resolving the path
+requires either consulting <code dir="auto">~/jinflow-packhub/</code> by convention or
+shipping the pack snapshot inside the AFS at init time.</li>
+</ol>
+<p>Path 1 works today and matches the existing brand-cascade
+fallback. Path 2 is more durable (the AFS becomes truly
+self-sufficient, no pack repo dependency at make time) but
+requires a small Sense 36 extension. <strong>Recommendation:</strong> Path 1
+for V1; revisit when Sense 36 Phase 2 lands.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="outlook--additional-resolution-axes">Outlook — additional resolution axes</h5><a class="sl-anchor-link" href="#outlook--additional-resolution-axes"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Outlook — additional resolution axes”</span></a></div>
+<p>This V1 cascades along <strong>one axis</strong> — layer — and resolves at
+<strong>one time</strong> — bake. Both choices are intentional simplifications.
+The longer trajectory layers in dimensions and timings the design
+needs to <em>accommodate without preempting</em>:</p>
+<ul>
+<li><strong>Identity-axis overrides.</strong> A specific user Z may resolve a key
+to a different value than users A-Y do, even with the same
+pack/tenant cascade behind them. A <em>named identity</em> (an
+authenticated principal) carries an overlay that fires <em>on top
+of</em> the layered resolution.</li>
+<li><strong>Role-axis overrides.</strong> A role (e.g. <em>auditor</em>, <em>analyst</em>,
+<em>board-member</em>) carries an overlay distinct from any one user’s
+preferences. A user’s effective resolution composes their role(s)
+⊕ their personal identity ⊕ the L0-L2 cascade.</li>
+<li><strong>Named-ruleset overlays.</strong> Bundled overrides activated by name
+(“audit mode,” “Q4-close mode,” “compliance review”). Orthogonal
+to identity — anyone running with the ruleset gets its values.</li>
+<li><strong>Time-scoped rulesets.</strong> Overlays that fire only during certain
+windows (feature flags scoped to date ranges).</li>
+</ul>
+<p>These dimensions are <strong>orthogonal to layer</strong>, not subordinate.
+They are not L4 instant overrides either — they’re durable,
+attributable resolutions that depend on <em>who is asking</em> rather
+than <em>what room the URL points at</em>.</p>
+<p><strong>Implications for V1 (constraints, not work):</strong></p>
+<ul>
+<li>The <code dir="auto">Resolved.level</code> field is <code dir="auto">Literal['engine', 'pack', 'tenant']</code>
+for now. The implementation does not assume that vocabulary will
+never grow — extending to <code dir="auto">'role'</code>, <code dir="auto">'identity'</code>, <code dir="auto">'user'</code>,
+<code dir="auto">'ruleset'</code> should require new entries in the enum, not a
+refactor of the resolver shape.</li>
+<li>The bake table <code dir="auto">_&#x3C;tenant>.config_resolved</code> records “the
+resolution at make time for an anonymous, no-identity, no-ruleset
+reader.” Future tables may sit alongside (<code dir="auto">config_resolved_by_role</code>,
+<code dir="auto">config_resolved_by_principal</code>) or the same table may grow a
+resolution-context key — both options stay open.</li>
+<li>JinDesk’s <code dir="auto">loadConfig()</code> reads the merged blob today. It
+must be able to layer an identity-scoped or ruleset-scoped
+overlay later <strong>without</strong> the layered result needing to be
+recomputed from primary sources at request time. The bake stays
+the layer-axis truth; identity/ruleset overlays apply on top.</li>
+<li>The merger function does not bake assumptions about resolution
+order beyond layer. When identity overlays arrive, the resolver
+will compose them in a specific order; the layer cascade stays
+the same shape, just one stage of a longer pipeline.</li>
+</ul>
+<p><strong>What V1 explicitly does NOT do:</strong></p>
+<ul>
+<li>Implement any identity-, role-, or ruleset-axis resolution.</li>
+<li>Plumb identity context through JinDesk request path.</li>
+<li>Define the storage shape for per-identity overlays.</li>
+<li>Pre-commit to an order of composition (layer first, then role,
+then identity? or some other arrangement?).</li>
+</ul>
+<p>These are decisions for the moment a real driver arrives — likely
+<a href="./sense_25_the_pass.md">Sense 25 (The Pass)</a>, when identity
+becomes first-class. The current spec leaves them open.</p>
+<p>See [[project_sense_43_resolution_strategies]] in memory for the
+fuller architectural reflection that motivated this outlook.</p>
+<div class="sl-heading-wrapper level-h5"><h5 id="out-of-scope-deliberate-deferrals">Out of scope (deliberate deferrals)</h5><a class="sl-anchor-link" href="#out-of-scope-deliberate-deferrals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Out of scope (deliberate deferrals)”</span></a></div>
+<ul>
+<li>L3 (entity-level overrides) for display config. No driver yet.</li>
+<li>Per-key aggregation policy (union, append, concat). V1 uses
+uniform replace; the gap is acknowledged in the <em>Aggregation
+semantics</em> section above.</li>
+<li>The runtime provenance helper (<code dir="auto">loadConfigProvenance</code>). Bake
+emits the data; JinDesk consumes it in a follow-up.</li>
+<li>Pack-level <code dir="auto">analytical_defaults</code> (the cascade resolver already
+ignores pack config; same gap exists, same fix shape, but
+separate implementation — handle when forced).</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="phase-3--l4-instant-overrides">Phase 3 — L4 instant overrides</h3><a class="sl-anchor-link" href="#phase-3--l4-instant-overrides"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Phase 3 — L4 instant overrides”</span></a></div>
+<p>Split by namespace, following the L4 contract above:</p>
+<ul>
+<li><strong>3.a ✅ shipped 2026-05-29</strong> — Display L4 (everywhere).
+<code dir="auto">?display.&#x3C;key>=&#x3C;value></code> applies on Board, Lab, and Studio. The
+posture chip renders wherever an override is active. No banner —
+display overrides don’t violate any authored-truth claim. Pilot
+key: <code dir="auto">?display.precision=N</code> overlays a synthetic catch-all
+precision rule before the baked patterns. Analytical (<code dir="auto">?ad.*</code>)
+keys are parsed and surfaced on the chip but currently no-op at
+runtime (Phase 3.b). Files: <code dir="auto">configWithOverrides.ts</code>,
+<code dir="auto">PostureChip.svelte</code>, layout wire-through, 11 unit tests + a
+Playworks smoke spec.</li>
+<li><strong>3.b — Analytical L4 (Lab-only with Board fallback).</strong> Deferred
+until either a real driver appears or runtime SQL re-emit
+arrives (likely with <a href="./sense_18_the_ledger.md">Sense 18</a>). The
+current arc bakes analytical defaults into compiled SQL at make
+time, so a URL param can’t change the result without
+re-materialising. When 3.b lands: <code dir="auto">?ad.&#x3C;key>=&#x3C;value></code> honoured
+in Lab; Board/Studio show the “Open in Lab” banner.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="phase-4--ledger-integration">Phase 4 — Ledger integration</h3><a class="sl-anchor-link" href="#phase-4--ledger-integration"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Phase 4 — Ledger integration”</span></a></div>
+<ul>
+<li><a href="./sense_18_the_ledger.md">Sense 18</a> narrates resolved cascade in
+Validation panels.</li>
+<li>Pending — blocks on Sense 18.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="phase-5--diff-loupe-extension-future">Phase 5 — Diff Loupe extension (future)</h3><a class="sl-anchor-link" href="#phase-5--diff-loupe-extension-future"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Phase 5 — Diff Loupe extension (future)”</span></a></div>
+<ul>
+<li>Snapshot comparison surfaces cascade diffs alongside data diffs —
+<em>“this snapshot was built with anchor=transaction_date; that one
+with reporting_date.”</em></li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="how-this-manifests-in-jinflow">How this manifests in jinflow</h2><a class="sl-anchor-link" href="#how-this-manifests-in-jinflow"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “How this manifests in jinflow”</span></a></div>
+<p>The Cascade is the layered configuration mechanism. Each authority — engine, pack, tenant, perspective, transient Lab override — gets its own layer, and any property resolves through the cascade L0 → L1 → L2 → L3 → L4. The same mechanism serves two namespaces: <strong><code dir="auto">analytical_defaults</code></strong> (what changes a number) and <strong><code dir="auto">display</code></strong> (what changes how a number is shown). The Configuration Engine is the runtime resolver.</p>
+<ul>
+<li><strong>Layers</strong>: L0 engine fallback → L1 pack <code dir="auto">config.yml</code> → L2 tenant <code dir="auto">config.yml</code> → L3 perspective override → L4 transient Lab override</li>
+<li><strong>Namespaces</strong>: <code dir="auto">analytical_defaults</code> (per <a href="/senses/sense-14-2/">Sense 14.2</a> ground rules) · <code dir="auto">display</code> (paging, columns, table behaviour, format, recents, dates, column actions, layout)</li>
+</ul>
+<p>Status: <strong>in bloom</strong>. Both namespaces are live and resolved on every page load; deeper override surfaces (perspective L3, transient L4) are forming.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="connection-to-other-senses">Connection to other Senses</h2><a class="sl-anchor-link" href="#connection-to-other-senses"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Connection to other Senses”</span></a></div>
+<ul>
+<li><strong><a href="./config_engine.md">Configuration Engine reference</a></strong> — the
+technical companion. This Sense holds principle; that doc holds
+resolver algorithm, file structure, baking, CLI, and open
+questions.</li>
+<li><strong><a href="./sense_14_2.md">Sense 14.2 — Typed Signals</a></strong> — Phase 3
+<code dir="auto">currency.anchor</code> is the pilot analytical key. Phase 5 temporal
+inheritance is the next migration candidate.</li>
+<li><strong><a href="./sense_13_the_canvas.md">Sense 13 — The Canvas</a></strong> — Board / Lab
+split maps onto L3 (authored) vs L4 (transient) authority. Board
+reads authored cascade only; Lab admits L4 overrides.</li>
+<li><strong><a href="./sense_18_the_ledger.md">Sense 18 — The Ledger</a></strong> — will
+narrate cascade resolution as part of every Validation panel.</li>
+<li><strong><a href="./sense_25_the_pass.md">Sense 25 — The Pass</a></strong> — a future
+candidate for <code dir="auto">identity:</code> as its own namespace.</li>
+<li><strong><a href="./sense_36_the_lineage.md">Sense 36 — The Lineage</a></strong> — the
+birth manifest records initial L1 declarations; pack upgrades
+reconcile cascade declarations the same way they reconcile any
+other artifact.</li>
+<li><strong><a href="../../packs/numetrix/evidence/pages/what_is_this.md">The Four Convictions</a></strong>
+— Declarative: behavior comes from data, not code. The Cascade
+is the largest single move in that direction.</li>
+</ul>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="the-one-sentence-summary">The one-sentence summary</h2><a class="sl-anchor-link" href="#the-one-sentence-summary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The one-sentence summary”</span></a></div>
+<p><strong>Configuration is layered authority — one mechanism, many
+namespaces, resolved at the last possible moment, with provenance
+preserved in the artifact it produces.</strong></p>
+<hr>
+<p><em>Numerical neighbors:</em> ← <a href="/senses/sense-42-the-landscape/">Sense 42: The Landscape</a> · <a href="/senses/sense-44-the-forge/">Sense 44: The Forge</a> →</p> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n">   </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/de/senses/sense-42-the-landscape/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Vorherige Seite <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Sense 42 — The Landscape</span> </span> </a> <a href="/de/senses/sense-16-p2p2p/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Nächste Seite <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Sense 16 — P2P2P</span> </span> </a> </div>  </footer> <div style="text-align: center; padding: 1.5rem 0 0.5rem; opacity: 0.5; font-size: 0.8rem; border-top: 1px solid var(--sl-color-gray-6);"> <a href="https://jazzisnow.com" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.4rem;"> <img src="/jazzisnow-logo.svg" alt="jazzisnow" style="height: 1.4em;">
+jinflow is a jazzisnow product
+</a> <div style="margin-top: 0.3rem; font-family: monospace; font-size: 0.7rem; opacity: 0.7;">
+v0.63.41 · built 2026-09-06 19:39 UTC </div> </div> </div> </div>  </main> </div> </div> </div> </div> </body></html>

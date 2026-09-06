@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<!--
+  Pipeline Cathedral 3D — docs.jinflow.io marketing demo.
+
+  Standalone Three.js walkthrough showing the *shape* of a jinflow pipeline
+  using a synthesised demo graph. Deliberately independent of the engine-side
+  template at scripts/pipeline3d_template.html — that one is driven by real
+  tenant data during `jin make` and is a different animal. Edits here do NOT
+  propagate there, and vice versa.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>jinflow — Pipeline Cathedral</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { overflow: hidden; background: #0a0e1a; font-family: 'Inter', -apple-system, sans-serif; }
+  canvas { display: block; }
+
+  #hud {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    padding: 20px 24px; pointer-events: none; z-index: 100;
+  }
+
+  #hud-left {
+    color: rgba(255,255,255,0.4); font-size: 11px; line-height: 1.8;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  }
+  #hud-left strong { color: rgba(255,255,255,0.7); font-weight: 600; }
+  #hud-left .key { display: inline-block; background: rgba(255,255,255,0.1); padding: 1px 6px; border-radius: 3px; font-family: monospace; font-size: 10px; }
+
+  #hud-right {
+    text-align: right; color: rgba(255,255,255,0.3);
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  }
+
+  #hud-center {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px; height: 4px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    pointer-events: none; z-index: 100;
+  }
+
+  #info-panel {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: rgba(10, 14, 26, 0.85); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px; padding: 14px 24px;
+    color: rgba(255,255,255,0.7); font-size: 13px;
+    text-align: center; pointer-events: none; z-index: 100;
+    opacity: 0; transition: opacity 0.4s;
+    max-width: 500px; backdrop-filter: blur(12px);
+  }
+  #info-panel.visible { opacity: 1; }
+  #info-panel .label { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+  #info-panel .layer { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  #info-panel .path { font-size: 10px; color: rgba(255,255,255,0.35); font-family: monospace; }
+
+  #loading {
+    position: fixed; inset: 0; background: #0a0e1a;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 200; color: rgba(255,255,255,0.5); font-size: 14px;
+    transition: opacity 0.8s;
+  }
+  #loading.done { opacity: 0; pointer-events: none; }
+  #loading .title { font-size: 28px; font-weight: 300; color: rgba(255,255,255,0.7); margin-bottom: 8px; letter-spacing: 0.1em; }
+  #loading .sub { font-size: 12px; color: rgba(255,255,255,0.3); }
+
+  #layer-legend {
+    position: fixed; right: 24px; bottom: 24px;
+    background: rgba(10, 14, 26, 0.7); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 10px; padding: 12px 16px;
+    pointer-events: auto; z-index: 100; backdrop-filter: blur(8px);
+  }
+  #layer-legend .row { display: flex; align-items: center; gap: 8px; padding: 2px 0; cursor: pointer; }
+  #layer-legend .row:hover { opacity: 0.8; }
+  #layer-legend .dot { width: 8px; height: 8px; border-radius: 50%; }
+  #layer-legend .name { font-size: 10px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 0.06em; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="title">Pipeline Cathedral</div>
+  <div class="sub">loading graph data...</div>
+</div>
+
+<div id="hud">
+  <div id="hud-left">
+    <strong>WASD</strong> move &nbsp; <strong>Mouse</strong> look &nbsp; <strong>Space</strong> up &nbsp; <strong>Shift</strong> down<br>
+    <span class="key">Scroll</span> speed &nbsp; <span class="key">F</span> sprint &nbsp; <span class="key">Click</span> to enter
+  </div>
+  <div id="hud-right">jinflow.io<br>pipeline cathedral</div>
+</div>
+<div id="hud-center"></div>
+
+<div id="info-panel">
+  <div class="label" id="info-label"></div>
+  <div class="layer" id="info-layer"></div>
+  <div class="path" id="info-path"></div>
+</div>
+
+<div id="layer-legend"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+
+// ── Layer config (matches generate_pipeline_graph.py) ─────────────────────
+const LAYERS = {
+  csv:         { color: '#94a3b8', label: 'CSV Sources',  order: 0 },
+  bronze:      { color: '#d4976a', label: 'Bronze',        order: 1 },
+  silver:      { color: '#a8b5c4', label: 'Silver',        order: 2 },
+  gold:        { color: '#d4b95e', label: 'Gold',          order: 3 },
+  metrics:     { color: '#6bb8c4', label: 'Metrics',       order: 4 },
+  lineage:     { color: '#6bbf8a', label: 'Lineage',       order: 4 },
+  signal:      { color: '#6b9fd4', label: 'Signals',       order: 5 },
+  perspective: { color: '#8b8fd4', label: 'Perspectives',  order: 6 },
+  thesis:      { color: '#a78bce', label: 'Theses',        order: 7 },
+  verdict:     { color: '#b99ad4', label: 'Verdicts',      order: 8 },
+  smebit:      { color: '#10b981', label: 'SMEbits',       order: 9 },
+  bitbundle:   { color: '#8b5cf6', label: 'BitBundles',    order: 10 },
+  registry:    { color: '#d4829e', label: 'Registries',    order: 11 },
+  report:      { color: '#f59e0b', label: 'Reports',       order: 12 },
+  notebook:    { color: '#06b6d4', label: 'Notebooks',     order: 13 },
+  platform:    { color: '#9b7ec8', label: 'Platform',      order: 14 },
+  frontend:    { color: '#6bb8a8', label: 'Frontends',     order: 15 },
+};
+
+// Layers to skip for cleaner view
+const SKIP_LAYERS = new Set(['csv', 'bronze', 'silver', 'yaml', 'compiler', 'contract', 'debug']);
+
+// ── Load graph data ───────────────────────────────────────────────────────
+// Demo-only site: no tenant data, no API. Always render the synthesised graph
+// so the page works even if docs.jinflow.io is served entirely from a CDN.
+const graphData = generateDemoGraph();
+
+function generateDemoGraph() {
+  const nodes = [];
+  const edges = [];
+  const layerKeys = ['gold', 'metrics', 'lineage', 'signal', 'perspective', 'thesis', 'verdict', 'smebit', 'bitbundle', 'registry', 'report', 'platform'];
+  const counts = { gold: 20, metrics: 3, lineage: 3, signal: 25, perspective: 5, thesis: 10, verdict: 8, smebit: 12, bitbundle: 3, registry: 5, report: 6, platform: 15 };
+  // Demo Gold nodes with realistic names so the Clinical/Master split works
+  const goldClinicalNames = ['gold_billing_events', 'gold_material_movements', 'gold_case_material_usage', 'gold_io_metering', 'gold_price_series', 'gold_price_comparison', 'gold_price_palette', 'gold_reconciliation_summary', 'gold_consumption_summary'];
+  const goldCoreNames = ['gold_materials', 'gold_cases', 'gold_cost_centers', 'gold_suppliers', 'gold_procedures', 'gold_article_catalogues'];
+  const goldViewNames = ['gold_taxonomy_nodes', 'gold_taxonomy_closure', 'gold_taxonomy_member_mappings', 'gold_packaging_types', 'gold_supply_orgs', 'gold_drg_lookup', 'gold_material_classifications'];
+  let eid = 0;
+  const allNodes = {};
+  for (const layer of layerKeys) {
+    if (layer === 'gold') {
+      // Use named Gold entities for demo
+      for (const id of [...goldClinicalNames, ...goldCoreNames, ...goldViewNames]) {
+        allNodes[id] = 'gold';
+        const kind = goldClinicalNames.includes(id) ? 'analytical' : goldViewNames.includes(id) ? 'view' : 'core';
+        nodes.push({ group: 'nodes', data: { id, label: id.replace('gold_', '').replace(/_/g, ' '), layer: 'gold', kind, layerOrder: 3, color: '#d4b95e', path: `models/gold/${id}.sql` }});
+      }
+      continue;
+    }
+    const n = counts[layer] || 5;
+    for (let i = 0; i < n; i++) {
+      const id = `${layer}_${i}`;
+      allNodes[id] = layer;
+      nodes.push({ group: 'nodes', data: { id, label: `${LAYERS[layer]?.label || layer} ${i+1}`, layer, layerOrder: LAYERS[layer]?.order || 0, color: LAYERS[layer]?.color || '#666', path: `models/${layer}/${id}.sql` }});
+    }
+  }
+  // Create plausible edges
+  const layerNodes = {};
+  for (const [id, layer] of Object.entries(allNodes)) {
+    if (!layerNodes[layer]) layerNodes[layer] = [];
+    layerNodes[layer].push(id);
+  }
+  const flow = [['gold','signal'],['gold','metrics'],['signal','perspective'],['signal','thesis'],['perspective','thesis'],['thesis','verdict'],['smebit','thesis'],['gold','platform'],['signal','platform'],['thesis','report']];
+  for (const [from, to] of flow) {
+    const src = layerNodes[from] || [], tgt = layerNodes[to] || [];
+    for (const t of tgt) {
+      const s = src[Math.floor(Math.random() * src.length)];
+      if (s) edges.push({ group: 'edges', data: { id: `e${eid++}`, source: s, target: t, type: 'ref' }});
+    }
+  }
+  return { elements: [...nodes, ...edges], layerConfig: LAYERS };
+}
+
+// ── Parse graph into 3D structures ────────────────────────────────────────
+const nodesRaw = graphData.elements.filter(e => e.group === 'nodes');
+const edgesRaw = graphData.elements.filter(e => e.group === 'edges');
+
+// Filter out skipped layers
+const nodes = nodesRaw.filter(n => !SKIP_LAYERS.has(n.data.layer));
+const nodeIds = new Set(nodes.map(n => n.data.id));
+const edgesFilt = edgesRaw.filter(e => nodeIds.has(e.data.source) && nodeIds.has(e.data.target));
+
+// Build adjacency
+const nodeMap = {};
+nodes.forEach(n => { nodeMap[n.data.id] = n.data; });
+
+// ── Gold sub-categories (from entity YAML kind: field) ────────────────────
+// Three Gold sub-categories from entity YAML kind: field
+//   analytical → Clinical Volume (transactional, year-filterable)
+//   core       → Master Data (foundational reference entities)
+//   view       → Reference (lookup / derived reference tables)
+const CLINICAL_PATTERNS = [
+  'billing', 'movement', 'usage', 'metering', 'io_', 'price_series',
+  'price_comparison', 'price_palette', 'reconciliation', 'quality_metrics',
+  'case_material', 'consumption',
+];
+const VIEW_PATTERNS = [
+  'taxonomy', 'closure', 'packaging', 'classification', 'drg', 'supply_org',
+  'lookup', 'mapping',
+];
+function goldCategory(nodeId) {
+  const nd = nodeMap[nodeId];
+  if (nd?.kind === 'analytical') return 'clinical';
+  if (nd?.kind === 'view') return 'view';
+  if (nd?.kind === 'core') return 'core';
+  // Heuristic fallback by name pattern
+  const id = (nodeId || '').toLowerCase();
+  if (CLINICAL_PATTERNS.some(p => id.includes(p))) return 'clinical';
+  if (VIEW_PATTERNS.some(p => id.includes(p))) return 'view';
+  return 'core';
+}
+
+// ── 3D Layout ─────────────────────────────────────────────────────────────
+// Group by layer, arrange each layer as a ring at a different Z depth.
+// Gold splits into two rings: Clinical Volume (left) and Master Data (right).
+const LAYER_SPACING = 40;
+const RING_RADIUS = 30;
+const GOLD_SPLIT_OFFSET = 22; // X offset between the two Gold rings
+
+const layerGroups = {};
+nodes.forEach(n => {
+  const layer = n.data.layer;
+  if (!layerGroups[layer]) layerGroups[layer] = [];
+  layerGroups[layer].push(n.data);
+});
+
+// Split Gold into three sub-groups
+const goldClinical = [];  // kind: analytical — transactional, year-filterable
+const goldCore = [];      // kind: core — foundational reference entities
+const goldView = [];      // kind: view — lookup / derived reference tables
+if (layerGroups.gold) {
+  layerGroups.gold.forEach(nd => {
+    const cat = goldCategory(nd.id);
+    if (cat === 'clinical') goldClinical.push(nd);
+    else if (cat === 'view') goldView.push(nd);
+    else goldCore.push(nd);
+  });
+}
+
+function layoutRing(group, z, xOffset = 0, yOffset = 0) {
+  const count = group.length;
+  const radius = RING_RADIUS * 0.6 + count * 0.4;
+  group.forEach((nd, i) => {
+    const angle = (i / count) * Math.PI * 2;
+    const jitter = (Math.random() - 0.5) * 6;
+    const yJitter = (Math.random() - 0.5) * 10;
+    nodePositions[nd.id] = new THREE.Vector3(
+      Math.cos(angle) * radius + jitter + xOffset,
+      Math.sin(angle) * radius * 0.6 + yJitter + yOffset,
+      z + (Math.random() - 0.5) * 8
+    );
+  });
+}
+
+const nodePositions = {};
+for (const [layer, group] of Object.entries(layerGroups)) {
+  if (layer === 'gold') continue; // handled below
+  const cfg = LAYERS[layer] || { order: 0 };
+  const z = -(cfg.order || 0) * LAYER_SPACING;
+  layoutRing(group, z);
+}
+
+// Gold: three rings in a triangle — Clinical Volume left, Master Data right, Reference below
+const goldZ = -(LAYERS.gold.order) * LAYER_SPACING;
+if (goldClinical.length > 0) layoutRing(goldClinical, goldZ, -GOLD_SPLIT_OFFSET, 6);
+if (goldCore.length > 0)     layoutRing(goldCore, goldZ, GOLD_SPLIT_OFFSET, 6);
+if (goldView.length > 0)     layoutRing(goldView, goldZ, 0, -16);
+
+// ── Scene setup ───────────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e1a);
+scene.fog = new THREE.FogExp2(0x0a0e1a, 0.006);
+
+const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.5, 2000);
+camera.position.set(0, 10, 50);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+document.body.appendChild(renderer.domElement);
+
+// ── Lighting ──────────────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0x1a2744, 0.6));
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.3);
+dirLight.position.set(50, 80, 30);
+scene.add(dirLight);
+
+// ── Node meshes ───────────────────────────────────────────────────────────
+const nodeObjects = {};
+const raycasterTargets = [];
+
+const glowMaterial = (color) => new THREE.MeshStandardMaterial({
+  color: new THREE.Color(color),
+  emissive: new THREE.Color(color),
+  emissiveIntensity: 0.5,
+  roughness: 0.3,
+  metalness: 0.1,
+  transparent: true,
+  opacity: 0.9,
+});
+
+const sphereGeo = new THREE.IcosahedronGeometry(1.0, 2);
+const bigSphereGeo = new THREE.IcosahedronGeometry(1.5, 2);
+
+nodes.forEach(n => {
+  const nd = n.data;
+  const pos = nodePositions[nd.id];
+  if (!pos) return;
+
+  const isLarge = ['thesis', 'verdict', 'perspective', 'platform'].includes(nd.layer);
+  const geo = isLarge ? bigSphereGeo : sphereGeo;
+  const mesh = new THREE.Mesh(geo, glowMaterial(nd.color || '#6b9fd4'));
+  mesh.position.copy(pos);
+  mesh.userData = nd;
+  scene.add(mesh);
+  nodeObjects[nd.id] = mesh;
+  raycasterTargets.push(mesh);
+
+  // Soft point light at each node
+  const pl = new THREE.PointLight(new THREE.Color(nd.color || '#6b9fd4'), 0.4, 20);
+  pl.position.copy(pos);
+  scene.add(pl);
+});
+
+// ── Edges (lines) ─────────────────────────────────────────────────────────
+const edgeGroup = new THREE.Group();
+scene.add(edgeGroup);
+
+edgesFilt.forEach(e => {
+  const srcPos = nodePositions[e.data.source];
+  const tgtPos = nodePositions[e.data.target];
+  if (!srcPos || !tgtPos) return;
+
+  const srcData = nodeMap[e.data.source];
+  const color = new THREE.Color(srcData?.color || '#334155');
+
+  // Curved line via quadratic bezier
+  const mid = new THREE.Vector3().lerpVectors(srcPos, tgtPos, 0.5);
+  mid.y += (Math.random() - 0.3) * 5;
+
+  const curve = new THREE.QuadraticBezierCurve3(srcPos, mid, tgtPos);
+  const pts = curve.getPoints(20);
+  const geo = new THREE.BufferGeometry().setFromPoints(pts);
+  const mat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.15 });
+  const line = new THREE.Line(geo, mat);
+  edgeGroup.add(line);
+});
+
+// ── Layer signposts ───────────────────────────────────────────────────────
+const canvas2d = document.createElement('canvas');
+const ctx2d = canvas2d.getContext('2d');
+
+function makeSignpost(text, color, position) {
+  canvas2d.width = 512; canvas2d.height = 64;
+  ctx2d.clearRect(0, 0, 512, 64);
+  ctx2d.fillStyle = color;
+  ctx2d.globalAlpha = 0.7;
+  ctx2d.font = 'bold 36px Inter, sans-serif';
+  ctx2d.textAlign = 'center';
+  ctx2d.fillText(text, 256, 44);
+
+  const tex = new THREE.CanvasTexture(canvas2d);
+  tex.needsUpdate = true;
+  const mat = new THREE.SpriteMaterial({ map: tex.clone(), transparent: true, depthWrite: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.position.copy(position);
+  sprite.position.y += 25;
+  sprite.scale.set(30, 4, 1);
+  scene.add(sprite);
+}
+
+for (const [layer, group] of Object.entries(layerGroups)) {
+  if (layer === 'gold') continue; // handled below
+  const cfg = LAYERS[layer];
+  if (!cfg) continue;
+  const z = -(cfg.order || 0) * LAYER_SPACING;
+  makeSignpost(cfg.label.toUpperCase(), cfg.color, new THREE.Vector3(0, 0, z));
+}
+// Gold: three signposts for the split rings
+if (goldClinical.length > 0) {
+  makeSignpost('CLINICAL VOLUME', '#d4b95e', new THREE.Vector3(-GOLD_SPLIT_OFFSET, 6, goldZ));
+}
+if (goldCore.length > 0) {
+  makeSignpost('MASTER DATA', '#d4b95e', new THREE.Vector3(GOLD_SPLIT_OFFSET, 6, goldZ));
+}
+if (goldView.length > 0) {
+  makeSignpost('REFERENCE', '#c4a84e', new THREE.Vector3(0, -16, goldZ));
+}
+
+// ── Particle dust ─────────────────────────────────────────────────────────
+const dustCount = 3000;
+const dustGeo = new THREE.BufferGeometry();
+const dustPos = new Float32Array(dustCount * 3);
+const dustColors = new Float32Array(dustCount * 3);
+for (let i = 0; i < dustCount; i++) {
+  dustPos[i*3]   = (Math.random() - 0.5) * 200;
+  dustPos[i*3+1] = (Math.random() - 0.5) * 150;
+  dustPos[i*3+2] = (Math.random() - 0.5) * 700;
+  const c = new THREE.Color().setHSL(0.55 + Math.random() * 0.15, 0.3, 0.3 + Math.random() * 0.2);
+  dustColors[i*3] = c.r; dustColors[i*3+1] = c.g; dustColors[i*3+2] = c.b;
+}
+dustGeo.setAttribute('position', new THREE.BufferAttribute(dustPos, 3));
+dustGeo.setAttribute('color', new THREE.BufferAttribute(dustColors, 3));
+const dustMat = new THREE.PointsMaterial({ size: 0.3, vertexColors: true, transparent: true, opacity: 0.4, sizeAttenuation: true });
+const dust = new THREE.Points(dustGeo, dustMat);
+scene.add(dust);
+
+// ── FPS Controls (WASD + mouse) ───────────────────────────────────────────
+const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+const velocity = new THREE.Vector3();
+const direction = new THREE.Vector3();
+let moveSpeed = 0.6;
+let sprint = false;
+const keys = {};
+
+document.addEventListener('click', () => {
+  renderer.domElement.requestPointerLock();
+});
+
+document.addEventListener('pointerlockchange', () => {
+  // nothing needed
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (document.pointerLockElement !== renderer.domElement) return;
+  euler.setFromQuaternion(camera.quaternion);
+  euler.y -= e.movementX * 0.002;
+  euler.x -= e.movementY * 0.002;
+  euler.x = Math.max(-Math.PI / 2.2, Math.min(Math.PI / 2.2, euler.x));
+  camera.quaternion.setFromEuler(euler);
+});
+
+document.addEventListener('keydown', (e) => { keys[e.code] = true; if (e.code === 'KeyF') sprint = true; });
+document.addEventListener('keyup', (e) => { keys[e.code] = false; if (e.code === 'KeyF') sprint = false; });
+
+document.addEventListener('wheel', (e) => {
+  moveSpeed = Math.max(0.1, Math.min(3.0, moveSpeed - e.deltaY * 0.001));
+});
+
+// ── Raycaster for node info ───────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+raycaster.far = 80;
+const screenCenter = new THREE.Vector2(0, 0);
+
+const infoPanel = document.getElementById('info-panel');
+const infoLabel = document.getElementById('info-label');
+const infoLayer = document.getElementById('info-layer');
+const infoPath = document.getElementById('info-path');
+
+// ── Layer legend ──────────────────────────────────────────────────────────
+const legendEl = document.getElementById('layer-legend');
+const visibleLayers = {};
+for (const [layer, cfg] of Object.entries(LAYERS)) {
+  if (SKIP_LAYERS.has(layer)) continue;
+  if (!layerGroups[layer]) continue;
+  visibleLayers[layer] = true;
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `<div class="dot" style="background:${cfg.color}"></div><div class="name">${cfg.label}</div>`;
+  row.addEventListener('click', () => {
+    visibleLayers[layer] = !visibleLayers[layer];
+    row.style.opacity = visibleLayers[layer] ? '1' : '0.3';
+    nodes.forEach(n => {
+      if (n.data.layer === layer && nodeObjects[n.data.id]) {
+        nodeObjects[n.data.id].visible = visibleLayers[layer];
+      }
+    });
+  });
+  legendEl.appendChild(row);
+}
+
+// ── Animate ───────────────────────────────────────────────────────────────
+const clock = new THREE.Clock();
+let loaded = false;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.1);
+
+  if (!loaded) {
+    document.getElementById('loading').classList.add('done');
+    loaded = true;
+  }
+
+  // Movement
+  const speed = moveSpeed * (sprint ? 3 : 1) * 60 * dt;
+  direction.set(0, 0, 0);
+  if (keys['KeyW'] || keys['ArrowUp'])    direction.z -= 1;
+  if (keys['KeyS'] || keys['ArrowDown'])  direction.z += 1;
+  if (keys['KeyA'] || keys['ArrowLeft'])  direction.x -= 1;
+  if (keys['KeyD'] || keys['ArrowRight']) direction.x += 1;
+  if (keys['Space'])                      direction.y += 1;
+  if (keys['ShiftLeft'] || keys['ShiftRight']) direction.y -= 1;
+
+  if (direction.lengthSq() > 0) {
+    direction.normalize();
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+    const up = new THREE.Vector3(0, 1, 0);
+    camera.position.addScaledVector(forward, -direction.z * speed);
+    camera.position.addScaledVector(right, direction.x * speed);
+    camera.position.addScaledVector(up, direction.y * speed);
+  }
+
+  // Node pulse
+  const t = clock.elapsedTime;
+  for (const [id, mesh] of Object.entries(nodeObjects)) {
+    if (!mesh.visible) continue;
+    const pulse = 0.3 + Math.sin(t * 2 + mesh.position.x * 0.3) * 0.15;
+    mesh.material.emissiveIntensity = pulse;
+  }
+
+  // Dust drift
+  const dPos = dust.geometry.attributes.position.array;
+  for (let i = 0; i < dustCount; i++) {
+    dPos[i*3+1] += Math.sin(t * 0.3 + i * 0.1) * 0.01;
+    dPos[i*3+2] += 0.02;
+    if (dPos[i*3+2] > 350) dPos[i*3+2] = -350;
+  }
+  dust.geometry.attributes.position.needsUpdate = true;
+
+  // Raycaster — show info for node we're looking at
+  raycaster.setFromCamera(screenCenter, camera);
+  const hits = raycaster.intersectObjects(raycasterTargets);
+  if (hits.length > 0 && hits[0].object.userData.id) {
+    const nd = hits[0].object.userData;
+    const cfg = LAYERS[nd.layer] || {};
+    infoLabel.textContent = nd.label || nd.id;
+    infoLayer.textContent = cfg.label || nd.layer;
+    infoLayer.style.color = cfg.color || '#888';
+    infoPath.textContent = nd.path || '';
+    infoPanel.classList.add('visible');
+  } else {
+    infoPanel.classList.remove('visible');
+  }
+
+  renderer.render(scene, camera);
+}
+
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+</script>
+</body>
+</html>

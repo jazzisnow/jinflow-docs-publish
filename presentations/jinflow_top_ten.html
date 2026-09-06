@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jinflow — Top Ten</title>
+<style>
+	:root {
+		--navy: #1a2744;
+		--navy-deep: #101a30;
+		--teal: #2a8f8f;
+		--teal-light: #3bbfbf;
+		--slate: #4a5568;
+		--muted: #6b7280;
+		--bg: #fafbfd;
+		--card: #ffffff;
+		--line: #e2e8f0;
+		--ink: #1a2744;
+		--v-platform: #2f6feb;
+		--v-pack: #8957e5;
+		--v-tenant: #2ea043;
+		--v-standard: #d29922;
+	}
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--bg: #0e1626; --card: #16203a; --line: #263352; --ink: #dbe4f0;
+			--slate: #9fb0c8; --muted: #7e8ca3; --navy: #dbe4f0; --navy-deep: #0a1120; --teal: #3bbfbf;
+		}
+	}
+	:root[data-theme="dark"] {
+		--bg: #0e1626; --card: #16203a; --line: #263352; --ink: #dbe4f0;
+		--slate: #9fb0c8; --muted: #7e8ca3; --navy: #dbe4f0; --navy-deep: #0a1120; --teal: #3bbfbf;
+	}
+	:root[data-theme="light"] {
+		--bg: #fafbfd; --card: #ffffff; --line: #e2e8f0; --ink: #1a2744;
+		--slate: #4a5568; --muted: #6b7280; --navy: #1a2744; --navy-deep: #101a30; --teal: #2a8f8f;
+	}
+
+	* { margin: 0; padding: 0; box-sizing: border-box; }
+	html, body { height: 100%; }
+	body {
+		font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+		background: var(--bg);
+		color: var(--ink);
+		overflow: hidden;
+	}
+	.slide {
+		display: none;
+		height: 100vh;
+		padding: 6vh 8vw;
+		flex-direction: column;
+		justify-content: center;
+		gap: 2.2vh;
+	}
+	.slide.active { display: flex; }
+
+	.eyebrow {
+		font-size: 0.78rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		color: var(--teal);
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+	}
+	.eyebrow .idx {
+		font-variant-numeric: tabular-nums;
+		color: var(--muted);
+		font-weight: 500;
+		letter-spacing: 0.06em;
+	}
+	h1 {
+		font-size: clamp(2rem, 4.6vw, 3.4rem);
+		font-weight: 750;
+		letter-spacing: -0.022em;
+		line-height: 1.08;
+		text-wrap: balance;
+		color: var(--navy);
+		max-width: 24ch;
+	}
+	.claim {
+		font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+		line-height: 1.5;
+		color: var(--slate);
+		max-width: 58ch;
+		text-wrap: balance;
+	}
+	ul.facts {
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		gap: 1.05vh;
+		margin-top: 0.6vh;
+		max-width: 74ch;
+	}
+	ul.facts li {
+		font-size: clamp(0.95rem, 1.35vw, 1.12rem);
+		line-height: 1.5;
+		color: var(--slate);
+		padding-left: 1.35rem;
+		position: relative;
+	}
+	ul.facts li::before {
+		content: "";
+		position: absolute;
+		left: 0; top: 0.62em;
+		width: 0.5rem; height: 0.5rem;
+		border-radius: 2px;
+		background: var(--teal);
+		opacity: 0.85;
+	}
+	ul.facts li strong { color: var(--navy); font-weight: 600; }
+	.lives {
+		margin-top: 1.6vh;
+		font-size: clamp(0.85rem, 1.15vw, 1rem);
+		color: var(--muted);
+		border-top: 1px solid var(--line);
+		padding-top: 1.4vh;
+		max-width: 74ch;
+		font-style: italic;
+	}
+
+	.slide.title { align-items: flex-start; }
+	.slide.title h1 { font-size: clamp(2.6rem, 6vw, 4.6rem); max-width: 18ch; }
+	.kicker {
+		font-size: 1rem; font-weight: 600; letter-spacing: 0.18em;
+		text-transform: uppercase; color: var(--teal);
+	}
+
+	.jinflow-shape {
+		width: min(58vw, 64vh);
+		max-width: 700px;
+		margin-top: 0.5vh;
+	}
+	.jinflow-shape .node {
+		font-size: 24px; font-weight: 700; fill: var(--navy);
+		letter-spacing: -0.01em;
+		font-family: inherit;
+	}
+	.jinflow-shape .sub { font-size: 15px; fill: var(--muted); font-style: italic; }
+	.jinflow-shape .centre { font-size: 15px; font-weight: 700; fill: #ffffff; }
+	.jinflow-shape .centre-sub { font-size: 11.5px; fill: #ffffff; opacity: 0.85; font-style: italic; }
+
+	.voc { display: grid; grid-template-columns: max-content 1fr; gap: 0.9vh 1.6rem; max-width: 66ch; align-items: baseline; }
+	.voc dt { font-weight: 650; color: var(--navy); text-decoration: underline dotted 2px; text-underline-offset: 4px; }
+	.voc dd { color: var(--slate); font-size: clamp(0.92rem, 1.3vw, 1.08rem); line-height: 1.45; }
+	.voc .p { text-decoration-color: var(--v-platform); }
+	.voc .k { text-decoration-color: var(--v-pack); }
+	.voc .t { text-decoration-color: var(--v-tenant); }
+	.voc .s { text-decoration-color: var(--v-standard); }
+
+	.hud {
+		position: fixed; bottom: 2.2vh; left: 8vw; right: 8vw;
+		display: flex; justify-content: space-between; align-items: center;
+		font-size: 0.75rem; color: var(--muted);
+		font-variant-numeric: tabular-nums;
+		pointer-events: none;
+	}
+	.hud .brand { font-weight: 650; letter-spacing: 0.04em; color: var(--slate); }
+	.progress {
+		position: fixed; top: 0; left: 0; height: 3px;
+		background: var(--teal); transition: width 0.25s ease;
+	}
+	@media (prefers-reduced-motion: reduce) { .progress { transition: none; } }
+</style>
+</head>
+<body>
+
+<!-- 1 · Title -->
+<section class="slide title active">
+	<div class="kicker">jazzisnow</div>
+	<h1>jinflow.<br>The top ten.</h1>
+	<p class="claim">What the product is — ten features that make it unlike anything else. And where it goes next.</p>
+</section>
+
+<!-- 2 · What jinflow is -->
+<section class="slide">
+	<div class="eyebrow">In one breath</div>
+	<h1>A declarative engine for diagnostic analytics.</h1>
+	<p class="claim">You declare what to watch for in your data. jinflow builds it, runs it, explains it — and keeps the answers on your machine.</p>
+	<div class="lives">Hospitals · HR · logistics · wine estates · river sensors — one engine, running on real production data.</div>
+</section>
+
+<!-- 2b · The jinflow -->
+<section class="slide">
+	<div class="eyebrow">The mental model</div>
+	<h1>The jinflow.</h1>
+	<p class="claim"><strong>jinflow fosters <em>Progress</em> by gaining <em>Understanding</em> through <em>Observations</em>, <em>Knowledge</em>, and <em>Data</em>.</strong> The sentence is the product, said once.</p>
+	<svg class="jinflow-shape" viewBox="0 0 860 400" role="img" aria-label="The jinflow: Observations, Knowledge and Data converge on Understanding, which leads to Progress">
+		<defs>
+			<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+				<path d="M 0 1 L 9 5 L 0 9 z" fill="var(--teal)" />
+			</marker>
+		</defs>
+		<!-- feeders → Understanding -->
+		<line x1="430" y1="78"  x2="430" y2="130" stroke="var(--teal)" stroke-width="2" marker-end="url(#arr)" opacity="0.8" />
+		<line x1="205" y1="200" x2="358" y2="200" stroke="var(--teal)" stroke-width="2" marker-end="url(#arr)" opacity="0.8" />
+		<line x1="655" y1="200" x2="502" y2="200" stroke="var(--teal)" stroke-width="2" marker-end="url(#arr)" opacity="0.8" />
+		<!-- Understanding → Progress -->
+		<line x1="430" y1="270" x2="430" y2="322" stroke="var(--teal)" stroke-width="2.5" marker-end="url(#arr)" />
+		<!-- Observations (top) -->
+		<g text-anchor="middle">
+			<text x="430" y="42" class="node">Observations</text>
+			<text x="430" y="64" class="sub">what we notice</text>
+			<!-- Knowledge (left) -->
+			<text x="120" y="196" class="node">Knowledge</text>
+			<text x="120" y="218" class="sub">what we know</text>
+			<!-- Data (right) -->
+			<text x="740" y="196" class="node">Data</text>
+			<text x="740" y="218" class="sub">what the data says</text>
+			<!-- Understanding (centre) -->
+			<circle cx="430" cy="200" r="62" fill="var(--teal)" opacity="0.94" />
+			<text x="430" y="196" class="centre">Understanding</text>
+			<text x="430" y="214" class="centre-sub">the resolution</text>
+			<!-- Progress (bottom) -->
+			<text x="430" y="358" class="node">Progress</text>
+			<text x="430" y="380" class="sub">what we’ll do</text>
+		</g>
+	</svg>
+	<div class="lives">It pairs with the tagline: talk to your data, so it speaks to you.</div>
+</section>
+
+<!-- 3 · 1 Declarative -->
+<section class="slide">
+	<div class="eyebrow"><span class="idx">1 / 10</span> Declarative to the bone</div>
+	<h1>Analytics you declare, not program.</h1>
+	<p class="claim">The entire analytical framework is human-readable declarations — versioned like source code, owned by the customer.</p>
+	<ul class="facts">
+		<li><strong>Everything is a declaration</strong> — diagnostic queries, business questions, root-cause rules, pages, charts, tiles, maps. A new analytical perspective is a text file, not a software project.</li>
+		<li><strong>Form follows data</strong> — visualizations adapt to the shape of the data automatically; a time series gets a chart, a fleet gets a map.</li>
+		<li><strong>One command builds it all</strong> — validate, compile, run, report. Deterministic and reproducible from a single framework commit.</li>
+	</ul>
+</section>
+
+<!-- 4 · 2 The diamond -->
+<section class="slide">
+	<div class="eyebrow"><span class="idx">2 / 10</span> The diamond</div>
+	<h1>From raw data to “here is why — and what to do.”</h1>
+	<p class="claim">jinflow doesn’t stop at dashboards. It climbs a reasoning ladder — and writes the answer in the reader’s language.</p>
+	<ul class="facts">
+		<li><strong>Signals</strong> find what doesn’t fit — unbilled usage, duplicate records, silent sensors — each finding priced with money at risk.</li>
+		<li><strong>Theses</strong> weigh the evidence into plain-language answers to business questions: confirmed, plausible, not observed.</li>
+		<li><strong>Verdicts</strong> explain the root cause and recommend the action — process failure, system gap, stale master data.</li>
+		<li><strong>Tri-lingual by design</strong> — every interpretation reads natively in English, German, and French.</li>
+	</ul>
+</section>
+
+<!-- 5 · 3 Expert knowledge -->
+<section class="slide">
+	<div class="eyebrow"><span class="idx">3 / 10</span> Institutional memory</div>
+	<h1>What the experts know becomes part of the system.</h1>
+	<p class="claim">The knowledge no data model can derive — workarounds, quirks, history — is captured, attributed, and kept honest.</p>
+	<ul class="facts">
+		<li><strong>Subject Matter</strong> — atomic expert statements with provenance: who said it, when, about what, and <em>why</em> it is so.</li>
+		<li><strong>Checkable</strong> — a statement can carry an executable check, so the system continuously verifies what the expert claimed.</li>
+		<li><strong>Dossiers</strong> curate the atoms into narratives — the story layer for handovers, audits, onboarding.</li>
+	</ul>
+</section>
+
+<!-- 6 · 4 The knowledge store -->
+<section class="slide">
+	<div class="eyebrow"><span class="idx">4 / 10</span> One file</div>
+	<h1>An entire analytical world in a single file.</h1>
+	<p class="claim">Every build produces one self-describing knowledge store: the data, the findings, the interpretations — and the framework that produced them, travelling inside.</p>
+	<ul class="facts">
+		<li><strong>Portable</strong> — copy it, ship it, open it anywhere; no server, no database cluster, no vendor account.</li>
+		<li><strong>Snapshot-able</strong> — freeze an immutable, timestamped copy at any decision point: this is what we knew, and how we knew it.</li>
+		<li><strong>Self-describing</strong> — the store carries its own build provenance and the complete source framework. An audit needs nothing else.</li>
+	</ul>
+</section>
+
+<!-- 7 · 5 Sovereignty -->
+<section class="slide">
+	<div class="eyebrow"><span class="idx">5 / 10</span> Data sovereignty</div>
+	<h1>Your data. Your machine. Their browser.</h1>
+	<p class="claim">Privacy is not a policy here — it is the architecture. Sensitive data can be analyzed, shared, and even AI-assisted without ever leaving the building.</p>
+	<ul class="facts">
+		<li><strong>Local-first</strong> — the full product runs on one laptop, offline.</li>
+		<li><strong>Share without surrendering</strong> — viewers reach the analysis through a tunnel to your machine; unplug it and the data is gone from the internet, instantly.</li>
+		<li><strong>Cloud only where it belongs</strong> — non-sensitive showcases run always-on in the cloud; the choice is per tenant, not per product.</li>
+	</ul>
+</section>
+
+<!-- 8 · 6 Vera -->
+<section class="slide">
+	<div class="eyebrow"><span class="idx">6 / 10</span> Vera</div>
+	<h1>A built-in analyst — on the framework, never on the data.</h1>
+	<p class="claim">Vera is jinflow’s conversational AI. For sensitive customers she works in structure-only mode — and that gate fails closed.</p>
+	<ul class="facts">
+		<li><strong>Structure-only mode</strong> — unless a tenant is explicitly a public showcase, Vera reasons about the framework — signals, questions, schema — while <strong>no data row ever reaches the AI provider</strong>. Even an internal error resolves to the safe side.</li>
+		<li><strong>She proposes, humans decide</strong> — her framework drafts go to a staging area for review and publication; she can never write directly.</li>
+		<li><strong>She speaks</strong> — voice in, voice out; conversations persist in the customer’s own store.</li>
+	</ul>
+</section>
+
+<!-- 9 · 7 Conversation with data -->
+<section class="slide">
+	<div class="eyebrow"><span class="idx">7 / 10</span> Living views</div>
+	<h1>You don’t read the data. You converse with it.</h1>
+	<p class="claim">Point at anything, and the whole picture answers — across every panel, and across every window.</p>
+	<ul class="facts">
+		<li><strong>Linked everywhere</strong> — brush a chart, click a site on the map, select dots on a scatter: tables, tiles, maps, and charts all re-scope together. Every view is a shareable URL.</li>
+		<li><strong>Connected windows</strong> — windows link into a constellation: one brush scopes them all, across monitors. Any panel detaches into its own chrome-less instrument window.</li>
+		<li><strong>Real cartography</strong> — geographic truth on real base maps, driven by the same selections.</li>
+	</ul>
+</section>
+
+<!-- 10 · 8 Typed truth -->
+<section class="slide">
+	<div class="eyebrow"><span class="idx">8 / 10</span> Typed truth</div>
+	<h1>Measurements, not just numbers.</h1>
+	<p class="claim">Every value in the product knows what it is — its type, its unit, and the real-world standard behind it. The build refuses anything less.</p>
+	<ul class="facts">
+		<li><strong>Semantic types on every column</strong> — quantity, identifier, time, category — with units and roll-up rules. Mis-typed data is a build error, not a surprise.</li>
+		<li><strong>Grounded in real standards</strong> — an in-product registry of industry standards (units, currencies, time, water quality, trade codes …), cited by the data that obeys them.</li>
+		<li><strong>Drill in two directions</strong> — down the organization’s hierarchy, and along the measurement’s refinement chain from raw reading to reported value.</li>
+	</ul>
+</section>
+
+<!-- 11 · 9 The record -->
+<section class="slide">
+	<div class="eyebrow"><span class="idx">9 / 10</span> The record</div>
+	<h1>Everything that happens is on the record.</h1>
+	<p class="claim">jinflow is built for environments where “trust me” is not an answer.</p>
+	<ul class="facts">
+		<li><strong>Data intake is a contract</strong> — every source file is declared, fingerprinted, verified on every run, and logged append-only.</li>
+		<li><strong>Every run is recorded</strong> — who started it, from where, phase by phase; failures carry their reason. Browse and replay any run, and watch anyone’s run live from any window.</li>
+		<li><strong>Every answer is reproducible</strong> — a knowledge store can always be rebuilt from the exact framework version that produced it.</li>
+	</ul>
+</section>
+
+<!-- 12 · 10 One engine, many worlds -->
+<section class="slide">
+	<div class="eyebrow"><span class="idx">10 / 10</span> One engine, many worlds</div>
+	<h1>Five industries. Seven live tenants. One engine.</h1>
+	<p class="claim">Domain expertise ships as packs — starter kits a customer copies and then owns. Every tenant is an isolated world, down to its language.</p>
+	<ul class="facts">
+		<li><strong>Running today</strong> — hospital material flow on real data, HR analytics, freshwater sensing, wine estate, freight forwarding.</li>
+		<li><strong>The pack seeds, the tenant owns</strong> — customers evolve their framework independently; the operator still sees fleet health at a glance.</li>
+		<li><strong>Even the words are governed</strong> — the UI marks which vocabulary every term belongs to, with a hover passport:</li>
+	</ul>
+	<dl class="voc">
+		<dt class="p">Platform</dt><dd>the engine’s nouns — identical everywhere</dd>
+		<dt class="k">Pack</dt><dd>the domain’s words</dd>
+		<dt class="t">Tenant</dt><dd>the customer’s own voice</dd>
+		<dt class="s">Standard</dt><dd>the outside world’s rules</dd>
+	</dl>
+</section>
+
+<!-- 13 · Next: near -->
+<section class="slide">
+	<div class="eyebrow">What comes next</div>
+	<h1>Near.</h1>
+	<ul class="facts">
+		<li><strong>The constellation grows</strong> — linked windows beyond one browser, and live run activity across the whole fleet in one view.</li>
+		<li><strong>An operational memory</strong> — a durable state-of-record for everything that happened, independent of any single machine.</li>
+		<li><strong>The fleet, modeled</strong> — the operator’s tenant population becomes explorable data: facets, cohorts, comparisons.</li>
+		<li><strong>The language, audited</strong> — a lint that lists every term no vocabulary claims, per tenant.</li>
+	</ul>
+</section>
+
+<!-- 14 · Next: horizon -->
+<section class="slide">
+	<div class="eyebrow">What comes next</div>
+	<h1>Horizon.</h1>
+	<ul class="facts">
+		<li><strong>Build in the cloud on push</strong> — the laptop becomes optional; publish is the build.</li>
+		<li><strong>One handshake for identity and license</strong> — a local install asks “who is this, and are they entitled?” and gets a signed answer.</li>
+		<li><strong>Showcases that announce themselves</strong> — declare a tenant public, and the cloud discovers, routes, and serves it.</li>
+		<li><strong>A doctor for the framework</strong> — advisory instruments on the analytics themselves: “I’ve seen this shape go wrong.”</li>
+		<li><strong>Packs that branch and share skills</strong> — graftable modules, and analytical patterns that travel between domains.</li>
+	</ul>
+</section>
+
+<!-- 15 · Close -->
+<section class="slide title">
+	<div class="kicker">jazzisnow · jinflow</div>
+	<h1>Your data. Your framework.<br>Your language. Your machine.</h1>
+	<p class="claim">And a product that shows its work — every answer explained, every run recorded, every view a conversation.</p>
+</section>
+
+<div class="progress" style="width: 0"></div>
+<div class="hud">
+	<span class="brand">jinflow · the top ten</span>
+	<span class="counter">1 / 15</span>
+</div>
+
+<script>
+	const slides = [...document.querySelectorAll('.slide')];
+	const counter = document.querySelector('.counter');
+	const progress = document.querySelector('.progress');
+	let i = Math.min(slides.length - 1, Math.max(0, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+	function show(n) {
+		i = Math.min(slides.length - 1, Math.max(0, n));
+		slides.forEach((s, k) => s.classList.toggle('active', k === i));
+		counter.textContent = (i + 1) + ' / ' + slides.length;
+		progress.style.width = ((i + 1) / slides.length * 100) + '%';
+		history.replaceState(null, '', '#' + (i + 1));
+	}
+	addEventListener('keydown', (e) => {
+		if (['ArrowRight', ' ', 'PageDown', 'Enter'].includes(e.key)) { e.preventDefault(); show(i + 1); }
+		if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); show(i - 1); }
+		if (e.key === 'Home') show(0);
+		if (e.key === 'End') show(slides.length - 1);
+	});
+	addEventListener('click', (e) => {
+		if (e.target.closest('a')) return;
+		show(e.clientX > innerWidth / 2 ? i + 1 : i - 1);
+	});
+	show(i);
+</script>
+</body>
+</html>

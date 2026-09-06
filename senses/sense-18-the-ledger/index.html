@@ -1,0 +1,668 @@
+<!DOCTYPE html><html lang="en" dir="ltr" data-theme="dark" data-has-toc data-has-sidebar class="astro-bguv2lll"> <head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><title>Sense 18: The Ledger — Computational Provenance as Narrative | docs</title><link rel="canonical" href="https://docs.jinflow.io/senses/sense-18-the-ledger/"/><link rel="alternate" hreflang="en" href="https://docs.jinflow.io/senses/sense-18-the-ledger/"/><link rel="alternate" hreflang="de" href="https://docs.jinflow.io/de/senses/sense-18-the-ledger/"/><link rel="alternate" hreflang="fr" href="https://docs.jinflow.io/fr/senses/sense-18-the-ledger/"/><link rel="sitemap" href="/sitemap-index.xml"/><link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="true"/><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&#38;display=swap"/><script type="module">
+						// Mermaid diagram lightbox — click to zoom, scroll to scale, drag to pan
+						document.addEventListener('click', e => {
+							const img = e.target.closest('img[id^="mermaid"]');
+							if (!img) return;
+
+							let scale = 1, tx = 0, ty = 0, dragging = false, sx, sy;
+
+							const overlay = document.createElement('div');
+							overlay.className = 'mermaid-lightbox';
+							const clone = img.cloneNode();
+							clone.removeAttribute('width');
+							clone.removeAttribute('height');
+							clone.style.cssText = 'max-width:90vw; max-height:90vh; cursor:grab;';
+							overlay.appendChild(clone);
+							document.body.appendChild(overlay);
+
+							const apply = () => { clone.style.transform = 'translate(' + tx + 'px,' + ty + 'px) scale(' + scale + ')'; };
+
+							overlay.addEventListener('wheel', e => {
+								e.preventDefault();
+								scale = Math.max(0.2, Math.min(10, scale * (e.deltaY < 0 ? 1.15 : 0.87)));
+								apply();
+							}, { passive: false });
+
+							clone.addEventListener('pointerdown', e => {
+								dragging = true; sx = e.clientX - tx; sy = e.clientY - ty;
+								clone.style.cursor = 'grabbing'; clone.setPointerCapture(e.pointerId);
+							});
+							clone.addEventListener('pointermove', e => {
+								if (!dragging) return; tx = e.clientX - sx; ty = e.clientY - sy; apply();
+							});
+							clone.addEventListener('pointerup', () => { dragging = false; clone.style.cursor = 'grab'; });
+
+							overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+							document.addEventListener('keydown', function esc(e) {
+								if (e.key === 'Escape') { overlay.remove(); document.removeEventListener('keydown', esc); }
+							});
+						});
+					</script><link rel="shortcut icon" href="/favicon.svg" type="image/svg+xml"/><meta name="generator" content="Astro v6.0.8"/><meta name="generator" content="Starlight v0.38.2"/><meta property="og:title" content="Sense 18: The Ledger — Computational Provenance as Narrative"/><meta property="og:type" content="article"/><meta property="og:url" content="https://docs.jinflow.io/senses/sense-18-the-ledger/"/><meta property="og:locale" content="en"/><meta property="og:description" content="Sense 18 · Vitality: In bloom · last touched 2026-08-20"/><meta property="og:site_name" content="docs"/><meta name="twitter:card" content="summary_large_image"/><meta name="description" content="Sense 18 · Vitality: In bloom · last touched 2026-08-20"/><script>
+	window.StarlightThemeProvider = (() => {
+		const storedTheme =
+			typeof localStorage !== 'undefined' && localStorage.getItem('starlight-theme');
+		const theme =
+			storedTheme ||
+			(window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+		document.documentElement.dataset.theme = theme === 'light' ? 'light' : 'dark';
+		return {
+			updatePickers(theme = storedTheme || 'auto') {
+				document.querySelectorAll('starlight-theme-select').forEach((picker) => {
+					const select = picker.querySelector('select');
+					if (select) select.value = theme;
+					/** @type {HTMLTemplateElement | null} */
+					const tmpl = document.querySelector(`#theme-icons`);
+					const newIcon = tmpl && tmpl.content.querySelector('.' + theme);
+					if (newIcon) {
+						const oldIcon = picker.querySelector('svg.label-icon');
+						if (oldIcon) {
+							oldIcon.replaceChildren(...newIcon.cloneNode(true).childNodes);
+						}
+					}
+				});
+			},
+		};
+	})();
+</script><template id="theme-icons"><svg aria-hidden="true" class="light astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M5 12a1 1 0 0 0-1-1H3a1 1 0 0 0 0 2h1a1 1 0 0 0 1-1Zm.64 5-.71.71a1 1 0 0 0 0 1.41 1 1 0 0 0 1.41 0l.71-.71A1 1 0 0 0 5.64 17ZM12 5a1 1 0 0 0 1-1V3a1 1 0 0 0-2 0v1a1 1 0 0 0 1 1Zm5.66 2.34a1 1 0 0 0 .7-.29l.71-.71a1 1 0 1 0-1.41-1.41l-.66.71a1 1 0 0 0 0 1.41 1 1 0 0 0 .66.29Zm-12-.29a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.71-.71a1.004 1.004 0 1 0-1.43 1.41l.73.71ZM21 11h-1a1 1 0 0 0 0 2h1a1 1 0 0 0 0-2Zm-2.64 6A1 1 0 0 0 17 18.36l.71.71a1 1 0 0 0 1.41 0 1 1 0 0 0 0-1.41l-.76-.66ZM12 6.5a5.5 5.5 0 1 0 5.5 5.5A5.51 5.51 0 0 0 12 6.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm0 3.5a1 1 0 0 0-1 1v1a1 1 0 0 0 2 0v-1a1 1 0 0 0-1-1Z"/></svg><svg aria-hidden="true" class="dark astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.64 13a1 1 0 0 0-1.05-.14 8.049 8.049 0 0 1-3.37.73 8.15 8.15 0 0 1-8.14-8.1 8.59 8.59 0 0 1 .25-2A1 1 0 0 0 8 2.36a10.14 10.14 0 1 0 14 11.69 1 1 0 0 0-.36-1.05Zm-9.5 6.69A8.14 8.14 0 0 1 7.08 5.22v.27a10.15 10.15 0 0 0 10.14 10.14 9.784 9.784 0 0 0 2.1-.22 8.11 8.11 0 0 1-7.18 4.32v-.04Z"/></svg><svg aria-hidden="true" class="auto astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg></template><link rel="stylesheet" href="/_astro/print.DNXP8c50.css" media="print"><link rel="stylesheet" href="/_astro/common.BAwZ3SRq.css">
+<link rel="stylesheet" href="/_astro/Code.BcHZMqfA.css"><script type="module" src="/_astro/page.BIhdncjw.js"></script></head> <body class="astro-bguv2lll"> <a href="#_top" class="astro-7q3lir66">Skip to content</a> <div class="page sl-flex astro-vrdttmbt"> <header class="header astro-vrdttmbt"><div class="header astro-kmkmnagf"> <div class="title-wrapper sl-flex astro-kmkmnagf"> <a href="/" class="site-title sl-flex astro-m46x6ez3">  <img class="astro-m46x6ez3" alt src="/_astro/jinflow-logo-dark.DoSSnADc.svg" width="1024" height="1024">  <span class="astro-m46x6ez3" translate="no"> docs </span> </a> </div> <div class="sl-flex print:hidden astro-kmkmnagf"> <site-search class="astro-kmkmnagf astro-v37mnknz" data-translations="{&#34;placeholder&#34;:&#34;Search&#34;}"> <button data-open-modal disabled aria-label="Search" aria-keyshortcuts="Control+K" class="astro-v37mnknz"> <svg aria-hidden="true" class="astro-v37mnknz astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21.71 20.29 18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 0-14 7 7 0 0 1 0 14Z"/></svg> <span class="sl-hidden md:sl-block astro-v37mnknz" aria-hidden="true">Search</span> <kbd class="sl-hidden md:sl-flex astro-v37mnknz" style="display: none;"> <kbd class="astro-v37mnknz">Ctrl</kbd><kbd class="astro-v37mnknz">K</kbd> </kbd> </button> <dialog style="padding:0" aria-label="Search" class="astro-v37mnknz"> <div class="dialog-frame sl-flex astro-v37mnknz">  <button data-close-modal class="sl-flex md:sl-hidden astro-v37mnknz"> Cancel </button> <div class="search-container astro-v37mnknz"> <div id="starlight__search" class="astro-v37mnknz"></div> </div> </div> </dialog> </site-search>  <script>
+	(() => {
+		const openBtn = document.querySelector('button[data-open-modal]');
+		const shortcut = openBtn?.querySelector('kbd');
+		if (!openBtn || !(shortcut instanceof HTMLElement)) return;
+		const platformKey = shortcut.querySelector('kbd');
+		if (platformKey && /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform)) {
+			platformKey.textContent = '⌘';
+			openBtn.setAttribute('aria-keyshortcuts', 'Meta+K');
+		}
+		shortcut.style.display = '';
+	})();
+</script> <script type="module" src="/_astro/Search.astro_astro_type_script_index_0_lang.BdDgbKxW.js"></script>  </div> <div class="sl-hidden md:sl-flex print:hidden right-group astro-kmkmnagf"> <div class="sl-flex social-icons astro-kmkmnagf"> <a href="https://jinflow.io" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">jinflow.io</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M19.33 10.18a1 1 0 0 1-.77 0 1 1 0 0 1-.62-.93l.01-1.83-8.2 8.2a1 1 0 0 1-1.41-1.42l8.2-8.2H14.7a1 1 0 0 1 0-2h4.25a1 1 0 0 1 1 1v4.25a1 1 0 0 1-.62.93Z"/><path d="M11 4a1 1 0 1 1 0 2H7a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-4a1 1 0 1 1 2 0v4a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h4Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script> <script type="module">const r="starlight-theme",o=e=>e==="auto"||e==="dark"||e==="light"?e:"auto",c=()=>o(typeof localStorage<"u"&&localStorage.getItem(r));function n(e){typeof localStorage<"u"&&localStorage.setItem(r,e==="light"||e==="dark"?e:"")}const l=()=>matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";function t(e){StarlightThemeProvider.updatePickers(e),document.documentElement.dataset.theme=e==="auto"?l():e,n(e)}matchMedia("(prefers-color-scheme: light)").addEventListener("change",()=>{c()==="auto"&&t("auto")});class s extends HTMLElement{constructor(){super(),t(c()),this.querySelector("select")?.addEventListener("change",a=>{a.currentTarget instanceof HTMLSelectElement&&t(o(a.currentTarget.value))})}}customElements.define("starlight-theme-select",s);</script> <starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select language</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/senses/sense-18-the-ledger/" class="astro-4yphtoen">English</option><option value="/de/senses/sense-18-the-ledger/" class="astro-4yphtoen">Deutsch</option><option value="/fr/senses/sense-18-the-ledger/" class="astro-4yphtoen">Français</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select><script type="module">class s extends HTMLElement{constructor(){super();const e=this.querySelector("select");e&&(e.addEventListener("change",t=>{t.currentTarget instanceof HTMLSelectElement&&(window.location.pathname=t.currentTarget.value)}),window.addEventListener("pageshow",t=>{if(!t.persisted)return;const n=e.querySelector("option[selected]")?.index;n!==e.selectedIndex&&(e.selectedIndex=n??0)}))}}customElements.define("starlight-lang-select",s);</script> </div> </div></header> <nav class="sidebar print:hidden astro-vrdttmbt" aria-label="Main"> <starlight-menu-button class="print:hidden astro-jif73yzw"> <button aria-expanded="false" aria-label="Menu" aria-controls="starlight__sidebar" class="sl-flex md:sl-hidden astro-jif73yzw"> <svg aria-hidden="true" class="open-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M3 8h18a1 1 0 1 0 0-2H3a1 1 0 0 0 0 2Zm18 8H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Zm0-5H3a1 1 0 0 0 0 2h18a1 1 0 0 0 0-2Z"/></svg> <svg aria-hidden="true" class="close-menu astro-jif73yzw astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="m13.41 12 6.3-6.29a1.004 1.004 0 1 0-1.42-1.42L12 10.59l-6.29-6.3a1.004 1.004 0 0 0-1.42 1.42l6.3 6.29-6.3 6.29a1 1 0 0 0 0 1.42.998.998 0 0 0 1.42 0l6.29-6.3 6.29 6.3a.999.999 0 0 0 1.42 0 1 1 0 0 0 0-1.42L13.41 12Z"/></svg> </button> </starlight-menu-button> <script type="module">class s extends HTMLElement{constructor(){super(),this.btn=this.querySelector("button"),this.btn.addEventListener("click",()=>this.toggleExpanded());const t=this.closest("nav");t&&t.addEventListener("keyup",e=>this.closeOnEscape(e))}setExpanded(t){this.setAttribute("aria-expanded",String(t)),document.body.toggleAttribute("data-mobile-menu-expanded",t)}toggleExpanded(){this.setExpanded(this.getAttribute("aria-expanded")!=="true")}closeOnEscape(t){t.code==="Escape"&&(this.setExpanded(!1),this.btn.focus())}}customElements.define("starlight-menu-button",s);</script>  <div id="starlight__sidebar" class="sidebar-pane astro-vrdttmbt"> <div class="sidebar-content sl-flex astro-vrdttmbt"> <sl-sidebar-state-persist data-hash="0d3optw" class="astro-kku4brbg"> <script aria-hidden="true">
+		(() => {
+			try {
+				if (!matchMedia('(min-width: 50em)').matches) return;
+				/** @type {HTMLElement | null} */
+				const target = document.querySelector('sl-sidebar-state-persist');
+				const state = JSON.parse(sessionStorage.getItem('sl-sidebar-state') || '0');
+				if (!target || !state || target.dataset.hash !== state.hash) return;
+				window._starlightScrollRestore = state.scroll;
+				customElements.define(
+					'sl-sidebar-restore',
+					class SidebarRestore extends HTMLElement {
+						connectedCallback() {
+							try {
+								const idx = parseInt(this.dataset.index || '');
+								const details = this.closest('details');
+								if (details && typeof state.open[idx] === 'boolean') details.open = state.open[idx];
+							} catch {}
+						}
+					}
+				);
+			} catch {}
+		})();
+	</script>  <ul class="top-level astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/big-picture/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">The Big Picture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/glossary/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Glossary</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/diagrams/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Diagrams</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Getting Started</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="0"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/operations/quick-start/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Quick Start</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorials — overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/first-build/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Your First Build</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/finding-to-verdict/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: From Finding to Verdict</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/expert-knowledge/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Capturing Expert Knowledge</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/evolve/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Exploring with evolve</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/onboarding/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Onboarding a Tenant</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/the-first-weeks-with-a-new-tenant/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: The first weeks with a new tenant</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/publishing-a-pack/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tutorial: Publishing a Pack</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/showcase-inspire/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Case to Verdict (Inspire)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/showcase-vai/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Person to Verdict (Val d&#39;Oria)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/tutorials/showcase-delta/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Showcase: From Reading to Verdict (Delta Basin)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/setup/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Setup</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Concepts</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="1"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/concepts/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Reading order</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">The jinflow</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="2"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/concepts/the-jinflow/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/concepts/from-evolution/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Elaborating the diamond, stage by stage</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/concepts/noun-topology/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Noun Topology</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/concepts/the-cycle/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Cycle — make, explore, evolve, publish</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/concepts/setup-is-the-analysis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Setup is the analysis</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/concepts/three-vocabularies/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Words</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/concepts/four-convictions/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Four Convictions</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/concepts/p2p2p/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">P2P2P — Data Sovereignty</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">The Senses</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="3"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/senses/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Index · all senses</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">In bloom</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="4"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/senses/sense-14-the-signal/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 14 — The Signal</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-14-2/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 14.2 — Typed Signals</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-15/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 15 — Observation, Explanation, Contributing Factor</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-18-the-ledger/" aria-current="page" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 18 — The Ledger</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-19-the-simulation/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 19 — The Simulation</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-21-the-heartbeat/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 21 — The Heartbeat</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-25-the-pass/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 25 — The Pass</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-29-the-atelier/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 29 — The Atelier</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-33-the-bell/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 33 — The Bell</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-36-the-lineage/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 36 — The Lineage</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-38-the-scribe/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 38 — The Scribe</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-42-the-landscape/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 42 — The Landscape</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-43-the-cascade/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 43 — The Cascade</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Steady</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="5"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/senses/sense-16-p2p2p/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 16 — P2P2P</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-19-1-simulation-prerequisites/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 19.1 — Simulation Prerequisites</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-20-the-seam/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 20 — The Seam</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-26-the-workshop/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 26 — The Workshop</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-27-the-funnel/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 27 — The Funnel</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-31-the-inlet/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 31 — The Inlet</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-32-the-chores/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 32 — The Chores</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-34-the-breeze/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 34 — The Breeze</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-35-the-drift/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 35 — The Drift</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Folded in</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="6"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/senses/sense-13-the-canvas/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 13 — The Canvas (room metaphors folded into 13.1)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-17-the-house/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 17 — The House</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/senses/sense-27-lever-2/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Sense 27 — Lever 2 (folded into Sense 27 The Funnel)</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Guides</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="7"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/guide/make/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Make (Build)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/diagnostics/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Diagnostics</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/playworks/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Playworks</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/explorer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">JinDesk</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/two-rails/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The two rails</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/inspecting/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Inspecting — Portraits &amp; Passports</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/search/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Search Grammar</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/tenants/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Tenants</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/extraction/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Extraction</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/instruments/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Instruments</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/collaboration/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Collaboration</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/deploy/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Deploy</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/ai/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">AI</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/sme/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Expert Knowledge Capture</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/notes/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Notes</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/bell/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Inbox (Bell)</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/simulation/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Simulation — Suggestion → Scenario</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/findings/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Findings — filter &amp; navigate</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/guide/finding-explainer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Finding Explainer</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Reference</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="8"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/reference/cli/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CLI</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/contracts/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Contracts</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/typology/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Typology — column types &amp; roll-up</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/explorer-api/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">JinDesk API</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">YAML Formats</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="9"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/reference/yaml-signal/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Signal</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-thesis/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Thesis</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-verdict/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Verdict</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-smebit/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">SMEbit</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-bitbundle/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">BitBundle</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-report/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Report</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-entity/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Entity</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-lineage/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Lineage</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-suggestion/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Suggestion</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/reference/yaml-intervention/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Intervention</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Cheatsheets</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="10"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/cheatsheets/commands/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">CLI Commands</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/analyst/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Analysts</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/data-engineer/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Data Engineers</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/instrument-author/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Instrument Authors</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/cheatsheets/operator/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">For Operators</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <a href="/presentations/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Presentations</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/advanced/domain-packs/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Domain Packs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/releases/" class="large astro-3ii7xxms"> <span class="astro-3ii7xxms">Release Notes</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">The DDD Book</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="11"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/ddd/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Foundations</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Chapters</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="12"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/ddd/chapters/01-the-verb-and-the-run/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">01 — The Verb and the Run</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/ddd/chapters/02-the-marked-language/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">02 — The Marked Language</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/ddd/chapters/03-the-compare-exception/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">03 — The Compare Exception</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">The EDA Book</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="13"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/eda/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Foundations</span>  </a> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Stories</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="14"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/eda/stories/coastal-bend/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">01 — The Silent Optic of Coastal Bend</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details open class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Journal</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="15"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/journal/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Overview</span>  </a> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">nuMetrix — Lessons</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="16"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/journal/numetrix/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/01-the-long-tail-is-not-waste/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">01 — The long tail is not waste</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/02-the-pareto-is-sharper-than-you-think/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">02 — The Pareto is sharper than you think</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/03-the-morning-batch/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">03 — The morning batch</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/04-three-suppliers-in-twelve-disguises/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">04 — Three suppliers in twelve disguises</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/05-the-week-is-the-cycle/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">05 — The week is the cycle</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/06-the-or-is-a-temporal-black-box/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">06 — The OR is a temporal black box</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/07-ward-base-consumables/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">07 — Ward base consumables</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/08-the-30-percent-discount-is-not-a-deal/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">08 — The 30-percent discount is not a deal</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/09-concentration-is-the-shape/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">09 — Concentration is the shape</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/10-the-catalogue-quotes-the-highest/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">10 — The catalogue quotes the highest</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/11-surgeons-do-not-mix-vendors/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">11 — Surgeons do not mix vendors</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/12-implants-skew-old/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">12 — Implants skew old</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/13-billing-does-not-pass-the-audit/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">13 — Billing does not pass the audit</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/14-the-silent-source-of-most-price-bugs/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">14 — The silent source of most price bugs</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/numetrix/lessons/15-one-channel-cannot-balance/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">15 — One channel cannot balance</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">hrcentral — Genesis</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="17"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/journal/hrcentral/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/hrcentral/genesis/01-week-1/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">01 — Week 1: A domain learns itself</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/hrcentral/genesis/02-when-a-person-is-not-atomic/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">02 — When a person is not atomic</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/hrcentral/genesis/03-the-synthetic-cast-and-the-career-arc/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">03 — The synthetic cast and the career arc</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Monthly</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="18"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/journal/monthly/2026-02/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">February 2026 — From bootstrap to pyramid</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/monthly/2026-03/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">March 2026 — The month the architecture grew language for itself</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/monthly/2026-04/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">April 2026 — The month of the Senses</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/monthly/2026-05/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">May 2026 — Twenty-four senses, the Atelier shipped, the pipeline got its voice</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/monthly/2026-06/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">June 2026 — The Stage, the Ledger, the sentence</span>  </a> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Weekly</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="19"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w07/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W07 — Origins</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w08/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W08 — The first vocabulary</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w09/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W09 — The roof goes on</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w10/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W10 — The pack era begins</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w11/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W11 — Shippable</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w12/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W12 — The Second User</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w13/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W13 — The Config Engine</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w14/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W14 — The Signal paradigm</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w15/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W15 — Sense 14 closeout, identity, P2P2P</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w16/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W16 — DuckDB migration, monolith drain begins</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w17/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W17 — Search v3, Sense 20, extraction discipline</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w18/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W18 — Foundations week</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w19/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W19 — hrcentral lands, the Lens arrives</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w20/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W20 — the Explorer learns to write back</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w21/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W21 — three threads cross the working line</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w22/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W22 — the pipeline settles into shape</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w23/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W23 — what signs and what remembers</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w24/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W24 — the picture arrives</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w25/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W25 — the worktrees agree</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w26/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W26 — the diamond, said in one sentence</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w27/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W27 — the identity source moves to Clerk</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w28/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W28 — truth: the system describes itself</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w29/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W29 — selection: the system learns to be pointed at</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w30/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W30 — the house: a front, and a foundation</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w31/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W31 — the instrument, and the ground</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/journal/weekly/2026-w32/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">W32 — the store: travels light, learns custody</span>  </a> </li> </ul> </details> </li> </ul> </details> </li><li class="astro-3ii7xxms"> <details class="astro-3ii7xxms"> <summary class="astro-3ii7xxms"> <span class="group-label astro-3ii7xxms"> <span class="large astro-3ii7xxms">Architecture</span>  </span> <svg aria-hidden="true" class="caret astro-3ii7xxms astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.25rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg> </summary> <sl-sidebar-restore data-index="20"></sl-sidebar-restore> <ul class="astro-3ii7xxms"> <li class="astro-3ii7xxms"> <a href="/architecture/design_principles/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Design Principles</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/terminology/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Terminology</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/two_worlds/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Two Worlds</span> <span class="sl-badge caution small  astro-3ii7xxms astro-avdet4wd">proposal</span> </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/probe_system/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Probe System</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/the_bell/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Bell</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/the_simulation/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">The Simulation</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/entity_registry/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Entity Registry</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/pipeline_overview/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Pipeline Overview</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/dlz_and_generations/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">DLZ &amp; Three Generations</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/operating_modes/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Operating Modes</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/supply_org_pricing/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Supply-Org Pricing</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/ecosystem/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Ecosystem</span>  </a> </li><li class="astro-3ii7xxms"> <a href="/architecture/documentation_process/" class="astro-3ii7xxms"> <span class="astro-3ii7xxms">Documentation Process</span>  </a> </li> </ul> </details> </li> </ul>  <script aria-hidden="true">
+		(() => {
+			const scroller = document.getElementById('starlight__sidebar');
+			if (!window._starlightScrollRestore || !scroller) return;
+			scroller.scrollTop = window._starlightScrollRestore;
+			delete window._starlightScrollRestore;
+		})();
+	</script> </sl-sidebar-state-persist> <div class="md:sl-hidden"> <div class="mobile-preferences sl-flex astro-wu23bvmt"> <div class="social-icons astro-wu23bvmt"> <a href="https://jinflow.io" rel="me" class="sl-flex astro-wy4te6ga"><span class="sr-only astro-wy4te6ga">jinflow.io</span><svg aria-hidden="true" class="astro-wy4te6ga astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M19.33 10.18a1 1 0 0 1-.77 0 1 1 0 0 1-.62-.93l.01-1.83-8.2 8.2a1 1 0 0 1-1.41-1.42l8.2-8.2H14.7a1 1 0 0 1 0-2h4.25a1 1 0 0 1 1 1v4.25a1 1 0 0 1-.62.93Z"/><path d="M11 4a1 1 0 1 1 0 2H7a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-4a1 1 0 1 1 2 0v4a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3h4Z"/></svg></a> </div> <starlight-theme-select>  <label style="--sl-select-width: 6.25em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select theme</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M21 14h-1V7a3 3 0 0 0-3-3H7a3 3 0 0 0-3 3v7H3a1 1 0 0 0-1 1v2a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-2a1 1 0 0 0-1-1ZM6 7a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v7H6V7Zm14 10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-1h16v1Z"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="dark" class="astro-4yphtoen">Dark</option><option value="light" class="astro-4yphtoen">Light</option><option value="auto" selected class="astro-4yphtoen">Auto</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label> </starlight-theme-select>  <script>
+	StarlightThemeProvider.updatePickers();
+</script>  <starlight-lang-select><label style="--sl-select-width: 7em" class="astro-4yphtoen"> <span class="sr-only astro-4yphtoen">Select language</span> <svg aria-hidden="true" class="icon label-icon astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path fill-rule="evenodd" d="M8.516 3a.94.94 0 0 0-.941.94v1.15H2.94a.94.94 0 1 0 0 1.882h7.362a7.422 7.422 0 0 1-1.787 3.958 7.42 7.42 0 0 1-1.422-2.425.94.94 0 1 0-1.774.627 9.303 9.303 0 0 0 1.785 3.043 7.422 7.422 0 0 1-4.164 1.278.94.94 0 1 0 0 1.881 9.303 9.303 0 0 0 5.575-1.855 9.303 9.303 0 0 0 4.11 1.74l-.763 1.525a.968.968 0 0 0-.016.034l-1.385 2.77a.94.94 0 1 0 1.683.841l1.133-2.267h5.806l1.134 2.267a.94.94 0 0 0 1.683-.841l-1.385-2.769a.95.95 0 0 0-.018-.036l-3.476-6.951a.94.94 0 0 0-1.682 0l-1.82 3.639a7.423 7.423 0 0 1-3.593-1.256 9.303 9.303 0 0 0 2.27-5.203h1.894a.94.94 0 0 0 0-1.881H9.456V3.94A.94.94 0 0 0 8.516 3Zm6.426 11.794a1.068 1.068 0 0 1-.02.039l-.703 1.407h3.924l-1.962-3.924-1.24 2.478Z" clip-rule="evenodd"/></svg> <select autocomplete="off" class="astro-4yphtoen"> <option value="/senses/sense-18-the-ledger/" class="astro-4yphtoen">English</option><option value="/de/senses/sense-18-the-ledger/" class="astro-4yphtoen">Deutsch</option><option value="/fr/senses/sense-18-the-ledger/" class="astro-4yphtoen">Français</option> </select> <svg aria-hidden="true" class="icon caret astro-4yphtoen astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1em;"><path d="M17 9.17a1 1 0 0 0-1.41 0L12 12.71 8.46 9.17a1 1 0 1 0-1.41 1.42l4.24 4.24a1.002 1.002 0 0 0 1.42 0L17 10.59a1.002 1.002 0 0 0 0-1.42Z"/></svg> </label></starlight-lang-select> </div> </div> </div> </div> </nav> <div class="main-frame astro-vrdttmbt">  <script type="module">const a=document.getElementById("starlight__sidebar"),n=a?.querySelector("sl-sidebar-state-persist"),o="sl-sidebar-state",i=()=>{let t=[];const e=n?.dataset.hash||"";try{const s=sessionStorage.getItem(o),r=JSON.parse(s||"{}");Array.isArray(r.open)&&r.hash===e&&(t=r.open)}catch{}return{hash:e,open:t,scroll:a?.scrollTop||0}},c=t=>{try{sessionStorage.setItem(o,JSON.stringify(t))}catch{}},d=()=>c(i()),l=(t,e)=>{const s=i();s.open[e]=t,c(s)};n?.addEventListener("click",t=>{if(!(t.target instanceof Element))return;const e=t.target.closest("summary")?.closest("details");if(!e)return;const s=e.querySelector("sl-sidebar-restore"),r=parseInt(s?.dataset.index||"");isNaN(r)||l(!e.open,r)});addEventListener("visibilitychange",()=>{document.visibilityState==="hidden"&&d()});addEventListener("pageHide",d);</script> <div class="lg:sl-flex astro-67yu43on"> <aside class="right-sidebar-container print:hidden astro-67yu43on"> <div class="right-sidebar astro-67yu43on"> <script type="module" src="/_astro/MobileTableOfContents.astro_astro_type_script_index_0_lang.hwBsy0Mo.js"></script><script type="module" src="/_astro/TableOfContents.astro_astro_type_script_index_0_lang.FuRcXuRY.js"></script><div class="lg:sl-hidden astro-pb3aqygn"><mobile-starlight-toc data-min-h="2" data-max-h="3" class="astro-doynk5tl"><nav aria-labelledby="starlight__on-this-page--mobile" class="astro-doynk5tl"><details id="starlight__mobile-toc" class="astro-doynk5tl"><summary id="starlight__on-this-page--mobile" class="sl-flex astro-doynk5tl"><span class="toggle sl-flex astro-doynk5tl">On this page<svg aria-hidden="true" class="caret astro-doynk5tl astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1rem;"><path d="m14.83 11.29-4.24-4.24a1 1 0 1 0-1.42 1.41L12.71 12l-3.54 3.54a1 1 0 0 0 0 1.41 1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.24-4.24a1.002 1.002 0 0 0 0-1.42Z"/></svg></span><span class="display-current astro-doynk5tl"></span></summary><div class="dropdown astro-doynk5tl"><ul class="isMobile astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-question" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The question</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-concept" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The concept</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#what-it-looks-like" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What it looks like</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#example-net-exposure-headline" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Example: Net Exposure headline</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#example-signal-finding" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Example: Signal finding</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#two-phases" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Two phases</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-a-the-ledger-page" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase A: The Ledger page</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-b-contextual-explain-panels" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase B: Contextual “explain” panels</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#what-already-exists" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What already exists</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#whats-missing" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What’s missing</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#connection-to-other-senses" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Connection to other Senses</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-deeper-principle" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The deeper principle</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#how-this-manifests-in-jinflow" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">How this manifests in jinflow</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#open-questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Open questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#implementation-spec--surfaces-v1-2026-06-04" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Implementation spec — Surfaces V1 (2026-06-04)</span> </a> <ul class="isMobile astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#what-pulled-us-in" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">What pulled us in</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-principle" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The principle</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#relationship-to-sense-13--the-canvas" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Relationship to Sense 13 — The Canvas</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#schema" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Schema</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#v1-surface-vocabulary" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">V1 surface vocabulary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#where-the-vocabulary-lives" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Where the vocabulary lives</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#index-page--the-ledger" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Index page — the Ledger</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#chip-on-note-headers" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Chip on note headers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#migration-story--zero" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Migration story — zero</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#validation-rules-in-notecheckpy" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Validation rules (in notecheck.py)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#implementation-surface-file-by-file" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Implementation surface (file-by-file)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#outlook--what-v1-makes-possible-later" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Outlook — what V1 makes possible later</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#out-of-scope-deliberate-deferrals" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Out of scope (deliberate deferrals)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#exit-criterion" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Exit criterion</span> </a>  </li> </ul> </li> </ul></div></details></nav></mobile-starlight-toc></div><div class="right-sidebar-panel sl-hidden lg:sl-block astro-pb3aqygn"><div class="sl-container astro-pb3aqygn"><starlight-toc data-min-h="2" data-max-h="3"><nav aria-labelledby="starlight__on-this-page"><h2 id="starlight__on-this-page">On this page</h2><ul class="astro-gnoq344e" style="--depth: 0;"> <li class="astro-gnoq344e" style="--depth: 0;"> <a href="#_top" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Overview</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-question" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The question</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-concept" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The concept</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#what-it-looks-like" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What it looks like</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#example-net-exposure-headline" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Example: Net Exposure headline</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#example-signal-finding" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Example: Signal finding</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#two-phases" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Two phases</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-a-the-ledger-page" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase A: The Ledger page</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#phase-b-contextual-explain-panels" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Phase B: Contextual “explain” panels</span> </a>  </li> </ul> </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#what-already-exists" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What already exists</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#whats-missing" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">What’s missing</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#connection-to-other-senses" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Connection to other Senses</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#the-deeper-principle" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">The deeper principle</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#how-this-manifests-in-jinflow" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">How this manifests in jinflow</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#open-questions" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Open questions</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 0;"> <a href="#implementation-spec--surfaces-v1-2026-06-04" class="astro-gnoq344e" style="--depth: 0;"> <span class="astro-gnoq344e" style="--depth: 0;">Implementation spec — Surfaces V1 (2026-06-04)</span> </a> <ul class="astro-gnoq344e" style="--depth: 1;"> <li class="astro-gnoq344e" style="--depth: 1;"> <a href="#what-pulled-us-in" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">What pulled us in</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#the-principle" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">The principle</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#relationship-to-sense-13--the-canvas" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Relationship to Sense 13 — The Canvas</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#schema" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Schema</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#v1-surface-vocabulary" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">V1 surface vocabulary</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#where-the-vocabulary-lives" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Where the vocabulary lives</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#index-page--the-ledger" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Index page — the Ledger</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#chip-on-note-headers" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Chip on note headers</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#migration-story--zero" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Migration story — zero</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#validation-rules-in-notecheckpy" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Validation rules (in notecheck.py)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#implementation-surface-file-by-file" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Implementation surface (file-by-file)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#outlook--what-v1-makes-possible-later" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Outlook — what V1 makes possible later</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#out-of-scope-deliberate-deferrals" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Out of scope (deliberate deferrals)</span> </a>  </li><li class="astro-gnoq344e" style="--depth: 1;"> <a href="#exit-criterion" class="astro-gnoq344e" style="--depth: 1;"> <span class="astro-gnoq344e" style="--depth: 1;">Exit criterion</span> </a>  </li> </ul> </li> </ul></nav></starlight-toc></div></div> </div> </aside> <div class="main-pane astro-67yu43on">  <main data-pagefind-body class="astro-bguv2lll" lang="en" dir="ltr">    <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <h1 id="_top" class="astro-j6tvhyss">Sense 18: The Ledger — Computational Provenance as Narrative</h1> </div> </div> <div class="content-panel astro-7nkwcw3z"> <div class="sl-container astro-7nkwcw3z"> <div class="sl-markdown-content"> <p><strong>Sense 18</strong> · <strong>In bloom</strong> · <span class="last-touched">Last touched 2026-08-20</span></p>
+<ul>
+<li><strong>last_verified:</strong> 2026-06-05</li>
+</ul>
+<blockquote>
+<p>Synced from <a href="https://github.com/jazzisnow/jinflow/blob/main/docs/design/sense_18_the_ledger.md"><code dir="auto">docs/design/sense_18_the_ledger.md</code></a> in the engine repo — that’s the source; this page is a build-time mirror.</p>
+</blockquote>
+<blockquote>
+<p>Every number in jinflow has a story. The Ledger tells it.</p>
+</blockquote>
+<p><strong>Status</strong>: proposed
+<strong>Date</strong>: 2026-04-16</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="the-question">The question</h2><a class="sl-anchor-link" href="#the-question"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The question”</span></a></div>
+<p>A user sees <strong>CHF −5,095,660</strong> on the overview tile. A material is flagged
+<strong>high severity</strong>. A thesis says <strong>confirmed</strong>. The natural question:</p>
+<p><strong>“How do you know?”</strong></p>
+<p>Not “how does jinflow work” (that’s the What is this? page). Not “what’s
+the DAG” (that’s dbt docs). The question is specific:</p>
+<blockquote>
+<p>How did THIS number come from MY data, through which steps,
+with what assumptions?</p>
+</blockquote>
+<p>Today jinflow can tell you <em>what</em> it found. It cannot tell a non-technical
+user <em>how it got there</em>.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="the-concept">The concept</h2><a class="sl-anchor-link" href="#the-concept"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The concept”</span></a></div>
+<p><strong>The Ledger</strong> is computational provenance rendered as narrative — specific
+to this tenant, this data, this moment. Like a financial ledger that traces
+every number back to its source transactions, the analytical Ledger traces
+every finding back through the pipeline:</p>
+<div class="expressive-code"><link rel="stylesheet" href="/_astro/ec.v4551.css"><script type="module" src="/_astro/ec.0vx5m.js"></script><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="plaintext"><code><div class="ec-line"><div class="code"><span style="--0:#d6deeb;--1:#403f53">Source delivery → Extraction → Bronze → Silver → Gold → Signal → Thesis → Verdict</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="Source delivery → Extraction → Bronze → Silver → Gold → Signal → Thesis → Verdict"><div></div></button></div></figure></div>
+<p>Each step is narrated: what went in, what came out, what was filtered, what
+was assumed, and what could change the result.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="what-it-looks-like">What it looks like</h2><a class="sl-anchor-link" href="#what-it-looks-like"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “What it looks like”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="example-net-exposure-headline">Example: Net Exposure headline</h3><a class="sl-anchor-link" href="#example-net-exposure-headline"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Example: Net Exposure headline”</span></a></div>
+<blockquote>
+<p><strong>Net Exposure: CHF −5,095,660</strong></p>
+<p>This number is the sum of all material-level net exposures where the
+polarity is “leakage” (delivered but not billed). It comes from
+<code dir="auto">gold_net_exposure</code>, which computes the arithmetic difference between
+warehouse deliveries and patient billing per material over the trailing
+12 months.</p>
+<p><strong>Data path:</strong></p>
+<ol>
+<li><strong>Source</strong>: 2,375,126 billing events extracted from the source system’s E3-E4 exports
+(OPALE, Feb 2026 delivery)</li>
+<li><strong>Bronze</strong>: structural ingestion, 14 columns preserved</li>
+<li><strong>Silver</strong>: validated — 2,371,842 rows passed (99.86%), 3,284 flagged
+invalid (missing case_id, date out of range)</li>
+<li><strong>Gold</strong>: filtered to is_valid=true, joined with material master</li>
+<li><strong>Gold I/O</strong>: transfer qty vs usage qty per material × month →
+net_exposure_chf per material</li>
+<li><strong>Aggregation</strong>: sum of abs(net_exposure_chf) WHERE polarity = ‘leakage’</li>
+</ol>
+<p><strong>What could change this number:</strong></p>
+<ul>
+<li>A new data delivery (current: Feb 2026)</li>
+<li>Fixing 3,284 invalid billing rows (currently excluded)</li>
+<li>Changing the time window (currently trailing 12 months)</li>
+</ul>
+</blockquote>
+<div class="sl-heading-wrapper level-h3"><h3 id="example-signal-finding">Example: Signal finding</h3><a class="sl-anchor-link" href="#example-signal-finding"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Example: Signal finding”</span></a></div>
+<blockquote>
+<p><strong>signal_negative_margin</strong> flagged material 620260 at <strong>high severity</strong></p>
+<p><strong>Why</strong>: billing price (CHF 12.50) is below internal price (CHF 18.30)
+for 847 billing events in the trailing 12 months.</p>
+<p><strong>Data path:</strong></p>
+<ol>
+<li>Billing price from <code dir="auto">gold_billing_prices</code> (derived from E3-E4 billing
+events, averaged by material × month)</li>
+<li>Internal price from <code dir="auto">gold_article_price_palette</code> rule <code dir="auto">default</code>
+(E1 catalogue, latest valid entry)</li>
+<li>Margin = billing − internal = CHF −5.80 per unit × 847 events</li>
+</ol>
+<p><strong>Assumptions:</strong></p>
+<ul>
+<li>Price palette uses the <code dir="auto">default</code> rule (highest-confidence catalogue entry)</li>
+<li>Billing events include all statuses (POSTED, PENDING, REVERSED)</li>
+</ul>
+</blockquote>
+<div class="sl-heading-wrapper level-h2"><h2 id="two-phases">Two phases</h2><a class="sl-anchor-link" href="#two-phases"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Two phases”</span></a></div>
+<div class="sl-heading-wrapper level-h3"><h3 id="phase-a-the-ledger-page">Phase A: The Ledger page</h3><a class="sl-anchor-link" href="#phase-a-the-ledger-page"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Phase A: The Ledger page”</span></a></div>
+<p>A dedicated tenant page at <code dir="auto">/{tenant}/ledger</code> (or <code dir="auto">/{tenant}/how</code>) that
+walks through the pipeline top-down:</p>
+<ol>
+<li>
+<p><strong>Sources</strong> — what was delivered, when, by whom, how many rows, SHA-256
+verified? Reads from <code dir="auto">pipeline.yml</code> + <code dir="auto">lineage_pipeline_metrics</code>.</p>
+</li>
+<li>
+<p><strong>Layers</strong> — Bronze → Silver → Gold with row counts, validity rates,
+filter rationale. Reads from <code dir="auto">lineage_pipeline_metrics</code> +
+<code dir="auto">silver_quality_metrics</code> + <code dir="auto">gold_quality_metrics</code>.</p>
+</li>
+<li>
+<p><strong>Entities</strong> — for each Gold entity, what it represents, how many rows,
+key columns, what was joined/derived. Reads from <code dir="auto">entity_registry</code> +
+entity YAML definitions.</p>
+</li>
+<li>
+<p><strong>Signals</strong> — what patterns were detected, how many findings, what
+severity distribution. Reads from <code dir="auto">signal_registry</code> + finding counts.</p>
+</li>
+<li>
+<p><strong>Theses &#x26; Verdicts</strong> — what questions were asked, what was confirmed,
+what root causes identified. Reads from <code dir="auto">thesis_verdicts</code> +
+<code dir="auto">verdict_findings</code>.</p>
+</li>
+<li>
+<p><strong>Net Exposure</strong> — the headline financial number, fully traced.</p>
+</li>
+</ol>
+<p>The page is <strong>generated at <code dir="auto">jin make</code> time</strong> from data already in the KLS:
+lineage tables, quality metrics, registries, entity definitions. No new
+computation needed — just narrative assembly.</p>
+<p>This is essentially a <strong>report</strong> (kind: report notebook) with a fixed
+structure that every tenant gets. The report engine (Step 6) can render
+it to PDF. JinDesk renders it as a scrollable page.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="phase-b-contextual-explain-panels">Phase B: Contextual “explain” panels</h3><a class="sl-anchor-link" href="#phase-b-contextual-explain-panels"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Phase B: Contextual “explain” panels”</span></a></div>
+<p>From any number on any JinDesk page, click to expand an inline explanation.
+A small icon (ℹ or ?) next to values that have provenance. Clicking opens
+a panel that shows the computation path for that specific value.</p>
+<p>Phase B is harder because it requires:</p>
+<ul>
+<li>Knowing which query produced the displayed value</li>
+<li>Tracing the query back through the model DAG</li>
+<li>Rendering the explanation in context (not a separate page)</li>
+</ul>
+<p>Phase B grows naturally from Phase A — once the narrative templates exist
+(from the Ledger page), they can be reused in contextual panels.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="what-already-exists">What already exists</h2><a class="sl-anchor-link" href="#what-already-exists"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “What already exists”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Asset</th><th>What it provides for the Ledger</th></tr></thead><tbody><tr><td><code dir="auto">lineage/*.yaml</code></td><td>Data flow declarations (Bronze → Silver → Gold)</td></tr><tr><td><code dir="auto">lineage_pipeline_metrics</code></td><td>Per-layer row counts, valid/invalid splits</td></tr><tr><td><code dir="auto">silver_quality_metrics</code></td><td>Invalid row counts + reasons</td></tr><tr><td><code dir="auto">gold_quality_metrics</code></td><td>Silver-to-Gold row loss</td></tr><tr><td><code dir="auto">entity_registry</code> + <code dir="auto">entities/*.yaml</code></td><td>Entity descriptions + column semantics</td></tr><tr><td><code dir="auto">signal_registry</code></td><td>Signal descriptions + finding counts</td></tr><tr><td><code dir="auto">thesis_verdicts</code> + interpretations</td><td>Thesis status + human-readable explanation</td></tr><tr><td><code dir="auto">pipeline.yml</code></td><td>Source declarations with SHA-256 + delivery metadata</td></tr><tr><td><code dir="auto">gold_net_exposure</code></td><td>The I/O-based financial truth</td></tr><tr><td><code dir="auto">notereportrender.py</code></td><td>PDF rendering engine (metric + table + narrative + chart cells)</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h2"><h2 id="whats-missing">What’s missing</h2><a class="sl-anchor-link" href="#whats-missing"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “What’s missing”</span></a></div>
+<ol>
+<li><strong>Narrative templates</strong> — nobody stitches lineage + metrics + entity
+descriptions into a readable story for a specific number</li>
+<li><strong>Entry point</strong> — no “explain this” gesture from any JinDesk page</li>
+<li><strong>Tenant-specific rendering</strong> — the narrative must reflect THIS tenant’s
+source system (OPALE, not SAP), THIS delivery date, THIS row counts</li>
+<li><strong>Assumption transparency</strong> — what filters, what time window, what was
+excluded and why</li>
+<li><strong>“What could change” section</strong> — the most trust-building part: telling
+the user what would make this number move</li>
+</ol>
+<div class="sl-heading-wrapper level-h2"><h2 id="connection-to-other-senses">Connection to other Senses</h2><a class="sl-anchor-link" href="#connection-to-other-senses"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Connection to other Senses”</span></a></div>
+<ul>
+<li><strong>Sense 14 (The Signal)</strong>: signals are the primary “claims” that need
+provenance. The Ledger explains how each signal reached its conclusion.</li>
+<li><strong>Sense 15 (Observations &#x26; Explanations)</strong>: Explanations are the
+strategic layer above Verdicts. The Ledger is the operational layer
+below — it explains the machinery, not the meaning.</li>
+<li><strong>Sense 13 (The Canvas)</strong>: the Ledger page could be a Canvas page
+definition (YAML-declared, panel-composed) rather than a hardcoded route.</li>
+<li><strong>Sense 42 (The Landscape)</strong>: the system surface as a vantage —
+the Garden (structural view) and the River (temporal view) live
+inside it. The Ledger is the prose companion to the Garden — same
+story, different medium.</li>
+<li><strong>Three inputs to Understanding</strong>: the Ledger is firmly a <strong>Data</strong>-stream
+artefact — it accretes what analytical instruments have said over time.
+<strong>Knowledge</strong> (Dossiers, Statements) might annotate the Ledger but
+doesn’t drive it; <strong>Observations</strong> cite Ledger entries as evidence
+through Contributing Factors.</li>
+</ul>
+<div class="sl-heading-wrapper level-h2"><h2 id="the-deeper-principle">The deeper principle</h2><a class="sl-anchor-link" href="#the-deeper-principle"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The deeper principle”</span></a></div>
+<p>Dashboards show answers. jinflow shows work.</p>
+<p>The Ledger is what makes jinflow auditable. It’s the difference between
+“trust me, the number is −5M” and “here’s exactly how we got −5M, here’s
+what we assumed, and here’s what would change it.” In a hospital
+procurement context, that transparency is not a feature — it’s a
+requirement.</p>
+<div class="sl-heading-wrapper level-h2"><h2 id="how-this-manifests-in-jinflow">How this manifests in jinflow</h2><a class="sl-anchor-link" href="#how-this-manifests-in-jinflow"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “How this manifests in jinflow”</span></a></div>
+<p>The Ledger answers <em>“where did this number come from?”</em> for every result. The first running surface is the per-finding provenance panel and the dedicated Ledger page in JinDesk; the deeper computational-narrative form (every dbt model, every join, every signal call that produced a single value) is forming.</p>
+<ul>
+<li>
+<p><strong>In the app</strong>: <a href="https://this-is.jinflow.io/hrcentral.vai/ledger">Ledger</a> · per-finding provenance on the <a href="https://this-is.jinflow.io/hrcentral.vai/findings">Findings</a> detail pages</p>
+</li>
+<li>
+<p><strong>Pairs with</strong>: <a href="/senses/sense-36-the-lineage/">Sense 36 The Lineage</a> — Lineage carries pack-to-tenant origin; the Ledger carries within-tenant computation</p>
+</li>
+</ul>
+<p>Status: <strong>in bloom</strong>. Basic provenance views are live; the full narrative chain (every transform, every reference) is the next layer.</p>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="open-questions">Open questions</h2><a class="sl-anchor-link" href="#open-questions"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Open questions”</span></a></div>
+<ol>
+<li>
+<p><strong>Name</strong>: “Ledger” vs “Provenance” vs “How” vs “Trail” vs “Receipt”?
+The name should be intuitive for hospital administrators, not just
+developers.</p>
+</li>
+<li>
+<p><strong>Granularity</strong>: does the Ledger explain every Gold column, or just
+the headline metrics (net exposure, finding counts, thesis verdicts)?
+Start narrow, expand based on user feedback.</p>
+</li>
+<li>
+<p><strong>Staleness</strong>: the Ledger reflects the last <code dir="auto">jin make</code>. If the user
+changes data and hasn’t rebuilt, the Ledger is stale. Should it show
+a warning? Should it timestamp visibly?</p>
+</li>
+<li>
+<p><strong>Interactivity</strong>: is the Ledger a static document (generated once,
+read many) or does it allow drill-down (click a layer to see the
+actual rows)? Phase A = static, Phase B = interactive.</p>
+</li>
+<li>
+<p><del><strong>Multi-tenant</strong>: does the platform layer need its own Ledger? Or is
+provenance always per-tenant?</del> <strong>Resolved 2026-06-02</strong> — the platform
+layer was retired (“the future will not be KLS with multiple tenants”).
+Provenance is per-tenant, period.</p>
+</li>
+</ol>
+<hr>
+<div class="sl-heading-wrapper level-h2"><h2 id="implementation-spec--surfaces-v1-2026-06-04">Implementation spec — Surfaces V1 (2026-06-04)</h2><a class="sl-anchor-link" href="#implementation-spec--surfaces-v1-2026-06-04"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Implementation spec — Surfaces V1 (2026-06-04)”</span></a></div>
+<p><strong>Status</strong>: spec, awaiting review. Code follows in a separate commit
+per the CLAUDE.md <em>spec before code for substantive engine work</em>
+rule.</p>
+<p>The Ledger spike on 2026-06-03/04 converged on a clear shape: traces
+are <code dir="auto">kind: report</code> notes. The next question — surfaced by Mig during
+the spike review — was <em>“how does the user see that a note is a
+Ledger entry and not just any note?”</em></p>
+<p>This spec answers that question with a mechanism wider than the
+Ledger. It’s structured around the Ledger’s V1 needs but the
+machinery is general: <strong>a note declares which surfaces render it.</strong></p>
+<div class="sl-heading-wrapper level-h3"><h3 id="what-pulled-us-in">What pulled us in</h3><a class="sl-anchor-link" href="#what-pulled-us-in"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “What pulled us in”</span></a></div>
+<p>Mig’s framing during the comparison between the hardcoded spike and
+the note-rendered version:</p>
+<blockquote>
+<p><em>“Note is missing certain information and disclaimers. Typographically
+note is more pleasing, and I truly think that we should go the note
+way. Currently there are no labels set, right? In the future we
+will mark clearly all sources that choose to use the notebook as an
+output channel.”</em></p>
+</blockquote>
+<p>The pre-spike phrasing of this question — <em>“tags for Ledger
+entries”</em> — was too narrow. The honest framing is broader: a note is
+content; the notebook view is one surface that renders it; the
+Ledger is another surface; future surfaces (a dashboard, a weekly
+digest, a PDF series) are more. <strong>Where a note appears should be
+declared on the note, not on the surface.</strong></p>
+<div class="sl-heading-wrapper level-h3"><h3 id="the-principle">The principle</h3><a class="sl-anchor-link" href="#the-principle"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “The principle”</span></a></div>
+<p>A note is content. A <em>surface</em> is a presentation context — a route,
+a list, a digest, a PDF series. The note declares which surfaces it
+belongs to. Each surface decides how to render the notes that named
+it. <strong>Authoring stays in YAML; JinDesk reads the declaration
+and routes accordingly.</strong></p>
+<div class="sl-heading-wrapper level-h3"><h3 id="relationship-to-sense-13--the-canvas">Relationship to Sense 13 — The Canvas</h3><a class="sl-anchor-link" href="#relationship-to-sense-13--the-canvas"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Relationship to Sense 13 — The Canvas”</span></a></div>
+<p><a href="./sense_13_the_canvas.md">The Canvas</a> is about <em>interior composition</em>:
+a page is built from declarative panels/cells. Surfaces is about
+<em>exterior routing</em>: an artifact declares which presentation contexts
+it belongs to. Same Form-Follows-Data conviction, different sides of
+the handshake.</p>
+<p>Each surface (Ledger, Dashboard, …) is conceptually a Canvas page.
+V1 ships them as SvelteKit routes — predictable, fast. When Canvas
+matures into “any page from YAML declaration”, surfaces becomes one
+of the filters a Canvas page reads. Two design constraints flow from
+this and apply to V1:</p>
+<ol>
+<li><strong><code dir="auto">surfaces</code> is a flat list of identifier strings, not a richer
+object.</strong> Future Canvas pages can filter on the field
+(<code dir="auto">filter: { surfaces: contains 'ledger' }</code>); they shouldn’t need
+to parse semantic structure inside each entry.</li>
+<li><strong>The note never carries surface-specific rendering.</strong> It
+declares which surfaces it belongs to; <em>the surface decides how
+to render it.</em> The same note appearing on <code dir="auto">notebook</code> and
+<code dir="auto">ledger</code> looks identical content-wise; only the chrome differs.</li>
+</ol>
+<p>If we hold those two lines, surfaces V1 ships now and Canvas absorbs
+it cleanly when ready.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="schema">Schema</h3><a class="sl-anchor-link" href="#schema"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Schema”</span></a></div>
+<p>A new optional top-level field on note YAMLs:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="yaml"><code><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">note_id</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">nb_ledger_net_exposure</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">kind</span><span style="--0:#D6DEEB;--1:#403F53">: </span><span style="--0:#ECC48D;--1:#3B61B0">report</span></div></div><div class="ec-line"><div class="code"><span style="--0:#7FDBCA;--1:#111111">surfaces</span><span style="--0:#D6DEEB;--1:#403F53">:</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">- </span><span style="--0:#ECC48D;--1:#3B61B0">notebook</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">  </span></span><span style="--0:#D6DEEB;--1:#403F53">- </span><span style="--0:#ECC48D;--1:#3B61B0">ledger</span></div></div><div class="ec-line"><div class="code"><span style="--0:#919F9F;--1:#5F636F"># ... rest of the note unchanged</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="note_id: nb_ledger_net_exposurekind: reportsurfaces:  - notebook  - ledger# ... rest of the note unchanged"><div></div></button></div></figure></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Property</th><th>Detail</th></tr></thead><tbody><tr><td>Type</td><td>List of strings</td></tr><tr><td>Default</td><td><code dir="auto">[notebook]</code> — every note browseable in the standard notebook view</td></tr><tr><td>Required</td><td>No — absence equals default</td></tr><tr><td>Empty list</td><td>Warning at compile time, treated as default</td></tr><tr><td>Unknown surface</td><td>Hard error at compile time (<code dir="auto">notecheck.py</code>)</td></tr><tr><td>Duplicates</td><td>Silently deduplicated</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="v1-surface-vocabulary">V1 surface vocabulary</h3><a class="sl-anchor-link" href="#v1-surface-vocabulary"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “V1 surface vocabulary”</span></a></div>
+<p>Two values supported:</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Surface</th><th>Meaning</th><th>Route</th></tr></thead><tbody><tr><td><code dir="auto">notebook</code></td><td>Standard browseable note. Default for every note.</td><td><code dir="auto">/&#x3C;tenant>/notebook?note=&#x3C;id></code></td></tr><tr><td><code dir="auto">ledger</code></td><td>A trace — a Ledger entry. Appears in the Ledger collection.</td><td><code dir="auto">/&#x3C;tenant>/ledger</code> (index), still readable via notebook URL</td></tr></tbody></table>
+<p>Future surfaces (<code dir="auto">dashboard</code>, <code dir="auto">digest</code>, etc.) land one at a time when
+a real driver arrives. Per the existing
+<em>“don’t pre-emptively migrate”</em> discipline, the vocabulary doesn’t
+grow until forced.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="where-the-vocabulary-lives">Where the vocabulary lives</h3><a class="sl-anchor-link" href="#where-the-vocabulary-lives"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Where the vocabulary lives”</span></a></div>
+<p>For V1, hardcoded in two places (mirror to the
+<a href="./sister18_sister42_conversations.md#q2-2026-06-02--jinflow_name-strings-as-a-shared-catalog">sister 42 Q2 conversation</a>
+about <code dir="auto">jinflow_name</code>):</p>
+<ul>
+<li><strong>Python</strong>: <code dir="auto">scripts/notecheck.py</code> — validator constant</li>
+<li><strong>TypeScript</strong>: <code dir="auto">explorer/src/lib/notes/surfaces.ts</code> (new) — chip
+rendering + index page filter</li>
+</ul>
+<p>When a third consumer arrives, extract to a shared catalog
+(<code dir="auto">jinflow/jinflow_surfaces.py</code> + TS mirror). Don’t refactor
+preemptively — same pattern as <code dir="auto">jinflow_name</code>.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="index-page--the-ledger">Index page — the Ledger</h3><a class="sl-anchor-link" href="#index-page--the-ledger"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Index page — the Ledger”</span></a></div>
+<p>A new SvelteKit route <code dir="auto">/[tenant]/ledger/+page.svelte</code> (and
+<code dir="auto">+page.server.ts</code>).</p>
+<p>Server load:</p>
+<div class="expressive-code"><figure class="frame not-content"><figcaption class="header"></figcaption><pre data-language="sql"><code><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">SELECT</span><span style="--0:#D6DEEB;--1:#403F53"> note_id, title_de, title_en, title_fr, title_it, modified_at,</span></div></div><div class="ec-line"><div class="code"><span class="indent"><span style="--0:#D6DEEB;--1:#403F53">       </span></span><span style="--0:#D6DEEB;--1:#403F53">kind, surfaces, tags</span></div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">FROM</span><span style="--0:#D6DEEB;--1:#403F53"> </span><span style="--0:#C792EA;--1:#8844AE">&#x3C;schema></span><span style="--0:#D6DEEB;--1:#403F53">.notes</span></div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">WHERE</span><span style="--0:#D6DEEB;--1:#403F53"> list_contains(surfaces, </span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#ECC48D;--1:#984E4D">ledger</span><span style="--0:#D9F5DD;--1:#111111">'</span><span style="--0:#D6DEEB;--1:#403F53">)</span></div></div><div class="ec-line"><div class="code"><span style="--0:#C792EA;--1:#8844AE">ORDER BY</span><span style="--0:#D6DEEB;--1:#403F53"> modified_at </span><span style="--0:#C792EA;--1:#8844AE">DESC</span></div></div></code></pre><div class="copy"><div aria-live="polite"></div><button title="Copy to clipboard" data-copied="Copied!" data-code="SELECT note_id, title_de, title_en, title_fr, title_it, modified_at,       kind, surfaces, tagsFROM <schema>.notesWHERE list_contains(surfaces, &#x27;ledger&#x27;)ORDER BY modified_at DESC"><div></div></button></div></figure></div>
+<p>Render: a list of cards. Each card shows the note title (in active
+locale), modified date, the first metric or table label as a
+preview, and the Ledger chip. Click → routes to
+<code dir="auto">/&#x3C;tenant>/notebook?note=&#x3C;id></code>.</p>
+<p>The page itself carries a one-line introduction: <em>“Every number in
+the Ledger has a story. Click a trace to read where it came from,
+what assumes it, and what could change it.”</em></p>
+<p>When the Ledger collection is empty for a tenant (no notes have
+<code dir="auto">surfaces: [ledger]</code>), render the empty-state with a hint that
+pack authors can promote a note by adding the surface declaration.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="chip-on-note-headers">Chip on note headers</h3><a class="sl-anchor-link" href="#chip-on-note-headers"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Chip on note headers”</span></a></div>
+<p>A small visible badge on the note’s header — one per surface that
+isn’t <code dir="auto">notebook</code> (the default). On the notebook view of a
+<code dir="auto">surfaces: [notebook, ledger]</code> note, a <em>Ledger</em> chip appears next
+to the title. Clicking the chip routes to the surface’s index page.</p>
+<p>Visual treatment matches existing chips (PostureChip etc.) — small,
+unobtrusive, semantic colour. The <code dir="auto">notebook</code> default surface gets
+no chip (it’s the universal context, doesn’t deserve a marker).</p>
+<p>Chip label is i18n-keyed (<code dir="auto">surfaces.ledger.label</code>, etc.) so locales
+follow.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="migration-story--zero">Migration story — zero</h3><a class="sl-anchor-link" href="#migration-story--zero"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Migration story — zero”</span></a></div>
+<p>All existing notes default to <code dir="auto">surfaces: [notebook]</code>. Their behaviour
+is byte-identical to before. The very first promoted note —
+<code dir="auto">nb_ledger_net_exposure.yaml</code> in numetrix — is the migration:
+add the field, watch the chip appear, watch the Ledger index page
+populate.</p>
+<div class="sl-heading-wrapper level-h3"><h3 id="validation-rules-in-notecheckpy">Validation rules (in <code dir="auto">notecheck.py</code>)</h3><a class="sl-anchor-link" href="#validation-rules-in-notecheckpy"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Validation rules (in notecheck.py)”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Check</th><th>Severity</th></tr></thead><tbody><tr><td><code dir="auto">surfaces:</code> present but not a list</td><td>Error</td></tr><tr><td><code dir="auto">surfaces:</code> contains a value outside V1 vocabulary</td><td>Error</td></tr><tr><td><code dir="auto">surfaces:</code> is empty list</td><td>Warning</td></tr><tr><td><code dir="auto">surfaces:</code> contains <code dir="auto">notebook</code> only</td><td>Allowed (verbose default)</td></tr><tr><td><code dir="auto">surfaces:</code> absent</td><td>Allowed (silently defaults)</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="implementation-surface-file-by-file">Implementation surface (file-by-file)</h3><a class="sl-anchor-link" href="#implementation-surface-file-by-file"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Implementation surface (file-by-file)”</span></a></div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>File</th><th>Change</th></tr></thead><tbody><tr><td><code dir="auto">scripts/notecheck.py</code></td><td>New <code dir="auto">VALID_SURFACES = {'notebook', 'ledger'}</code> constant; new validator call inside the per-note loop.</td></tr><tr><td><code dir="auto">scripts/notecompile.py</code></td><td>If notes get baked into a table (verify), include <code dir="auto">surfaces</code> column. Otherwise no change.</td></tr><tr><td><code dir="auto">explorer/src/lib/notes/surfaces.ts</code> <em>(new)</em></td><td>TypeScript mirror of the vocabulary + chip metadata (label-key, route).</td></tr><tr><td><code dir="auto">explorer/src/lib/components/notes/SurfaceChip.svelte</code> <em>(new)</em></td><td>Renders a clickable chip per surface.</td></tr><tr><td><code dir="auto">explorer/src/routes/[tenant]/ledger/+page.server.ts</code> <em>(new)</em></td><td>Server load queries notes filtered by surface.</td></tr><tr><td><code dir="auto">explorer/src/routes/[tenant]/ledger/+page.svelte</code> <em>(new)</em></td><td>Index page.</td></tr><tr><td><code dir="auto">explorer/src/routes/[tenant]/notebook/+page.svelte</code></td><td>Mount <code dir="auto">SurfaceChip</code> next to the note title.</td></tr><tr><td><code dir="auto">explorer/src/lib/i18n/locales/{de,en,fr,it}.json</code></td><td>Add <code dir="auto">surfaces.ledger.label</code> and one-liner intro for the Ledger index page.</td></tr><tr><td><code dir="auto">tests/test_notecheck.py</code></td><td>New cases for valid / unknown / empty / absent.</td></tr><tr><td><code dir="auto">jinflow-pack-numetrix/notebook/nb_ledger_net_exposure.yaml</code></td><td>Add <code dir="auto">surfaces: [notebook, ledger]</code>. First adopter.</td></tr><tr><td><code dir="auto">docs/design/sister18_sister42_conversations.md</code></td><td>Mark the surfaces question <code dir="auto">resolved 2026-06-04</code> once code lands.</td></tr></tbody></table>
+<div class="sl-heading-wrapper level-h3"><h3 id="outlook--what-v1-makes-possible-later">Outlook — what V1 makes possible later</h3><a class="sl-anchor-link" href="#outlook--what-v1-makes-possible-later"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Outlook — what V1 makes possible later”</span></a></div>
+<ul>
+<li><strong>A new pack ships a <code dir="auto">dashboard:</code> surface</strong> — its notes opt in with
+<code dir="auto">surfaces: [dashboard]</code>. Future Dashboard route reads the same
+field; no new mechanism.</li>
+<li><strong>Per-identity visibility</strong> (per the <a href="./sense_43_the_cascade.md#outlook---additional-resolution-axes">Sense 43 Outlook section</a>)
+could be added by introducing <code dir="auto">surfaces:</code> overlays — e.g., the
+surface list resolves through identity/role overlays before
+filtering. Not V1.</li>
+<li><strong>Canvas-rendered surface index</strong> — when <a href="./sense_13_the_canvas.md">Canvas</a>
+matures, the <code dir="auto">/ledger</code> route migrates from a SvelteKit route to a
+Canvas page declaration. Filters on <code dir="auto">surfaces</code> contains <code dir="auto">ledger</code>.
+The note YAMLs are unchanged.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="out-of-scope-deliberate-deferrals">Out of scope (deliberate deferrals)</h3><a class="sl-anchor-link" href="#out-of-scope-deliberate-deferrals"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Out of scope (deliberate deferrals)”</span></a></div>
+<ul>
+<li>A third surface (dashboard, digest, etc.). One forcing case at a
+time. The Ledger forces V1; the next pack with a real second-surface
+driver forces V2.</li>
+<li>Surface-specific rendering hints in the note YAML (e.g., <em>“on the
+Ledger surface, render only cells 1, 4, 6”</em>). Notes stay content-
+shaped; surfaces stay form-shaped.</li>
+<li>Per-surface validation rules beyond vocabulary check (e.g.,
+<em>“surface <code dir="auto">ledger</code> requires a <code dir="auto">kind: report</code>”</em>). Not needed for the
+Ledger spike; revisit when a surface emerges that has real
+pre-conditions.</li>
+<li>The “what could change this number” cell type promotion. Still a
+V1 <code dir="auto">narrative</code> cell. Wait for a second trace before inventing a
+new cell kind.</li>
+</ul>
+<div class="sl-heading-wrapper level-h3"><h3 id="exit-criterion">Exit criterion</h3><a class="sl-anchor-link" href="#exit-criterion"><span aria-hidden="true" class="sl-anchor-icon"><svg width="16" height="16" viewBox="0 0 24 24"><path fill="currentcolor" d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 0 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 1 0-1.42-1.42Zm8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 0 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 1 0 1.42 1.42l3.88-3.89a4.49 4.49 0 0 0 0-6.33ZM8.83 15.17a1 1 0 0 0 1.1.22 1 1 0 0 0 .32-.22l4.92-4.92a1 1 0 0 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42Z"></path></svg></span><span class="sr-only" data-pagefind-ignore="">Section titled “Exit criterion”</span></a></div>
+<p>A pack author can add <code dir="auto">surfaces: [ledger]</code> to any note in
+<code dir="auto">&#x3C;pack>/notebook/</code>, run <code dir="auto">jin afs update --do-it &#x26;&#x26; jin make</code>, and
+see:</p>
+<ol>
+<li>The note appears on <code dir="auto">/&#x3C;tenant>/ledger</code></li>
+<li>The note’s title in the notebook view carries a <em>Ledger</em> chip</li>
+<li>Removing the field reverts both signals — the note vanishes from
+the Ledger collection and the chip disappears</li>
+</ol>
+<p>with <strong>zero Svelte edits</strong> and zero pack-internal SQL.</p>
+<hr>
+<p><em>Numerical neighbors:</em> ← <a href="/senses/sense-17-the-house/">Sense 17: The House</a> · <a href="/senses/sense-19-the-simulation/">Sense 19: The Simulation</a> →</p> </div> <footer class="sl-flex astro-3yyafb3n"> <div class="meta sl-flex astro-3yyafb3n">   </div> <div class="pagination-links print:hidden astro-u2l5gyhi" dir="ltr"> <a href="/senses/sense-15/" rel="prev" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17 11H9.41l3.3-3.29a1.004 1.004 0 1 0-1.42-1.42l-5 5a1 1 0 0 0-.21.33 1 1 0 0 0 0 .76 1 1 0 0 0 .21.33l5 5a1.002 1.002 0 0 0 1.639-.325 1 1 0 0 0-.219-1.095L9.41 13H17a1 1 0 0 0 0-2Z"/></svg> <span class="astro-u2l5gyhi"> Previous <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Sense 15 — Observation, Explanation, Contributing Factor</span> </span> </a> <a href="/senses/sense-19-the-simulation/" rel="next" class="astro-u2l5gyhi"> <svg aria-hidden="true" class="astro-u2l5gyhi astro-c6vsoqas" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="--sl-icon-size: 1.5rem;"><path d="M17.92 11.62a1.001 1.001 0 0 0-.21-.33l-5-5a1.003 1.003 0 1 0-1.42 1.42l3.3 3.29H7a1 1 0 0 0 0 2h7.59l-3.3 3.29a1.002 1.002 0 0 0 .325 1.639 1 1 0 0 0 1.095-.219l5-5a1 1 0 0 0 .21-.33 1 1 0 0 0 0-.76Z"/></svg> <span class="astro-u2l5gyhi"> Next <br class="astro-u2l5gyhi"> <span class="link-title astro-u2l5gyhi">Sense 19 — The Simulation</span> </span> </a> </div>  </footer> <div style="text-align: center; padding: 1.5rem 0 0.5rem; opacity: 0.5; font-size: 0.8rem; border-top: 1px solid var(--sl-color-gray-6);"> <a href="https://jazzisnow.com" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.4rem;"> <img src="/jazzisnow-logo.svg" alt="jazzisnow" style="height: 1.4em;">
+jinflow is a jazzisnow product
+</a> <div style="margin-top: 0.3rem; font-family: monospace; font-size: 0.7rem; opacity: 0.7;">
+v0.63.41 · built 2026-09-06 19:39 UTC </div> </div> </div> </div>  </main> </div> </div> </div> </div> </body></html>
