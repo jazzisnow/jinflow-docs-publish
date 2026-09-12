@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --accent-glow: rgba(42, 143, 143, 0.08);
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Slide container ── */
+  .deck {
+    position: relative;
+    width: 100%; height: 100%;
+  }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 8vh 10vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* ── Typography ── */
+  .logo {
+    font-size: clamp(1.2rem, 2vw, 1.6rem);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 3vh;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    text-align: center;
+    color: var(--navy);
+    margin-bottom: 3vh;
+    max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.6rem, 3.2vw, 2.6rem);
+    font-weight: 600;
+    line-height: 1.25;
+    text-align: center;
+    color: var(--navy);
+    margin-bottom: 2.5vh;
+    max-width: 800px;
+  }
+
+  .subtitle {
+    font-size: clamp(1.1rem, 2vw, 1.5rem);
+    font-weight: 300;
+    line-height: 1.6;
+    text-align: center;
+    color: var(--slate);
+    max-width: 700px;
+  }
+
+  .highlight {
+    color: var(--teal);
+    font-weight: 500;
+  }
+
+  /* ── Staggered fade-in for child elements ── */
+  .slide .fade-in {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+
+  /* ── Decorative line ── */
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px;
+    margin: 2.5vh 0;
+  }
+
+  /* ── Step cards ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2.5vw;
+    max-width: 1000px;
+    width: 100%;
+    margin-top: 2vh;
+  }
+
+  .step {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px;
+    padding: 2.5vh 2vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .step-num {
+    font-size: clamp(2rem, 3vw, 3rem);
+    font-weight: 700;
+    color: var(--teal);
+    line-height: 1;
+    margin-bottom: 1vh;
+  }
+
+  .step-title {
+    font-size: clamp(0.95rem, 1.4vw, 1.15rem);
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 0.8vh;
+  }
+
+  .step-desc {
+    font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+    color: var(--warm-gray);
+    line-height: 1.5;
+  }
+
+  /* ── Pyramid ── */
+  .pyramid {
+    display: flex; flex-direction: column;
+    align-items: center;
+    gap: 0.8vh;
+    margin-top: 2vh;
+    width: 100%;
+    max-width: 700px;
+  }
+
+  .pyramid-layer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: clamp(48px, 7vh, 64px);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: clamp(0.85rem, 1.3vw, 1.1rem);
+    color: var(--white);
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+
+  .pyramid-layer.future {
+    border: 2px dashed rgba(42, 143, 143, 0.4);
+    color: var(--teal);
+    background: transparent;
+  }
+
+  .pyr-1 { width: 35%; background: var(--navy); }
+  .pyr-2 { width: 45%; background: #234060; }
+  .pyr-3 { width: 58%; background: var(--teal); }
+  .pyr-4 { width: 72%; background: #2a8f8f; }
+  .pyr-5 { width: 88%; background: #1a7070; }
+
+  .pyramid-label {
+    font-size: clamp(0.7rem, 1vw, 0.85rem);
+    color: var(--warm-gray);
+    margin-top: 0.3vh;
+    font-weight: 400;
+  }
+
+  /* ── Hypothesis + engine layout ── */
+  .hyp-meets-engine {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3vw;
+    width: 100%;
+    max-width: 960px;
+    margin-top: 2vh;
+  }
+
+  .hyp-side {
+    flex: 1;
+    max-width: 380px;
+  }
+
+  .hyp-speech {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.55;
+    color: var(--navy);
+    padding: 3vh 2.5vw;
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.2);
+    border-radius: 16px;
+    position: relative;
+    box-shadow: 0 2px 16px rgba(26, 39, 68, 0.05);
+  }
+
+  .hyp-speech::after {
+    content: '';
+    position: absolute;
+    right: -12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0; height: 0;
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    border-left: 12px solid var(--white);
+    filter: drop-shadow(2px 0 1px rgba(42, 143, 143, 0.1));
+  }
+
+  .hyp-source {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    font-weight: 500;
+    font-style: normal;
+    color: var(--warm-gray);
+    margin-top: 1.2vh;
+    text-align: right;
+  }
+
+  .hyp-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5vh;
+    flex-shrink: 0;
+  }
+
+  .hyp-connector-arrow {
+    font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+    color: var(--teal);
+  }
+
+  .hyp-connector-label {
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 600;
+    color: var(--teal);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    writing-mode: horizontal-tb;
+  }
+
+  .engine-side {
+    flex: 1;
+    max-width: 340px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6vh;
+  }
+
+  .engine-layer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: clamp(38px, 5.5vh, 50px);
+    border-radius: 7px;
+    font-weight: 600;
+    font-size: clamp(0.75rem, 1.1vw, 0.95rem);
+    color: var(--white);
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+
+  .engine-verdict {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8vw;
+    margin-top: 1.5vh;
+  }
+
+  .engine-verdict-line {
+    width: 40px;
+    height: 2px;
+    background: rgba(42, 143, 143, 0.3);
+  }
+
+  .engine-verdict-label {
+    font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+    font-weight: 600;
+    color: var(--teal);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── Verdict cards ── */
+  .verdicts {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5vw;
+    max-width: 800px;
+    width: 100%;
+    margin-top: 2.5vh;
+  }
+
+  .verdict-card {
+    background: var(--white);
+    border-radius: 12px;
+    padding: 2.5vh 1.5vw;
+    text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .verdict-icon {
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    margin-bottom: 1vh;
+  }
+
+  .verdict-status {
+    font-size: clamp(0.85rem, 1.2vw, 1.05rem);
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 0.5vh;
+  }
+
+  .verdict-desc {
+    font-size: clamp(0.7rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray);
+    line-height: 1.4;
+  }
+
+  @media (max-width: 768px) {
+    .verdicts { grid-template-columns: 1fr 1fr; }
+    .hyp-meets-engine { flex-direction: column; }
+    .hyp-speech::after { display: none; }
+  }
+
+  /* ── Bullet list ── */
+  .features {
+    list-style: none;
+    max-width: 700px;
+    width: 100%;
+    margin-top: 1vh;
+  }
+
+  .features li {
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    line-height: 1.7;
+    color: var(--navy);
+    padding: 1vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.1);
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .features li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block;
+    width: 8px; height: 8px;
+    min-width: 8px;
+    background: var(--teal);
+    border-radius: 50%;
+    margin-top: 0.5em;
+  }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--navy);
+    max-width: 750px;
+  }
+
+  .quote-attr {
+    font-size: clamp(0.85rem, 1.2vw, 1rem);
+    font-weight: 400;
+    font-style: normal;
+    color: var(--warm-gray);
+    margin-top: 2vh;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 1.5vw;
+    margin-top: 2vh;
+  }
+
+  .flow-box {
+    background: var(--white);
+    border: 2px solid var(--teal);
+    border-radius: 10px;
+    padding: 1.5vh 2vw;
+    font-weight: 600;
+    font-size: clamp(0.9rem, 1.3vw, 1.1rem);
+    color: var(--navy);
+    text-align: center;
+    min-width: 120px;
+  }
+
+  .flow-arrow {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    color: var(--teal);
+    font-weight: 300;
+  }
+
+  /* ── Locale badges ── */
+  .locales {
+    display: flex;
+    gap: 1.5vw;
+    margin-top: 2vh;
+  }
+
+  .locale-badge {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: 700;
+    color: var(--white);
+    background: var(--teal);
+    width: clamp(64px, 8vw, 90px);
+    height: clamp(64px, 8vw, 90px);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.02em;
+  }
+
+  .locale-badge:nth-child(2) { background: var(--navy); }
+  .locale-badge:nth-child(3) { background: #234060; }
+
+  /* ── Progress bar ── */
+  .progress-track {
+    position: fixed;
+    bottom: 0; left: 0;
+    width: 100%; height: 3px;
+    background: rgba(42, 143, 143, 0.12);
+    z-index: 100;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: var(--teal);
+    width: 0%;
+    transition: width 0.3s linear;
+  }
+
+  /* ── Bottom-right branding ── */
+  .brand {
+    position: fixed;
+    bottom: 2vh; right: 3vw;
+    font-size: clamp(0.7rem, 1vw, 0.85rem);
+    font-weight: 500;
+    color: var(--warm-gray);
+    letter-spacing: 0.06em;
+    opacity: 0.6;
+    z-index: 100;
+  }
+
+  /* ── Slide counter ── */
+  .slide-counter {
+    position: fixed;
+    bottom: 2vh; left: 3vw;
+    font-size: clamp(0.7rem, 1vw, 0.85rem);
+    font-weight: 500;
+    color: var(--warm-gray);
+    letter-spacing: 0.04em;
+    opacity: 0.5;
+    z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .slide { padding: 6vh 6vw; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ═══ Slide 1: Title ═══ -->
+  <div class="slide active">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">Diagnostic Intelligence<br>for Hospital Material Flow</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Your ERP has the data. We make it speak.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 2: The problem ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Problem</div>
+    <h2 class="fade-in">Every hospital has the data.<br>No hospital can read it.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Materials are received, moved, consumed, and billed across disconnected systems.
+      The gaps between these systems are where revenue leaks.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 3: The approach ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Our Approach</div>
+    <h2 class="fade-in">From raw exports to certified findings</h2>
+    <div class="steps fade-in">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Ingest</div>
+        <div class="step-desc">Load every row from any ERP. Nothing is judged, nothing is dropped.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">Translate</div>
+        <div class="step-desc">Map vendor-specific columns to one canonical schema. Once.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Validate</div>
+        <div class="step-desc">Flag every row valid or invalid with a human-readable reason.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">Diagnose</div>
+        <div class="step-desc">Run probes, score entity health, test business hypotheses.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Slide 4: Source systems ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Source-System Agnostic</div>
+    <h2 class="fade-in">One pipeline. Any ERP.</h2>
+    <div class="flow fade-in">
+      <div class="flow-box">OPALE</div>
+      <div class="flow-box">SAP</div>
+      <div class="flow-box">Navision</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box" style="border-color: var(--navy); background: var(--navy); color: var(--white);">
+        Canonical Model
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Vendor translation happens once, at the boundary.<br>
+      From that point forward, every hospital looks the same.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 5: The diagnostic engine ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Diagnostic Engine</div>
+    <h2 class="fade-in">A standing infrastructure.<br>Always running. Always scoring.</h2>
+    <div class="pyramid fade-in">
+      <div class="pyramid-layer pyr-1 future fade-in">Action Lists</div>
+      <div class="pyramid-label fade-in">prescribed remediation</div>
+      <div class="pyramid-layer pyr-2 future fade-in">Diagnosis</div>
+      <div class="pyramid-label fade-in">root cause analysis</div>
+      <div class="pyramid-layer pyr-4 fade-in">Assessments</div>
+      <div class="pyramid-label fade-in">entity health scores</div>
+      <div class="pyramid-layer pyr-5 fade-in">Probes</div>
+      <div class="pyramid-label fade-in">detect symptoms in data</div>
+    </div>
+  </div>
+
+  <!-- ═══ Slide 6: A question arrives ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Then a Question Arrives</div>
+    <h2 class="fade-in">From the outside world. A hunch. A concern.</h2>
+
+    <div class="hyp-meets-engine fade-in">
+      <div class="hyp-side fade-in">
+        <div class="hyp-speech">
+          &ldquo;I have a hunch that we don't invoice everything
+          we are actually using in a case&hellip;&rdquo;
+        </div>
+        <div class="hyp-source">&mdash; a CFO who can't sleep</div>
+      </div>
+
+      <div class="hyp-connector fade-in">
+        <div class="hyp-connector-label">activates</div>
+        <div class="hyp-connector-arrow">&rarr;</div>
+      </div>
+
+      <div class="engine-side fade-in">
+        <div class="engine-layer pyr-4" style="width: 70%;">Assessments</div>
+        <div class="engine-layer pyr-5" style="width: 90%;">Probes</div>
+        <div class="engine-verdict">
+          <div class="engine-verdict-line"></div>
+          <div class="engine-verdict-label">verdict</div>
+          <div class="engine-verdict-line"></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      The hypothesis drives the inquiry. The engine delivers the evidence.<br>
+      The verdict emerges where they meet.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 7: The verdict ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Verdict</div>
+    <h2 class="fade-in">The engine answers.<br>In one of four ways.</h2>
+    <div class="verdicts fade-in">
+      <div class="verdict-card">
+        <div class="verdict-icon" style="color: #dc2626;">&#9679;</div>
+        <div class="verdict-status">Confirmed</div>
+        <div class="verdict-desc">Strong evidence supports the concern</div>
+      </div>
+      <div class="verdict-card">
+        <div class="verdict-icon" style="color: #f59e0b;">&#9679;</div>
+        <div class="verdict-status">Plausible</div>
+        <div class="verdict-desc">Some evidence, warrants investigation</div>
+      </div>
+      <div class="verdict-card">
+        <div class="verdict-icon" style="color: #10b981;">&#9679;</div>
+        <div class="verdict-status">Not Observed</div>
+        <div class="verdict-desc">The data does not support the concern</div>
+      </div>
+      <div class="verdict-card">
+        <div class="verdict-icon" style="color: #94a3b8;">&#9679;</div>
+        <div class="verdict-status">Insufficient</div>
+        <div class="verdict-desc">Not enough data to judge</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2.5vh;">
+      Every verdict is backed by weighted evidence &mdash; traceable to specific probes and findings.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 8: Probes ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Probes</div>
+    <h2 class="fade-in">Automated auditors that never sleep</h2>
+    <div class="divider fade-in"></div>
+    <ul class="features fade-in">
+      <li><span class="bullet"></span> Revenue leakage &mdash; usage without billing</li>
+      <li><span class="bullet"></span> Missing implants &mdash; surgery without documentation</li>
+      <li><span class="bullet"></span> Cost centre misattribution &mdash; money in the wrong P&amp;L</li>
+      <li><span class="bullet"></span> Duplicate billing &mdash; the same event invoiced twice</li>
+      <li><span class="bullet"></span> I/O coefficient &mdash; warehouse vs. patient-level consumption</li>
+    </ul>
+  </div>
+
+  <!-- ═══ Slide 9: Validation ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">No Silent Filtering</div>
+    <h2 class="fade-in">Every row is flagged.<br>Nothing is swept under the rug.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Invalid rows aren't deleted &mdash; they're diagnosed.
+      Data quality is not a prerequisite for analysis. It <em>is</em> analysis.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 10: Real data ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Proven on Real Data</div>
+    <h2 class="fade-in">Not a prototype.<br>A working system.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Tested on real Swiss hospital data &mdash; real cases, real materials, real billing.
+      The probes find things. The findings have real-world consequences.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 11: Two supply chains ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">What We Discovered</div>
+    <h2 class="fade-in">The hospital doesn't have one supply chain.<br>It has two.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Warehouse logistics and patient-level consumption operate as parallel systems.
+      Some materials appear in both. Many appear in only one.
+      Nobody had measured the gap &mdash; until now.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 12: The same product ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Telling Detail</div>
+    <h2 class="fade-in">Same product. Two package sizes.<br>Completely different tracking.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      The smaller size, used in the operating theatre, tracks perfectly &mdash;
+      every unit delivered is recorded as consumed.<br><br>
+      The larger size, used on the ward, shows a fraction.
+      Not an error. A structural feature of hospital logistics &mdash; now visible.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 13: Tri-lingual ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Tri-lingual by Default</div>
+    <h2 class="fade-in">Everything speaks<br>your language</h2>
+    <div class="locales fade-in">
+      <div class="locale-badge">DE</div>
+      <div class="locale-badge">FR</div>
+      <div class="locale-badge">EN</div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Every finding, every verdict, every PDF report.<br>
+      German. French. English. From the start.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 14: Privacy ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Privacy by Design</div>
+    <h2 class="fade-in">We never see patient names.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      All identifiers are pseudonymised tokens.
+      The system tracks materials, costs, and processes &mdash;
+      never individuals. Each hospital's data is fully isolated.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 15: Output ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Audit-Ready Output</div>
+    <h2 class="fade-in">PDF reports for the<br>audit committee</h2>
+    <div class="divider fade-in"></div>
+    <ul class="features fade-in">
+      <li><span class="bullet"></span> Data Quality Reports</li>
+      <li><span class="bullet"></span> Financial Risk Reports</li>
+      <li><span class="bullet"></span> Entity Health Cards</li>
+    </ul>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      Every finding is traceable. Every result is reproducible.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 16: What we need ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Getting Started</div>
+    <h2 class="fade-in">We need one thing from you.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      A CSV export from your existing ERP.<br>
+      No IT project. No integration. No installation.<br><br>
+      We will show you what your data contains.
+    </p>
+  </div>
+
+  <!-- ═══ Slide 17: Closing ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">nuMetrix</div>
+    <div class="quote fade-in">
+      For every material consumed,<br>was it properly tracked and billed?
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      We answer that question. At scale. Across systems. Today.
+    </p>
+  </div>
+
+  <!-- ═══ Breathing ═══ -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+</div>
+
+<!-- Progress bar -->
+<div class="progress-track">
+  <div class="progress-bar" id="progress"></div>
+</div>
+
+<div class="brand">nuMetrix</div>
+<div class="slide-counter" id="counter"></div>
+
+<script>
+(function() {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const progress = document.getElementById('progress');
+  const counter = document.getElementById('counter');
+  let current = 0;
+  let timer = null;
+  let elapsed = 0;
+  const TICK = 50;
+  const BREATHING_MS = 12000;
+
+  const contentTotal = slides.filter(s => !s.classList.contains('breathing')).length;
+
+  function computeDuration(slide) {
+    if (slide.classList.contains('breathing')) return BREATHING_MS;
+
+    const text = slide.textContent.replace(/\s+/g, ' ').trim();
+    const chars = text.length;
+    const elements = slide.querySelectorAll(
+      'li, .step, .verdict-card, .pyramid-layer, .engine-layer, ' +
+      '.flow-box, .locale-badge'
+    ).length;
+
+    const base = 4500;
+    const reading = Math.min(chars * 25, 8000);
+    const structure = elements * 900;
+    return Math.max(5500, Math.min(base + reading + structure, 16000));
+  }
+
+  const durations = slides.map(computeDuration);
+
+  function updateCounter(index) {
+    const isBreathing = slides[index].classList.contains('breathing');
+    if (isBreathing) {
+      counter.classList.add('hidden');
+      return;
+    }
+    counter.classList.remove('hidden');
+    let num = 0;
+    for (let i = 0; i <= index; i++) {
+      if (!slides[i].classList.contains('breathing')) num++;
+    }
+    counter.textContent = num + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[index].classList.add('active');
+    elapsed = 0;
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function tick() {
+    const dur = durations[current];
+    elapsed += TICK;
+    progress.style.width = Math.min((elapsed / dur) * 100, 100) + '%';
+    if (elapsed >= dur) advance();
+  }
+
+  let paused = false;
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      current = (current - 1 + slides.length) % slides.length;
+      show(current);
+    } else if (e.key === 'p') {
+      paused = !paused;
+      if (paused) { clearInterval(timer); timer = null; }
+      else { timer = setInterval(tick, TICK); }
+    }
+  });
+
+  document.addEventListener('click', advance);
+
+  show(0);
+  timer = setInterval(tick, TICK);
+})();
+</script>
+
+</body>
+</html>

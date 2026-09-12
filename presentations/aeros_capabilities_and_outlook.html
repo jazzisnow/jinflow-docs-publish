@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- jinflow & aeros — capabilities & outlook. Source of record: docs/presentations/. -->
+<title>jinflow & aeros — capabilities & outlook</title>
+<style>
+  :root {
+    --ink:#0e1622; --paper:#f6f8fa; --panel:#fff; --slate:#55637a; --faint:#8b97a8;
+    --hair:#e0e5ec; --cyan:#0e7490; --cyan-br:#0891b2; --amber:#b45309; --amber-br:#d97706;
+    --g:#16a34a; --y:#ca8a04; --o:#ea580c; --r:#dc2626;
+    --grid:rgba(14,116,144,.06);
+    --shadow:0 1px 2px rgba(15,23,42,.04),0 12px 32px -12px rgba(15,23,42,.12);
+    --bg:var(--paper); --fg:var(--ink); --card:var(--panel);
+  }
+  @media (prefers-color-scheme: dark){:root{
+    --ink:#eaeff5;--paper:#0b1119;--panel:#111a25;--slate:#9aa7ba;--faint:#6b7789;--hair:#1e2a3a;
+    --cyan:#22d3ee;--cyan-br:#67e8f9;--amber:#f59e0b;--amber-br:#fbbf24;
+    --g:#22c55e;--y:#eab308;--o:#f97316;--r:#f87171;--grid:rgba(34,211,238,.06);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 20px 40px -16px rgba(0,0,0,.6);}}
+  :root[data-theme="dark"]{--ink:#eaeff5;--paper:#0b1119;--panel:#111a25;--slate:#9aa7ba;--faint:#6b7789;--hair:#1e2a3a;
+    --cyan:#22d3ee;--cyan-br:#67e8f9;--amber:#f59e0b;--amber-br:#fbbf24;--g:#22c55e;--y:#eab308;--o:#f97316;--r:#f87171;
+    --grid:rgba(34,211,238,.06);--shadow:0 1px 2px rgba(0,0,0,.3),0 20px 40px -16px rgba(0,0,0,.6);}
+  :root[data-theme="light"]{--ink:#0e1622;--paper:#f6f8fa;--panel:#fff;--slate:#55637a;--faint:#8b97a8;--hair:#e0e5ec;
+    --cyan:#0e7490;--cyan-br:#0891b2;--amber:#b45309;--amber-br:#d97706;--g:#16a34a;--y:#ca8a04;--o:#ea580c;--r:#dc2626;
+    --grid:rgba(14,116,144,.06);--shadow:0 1px 2px rgba(15,23,42,.04),0 12px 32px -12px rgba(15,23,42,.12);}
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html, body { height:100%; }
+  body { margin:0; background:var(--bg); color:var(--fg); overflow:hidden;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace; }
+
+  #deck { position:fixed; inset:0;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:42px 42px; }
+  .slide { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+    padding:clamp(1.5rem,5vw,6rem); padding-bottom:clamp(4rem,8vh,6rem);
+    opacity:0; transform:translateY(14px) scale(.995); transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);
+    pointer-events:none; overflow-y:auto; }
+  .slide.active { opacity:1; transform:none; pointer-events:auto; }
+  .wrap { width:100%; max-width:1080px; margin:0 auto; }
+
+  .eyebrow { font-family:ui-monospace,Menlo,monospace; font-size:.72rem; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--cyan); font-weight:600; margin:0 0 1.1rem; display:flex; align-items:center; gap:.7rem; }
+  .eyebrow::before { content:""; width:26px; height:1px; background:var(--cyan); opacity:.6; }
+  .eyebrow.out { color:var(--amber-br); } .eyebrow.out::before { background:var(--amber-br); }
+  h1.title { font-size:clamp(2.6rem,7vw,5.4rem); font-weight:800; letter-spacing:-.04em; line-height:.98; margin:0; text-wrap:balance;
+    background:linear-gradient(180deg,var(--fg),color-mix(in oklab,var(--fg) 62%,var(--cyan))); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  h2 { font-size:clamp(1.7rem,4.2vw,3.2rem); font-weight:750; letter-spacing:-.025em; line-height:1.05; margin:0 0 1.2rem; text-wrap:balance; max-width:22ch; }
+  .lede { font-size:clamp(1.02rem,1.6vw,1.32rem); line-height:1.5; color:var(--slate); max-width:60ch; margin:0; }
+  .lede.tight { max-width:50ch; }
+  p { margin:0; } strong { color:var(--fg); font-weight:650; } em { font-style:italic; }
+  .term { font-family:ui-monospace,Menlo,monospace; font-size:.9em; font-weight:600; color:var(--cyan);
+    background:color-mix(in oklab,var(--cyan) 12%,transparent); border:1px solid color-mix(in oklab,var(--cyan) 30%,transparent);
+    border-radius:5px; padding:.08em .4em; white-space:nowrap; }
+  .term.amber { color:var(--amber-br); background:color-mix(in oklab,var(--amber-br) 12%,transparent); border-color:color-mix(in oklab,var(--amber-br) 30%,transparent); }
+  .tag { font-family:ui-monospace,Menlo,monospace; font-size:.62rem; letter-spacing:.14em; text-transform:uppercase; font-weight:600;
+    padding:.2em .5em; border-radius:4px; }
+  .tag.live { color:var(--g); background:color-mix(in oklab,var(--g) 14%,transparent); }
+  .tag.road { color:var(--amber-br); background:color-mix(in oklab,var(--amber-br) 14%,transparent); }
+
+  .grid { display:grid; gap:1rem; } .g3 { grid-template-columns:repeat(3,1fr); } .g2 { grid-template-columns:1.05fr .95fr; }
+  @media (max-width:820px){ .g3,.g2 { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--hair); border-radius:14px; padding:1.3rem 1.4rem; box-shadow:var(--shadow); }
+  .card h3 { font-size:1.08rem; font-weight:700; margin:0 0 .5rem; letter-spacing:-.01em; }
+  .card p { font-size:.95rem; line-height:1.48; color:var(--slate); }
+
+  .stats { display:flex; gap:2.2rem; flex-wrap:wrap; margin:.2rem 0 1.4rem; }
+  .stat .v { font-size:clamp(1.5rem,3.4vw,2.4rem); font-weight:800; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+  .stat .l { font-family:ui-monospace,Menlo,monospace; font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); }
+
+  .netviz { width:100%; height:min(42vh,300px); display:block; }
+  .nd { transition: r .5s ease, opacity .5s ease; }
+
+  .ramp { display:flex; height:9px; border-radius:5px; overflow:hidden; margin-top:.3rem; max-width:340px; }
+  .ramp span { flex:1; } .ramp-l { display:flex; justify-content:space-between; max-width:340px;
+    font-family:ui-monospace,Menlo,monospace; font-size:.64rem; letter-spacing:.06em; text-transform:uppercase; color:var(--faint); margin-top:.3rem; }
+
+  .diamond { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; margin-top:.4rem; }
+  .dnode { font-family:ui-monospace,Menlo,monospace; font-size:.82rem; font-weight:600; padding:.5em .8em; border-radius:8px;
+    border:1px solid var(--hair); background:var(--card); box-shadow:var(--shadow); }
+  .dnode.v { color:var(--amber-br); border-color:color-mix(in oklab,var(--amber-br) 30%,var(--hair)); }
+  .darr { color:var(--faint); }
+
+  .outlist { display:flex; flex-direction:column; gap:1rem; margin-top:1.2rem; }
+  .oitem { display:grid; grid-template-columns:auto 1fr; gap:1rem; align-items:start; }
+  .oitem .k { font-family:ui-monospace,Menlo,monospace; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase; color:var(--amber-br);
+    padding-top:.2rem; white-space:nowrap; }
+  .oitem .t { font-size:1.02rem; line-height:1.42; } .oitem .t b { font-weight:650; }
+
+  #bar { position:fixed; left:0; top:0; height:3px; background:linear-gradient(90deg,var(--cyan),var(--cyan-br)); width:0; transition:width .45s ease; z-index:40; }
+  #brand { position:fixed; left:clamp(1.2rem,3vw,2.4rem); top:clamp(1rem,2.6vh,1.8rem); z-index:30; display:flex; align-items:center; gap:.55rem; font-weight:700; letter-spacing:-.02em; }
+  #brand .d { width:9px; height:9px; background:var(--cyan); border-radius:2px; transform:rotate(45deg); }
+  #brand small { font-family:ui-monospace,Menlo,monospace; font-weight:500; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); }
+  #foot { position:fixed; right:clamp(1.2rem,3vw,2.4rem); bottom:clamp(1rem,2.6vh,1.6rem); left:clamp(1.2rem,3vw,2.4rem); z-index:30;
+    display:flex; justify-content:space-between; align-items:center; font-family:ui-monospace,Menlo,monospace; font-size:.7rem; letter-spacing:.1em; color:var(--faint); }
+  #dots { display:flex; gap:.5rem; } #dots button { width:7px; height:7px; border-radius:50%; border:none; background:var(--hair); padding:0; cursor:pointer; transition:all .3s; }
+  #dots button.on { background:var(--cyan); transform:scale(1.35); }
+  #hint b { color:var(--slate); }
+  @media (prefers-reduced-motion: reduce){ * { transition:none !important; } }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="brand"><span class="d"></span> jinflow <small>a jazzisnow engine</small></div>
+
+<div id="deck">
+
+  <!-- 1 · Title -->
+  <section class="slide active">
+    <div class="wrap">
+      <p class="eyebrow">jinflow &amp; aeros · capabilities &amp; outlook</p>
+      <h1 class="title">Air quality,<br>measured honestly.</h1>
+      <p class="lede" style="margin-top:1.6rem;max-width:52ch;">
+        What the engine does today, shown on a live atmospheric Study — and the frontier it opens next.
+      </p>
+    </div>
+  </section>
+
+  <!-- 2 · The Study -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">aeros · the Study</p>
+      <h2 style="max-width:20ch;">A continent's air, one Study.</h2>
+      <div class="stats">
+        <div class="stat"><div class="v mono">30.6 M</div><div class="l">measurements</div></div>
+        <div class="stat"><div class="v mono">1,664</div><div class="l">sampling points</div></div>
+        <div class="stat"><div class="v mono">6</div><div class="l">pollutants</div></div>
+        <div class="stat"><div class="v mono">live</div><div class="l">on the open web</div></div>
+      </div>
+      <svg id="net" class="netviz" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet" aria-label="Monitoring stations coloured by magnitude"></svg>
+      <div class="ramp"><span style="background:var(--g)"></span><span style="background:var(--y)"></span><span style="background:var(--o)"></span><span style="background:var(--r)"></span></div>
+      <div class="ramp-l"><span>within guideline</span><span>&gt; 4× over</span></div>
+    </div>
+  </section>
+
+  <!-- 3 · See the network + magnitude -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">Capability · see the whole network <span class="tag live" style="margin-left:.6rem;">live</span></p>
+      <h2 style="max-width:22ch;">Colour by pollutant. Scrub through time. Read magnitude, not a threshold.</h2>
+      <div class="grid g3" style="margin-top:1.2rem;">
+        <div class="card"><h3>The Selector</h3><p>Switch the pollutant colouring the map — NO₂, O₃, PM₂.₅, PM₁₀, SO₂, CO — and every station recolours at once.</p></div>
+        <div class="card"><h3>The Clock</h3><p>A time slider walks the map through the record: watch winter haze flare and clear, station by station.</p></div>
+        <div class="card"><h3>The Band Grid</h3><p>Against the strict guideline nearly every station exceeds. So colour by <em>how many times over</em> — and PM₂.₅ crosses its annual guideline at <strong>255 of 260 stations</strong>.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · Overview → evidence -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">Capability · from overview to evidence <span class="tag live" style="margin-left:.6rem;">live</span></p>
+      <h2 style="max-width:22ch;">One click from the map to the measurement.</h2>
+      <p class="lede">
+        Click a station → its co-located pollutant <strong>streams</strong> appear → open one and its measured
+        time series draws in place, with the guideline reference and the uncertainty band. Brush a set and the
+        <span class="term">Selection</span> follows you from map to table to chart —
+        <strong>narrow once, everything answers.</strong>
+      </p>
+      <p class="lede tight" style="margin-top:1.2rem;font-size:1.02rem;">
+        The linked, brushed way of seeing — kept alive, now on the open web.
+      </p>
+    </div>
+  </section>
+
+  <!-- 5 · Honest by construction -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">Capability · honest by construction <span class="tag live" style="margin-left:.6rem;">live</span></p>
+      <h2 style="max-width:20ch;">Every number a measurement. Every finding, traceable.</h2>
+      <div class="grid g2" style="margin-top:1rem; align-items:start;">
+        <div class="card">
+          <h3>Measured</h3>
+          <p style="margin-bottom:.7rem;">Units (<span class="mono">UCUM</span>), roll-up rules, and uncertainty (<span class="mono">GUM</span>) travel with every value.</p>
+          <p class="mono" style="color:var(--fg);font-size:.86rem;background:color-mix(in oklab,var(--cyan) 8%,transparent);border-radius:8px;padding:.55rem .65rem;">35.1 µg/m³ ± 2.3 <span style="color:var(--faint)">(1σ)</span> · 1.52× WHO</p>
+        </div>
+        <div class="card">
+          <h3>Diagnosed &amp; traceable</h3>
+          <p style="margin-bottom:.8rem;">The diamond turns evidence into an answer — <strong>5,082 findings</strong> across the Study — and each carries a trail back to its rows. The whole method rides <em>inside</em> the store (the <span class="term amber">Imprint</span>): reproducible by construction.</p>
+          <div class="diamond">
+            <span class="dnode">Signal</span><span class="darr">→</span>
+            <span class="dnode">Thesis</span><span class="darr">→</span>
+            <span class="dnode v">Verdict</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · Outlook: the Processor / PMF -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow out">Outlook · beyond SQL <span class="tag road" style="margin-left:.6rem;">on the roadmap</span></p>
+      <h2 style="max-width:20ch;">The Processor — bring your own science into the Study.</h2>
+      <p class="lede">
+        So far the engine reasons in SQL. The <span class="term amber">Processor</span> opens the store to
+        methods SQL can't express — the first being <strong>PMF</strong> (positive matrix factorization),
+        the workhorse of aerosol <em>source apportionment</em>.
+      </p>
+      <p class="lede tight" style="margin-top:1.2rem;">
+        Point it at a speciated matrix, and factor the mixture into its sources — <em>inside</em> the Study,
+        with the same provenance, units, and reproducibility as everything else. Your method becomes a
+        first-class citizen, not an export to a script that leaves no trail.
+      </p>
+    </div>
+  </section>
+
+  <!-- 7 · Outlook: what's next -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow out">Outlook · the shape of what's next <span class="tag road" style="margin-left:.6rem;">on the roadmap</span></p>
+      <h2 style="max-width:18ch;">A studio for what happens after the data lands.</h2>
+      <div class="outlist">
+        <div class="oitem"><div class="k">The studio</div><div class="t"><b>Post-gold as instruments.</b> Processors as plugins; runs as renders; alternatives as scenarios — explore many analyses without disturbing the record.</div></div>
+        <div class="oitem"><div class="k">Speciation</div><div class="t"><b>Mass-spectral data.</b> The m/z matrix as a first-class input, so the chemistry — not just the concentration — enters the Study.</div></div>
+        <div class="oitem"><div class="k">Networked</div><div class="t"><b>Studies that link.</b> Sovereign by default, connected by consent — your instance stays yours, and still talks to the others when you choose.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · Close -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">Where this goes</p>
+      <h2 style="max-width:22ch;">Capabilities today. A frontier you can help shape.</h2>
+      <p class="lede" style="max-width:50ch;">
+        aeros is not a demo of a finished thing — it's a living Study, on the open web, showing the engine
+        do real work on real air. The frontier beyond it (the Processor, your own methods, the mass spectra)
+        is close, and it's open to the science that needs it.
+      </p>
+      <p class="lede" style="margin-top:2rem;font-size:1rem;color:var(--faint);">jinflow &amp; aeros — a jazzisnow engine.</p>
+    </div>
+  </section>
+
+</div>
+
+<div id="foot">
+  <div id="dots"></div>
+  <div id="hint"><b>←</b> / <b>→</b> to move</div>
+</div>
+
+<script>
+  (function () {
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const bar = document.getElementById('bar');
+    const dotsWrap = document.getElementById('dots');
+    let i = 0;
+    slides.forEach((_, n) => { const b = document.createElement('button'); b.addEventListener('click', () => go(n)); dotsWrap.appendChild(b); });
+    const dots = Array.from(dotsWrap.children);
+
+    // Station network: ~64 dots, coloured by magnitude band (skewed to yellow/orange — most exceed).
+    const net = document.getElementById('net');
+    if (net) {
+      const ns = 'http://www.w3.org/2000/svg';
+      const cols = getComputedStyle(document.documentElement);
+      const band = [cols.getPropertyValue('--g'), cols.getPropertyValue('--y'), cols.getPropertyValue('--o'), cols.getPropertyValue('--r')];
+      const weights = [0.10, 0.42, 0.34, 0.14]; // realistic skew: mostly over, some severe
+      // deterministic pseudo-random so it's stable across renders
+      let s = 20260811;
+      const rnd = () => { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+      const pick = () => { let r = rnd(), a = 0; for (let j = 0; j < 4; j++) { a += weights[j]; if (r <= a) return j; } return 3; };
+      for (let k = 0; k < 64; k++) {
+        const x = 30 + rnd() * 740, y = 24 + rnd() * 252, b = pick();
+        const el = document.createElementNS(ns, 'circle');
+        el.setAttribute('cx', x.toFixed(0)); el.setAttribute('cy', y.toFixed(0));
+        el.setAttribute('r', (3 + b * 0.9).toFixed(1)); el.setAttribute('class', 'nd');
+        el.setAttribute('fill', band[b].trim()); el.setAttribute('opacity', (0.55 + b * 0.11).toFixed(2));
+        net.appendChild(el);
+      }
+    }
+
+    function go(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach((sl, k) => sl.classList.toggle('active', k === i));
+      dots.forEach((d, k) => d.classList.toggle('on', k === i));
+      bar.style.width = (i / (slides.length - 1) * 100) + '%';
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(i + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(i - 1); }
+      else if (e.key === 'Home') go(0); else if (e.key === 'End') go(slides.length - 1);
+    });
+    document.getElementById('deck').addEventListener('click', (e) => {
+      if (e.target.closest('a,button,svg')) return;
+      (e.clientX / window.innerWidth < 0.28) ? go(i - 1) : go(i + 1);
+    });
+    go(0);
+  })();
+</script>
+</body>
+</html>
