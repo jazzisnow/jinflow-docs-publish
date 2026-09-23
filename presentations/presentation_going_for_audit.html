@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix -- Going for Audit</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --border: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --green: #4ade80;
+    --amber: #fbbf24;
+    --red: #f87171;
+    --purple: #a78bfa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .slide {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    padding: 4rem 6rem;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .slide.active { display: flex; }
+
+  /* Navigation */
+  .nav {
+    position: fixed;
+    bottom: 2rem;
+    right: 3rem;
+    display: flex;
+    gap: 0.75rem;
+    z-index: 100;
+    align-items: center;
+  }
+
+  .nav button {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+
+  .nav button:hover { background: var(--border); }
+  .nav button:disabled { opacity: 0.3; cursor: default; }
+
+  .counter {
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+
+  h2 {
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--accent);
+  }
+
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--accent);
+  }
+
+  p, li {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .subtitle {
+    font-size: 1.4rem;
+    color: var(--muted);
+    margin-bottom: 2rem;
+  }
+
+  .small { font-size: 0.95rem; color: var(--muted); }
+
+  ul { list-style: none; padding: 0; }
+  ul li { padding: 0.4rem 0; padding-left: 1.5rem; position: relative; }
+  ul li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.85rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* Score badges */
+  .score {
+    display: inline-block;
+    width: 2.2rem;
+    height: 2.2rem;
+    line-height: 2.2rem;
+    text-align: center;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-right: 0.5rem;
+  }
+
+  .score-5 { background: var(--green); color: #052e16; }
+  .score-4 { background: #86efac; color: #052e16; }
+  .score-3 { background: var(--amber); color: #451a03; }
+  .score-2 { background: #fb923c; color: #451a03; }
+  .score-1 { background: var(--red); color: #450a0a; }
+
+  /* Matrix table */
+  .matrix {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 1rem;
+  }
+
+  .matrix th {
+    text-align: left;
+    padding: 0.6rem 1rem;
+    border-bottom: 2px solid var(--border);
+    color: var(--muted);
+    font-weight: 500;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .matrix td {
+    padding: 0.55rem 1rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .matrix tr:last-child td { border-bottom: none; }
+
+  .matrix .cap { font-weight: 500; }
+  .matrix .evidence { color: var(--muted); font-size: 0.9rem; }
+
+  /* Progress bar */
+  .progress-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 0.5rem;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+
+  /* Two-column layout */
+  .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-top: 1rem;
+  }
+
+  .col { }
+
+  /* Phase cards */
+  .phase-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .phase-card h3 { margin-bottom: 0.5rem; }
+
+  .phase-label {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+  }
+
+  .effort-low { background: #065f46; color: var(--green); }
+  .effort-med { background: #713f12; color: var(--amber); }
+
+  /* Tier badges */
+  .tier {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+
+  .tier-1 { background: #7f1d1d; color: var(--red); }
+  .tier-2 { background: #713f12; color: var(--amber); }
+  .tier-3 { background: #1e3a5f; color: var(--accent); }
+
+  /* Existing feature list */
+  .check-list li::before {
+    content: '';
+    background: var(--green);
+  }
+
+  .gap-list li::before {
+    background: var(--red);
+  }
+
+  /* Diagram */
+  .pyramid {
+    text-align: center;
+    padding: 1rem 0;
+  }
+
+  .pyramid-level {
+    display: inline-block;
+    padding: 0.6rem 1.5rem;
+    margin: 0.25rem auto;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  /* Big number */
+  .big-number {
+    font-size: 5rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .accent { color: var(--accent); }
+  .green { color: var(--green); }
+  .amber { color: var(--amber); }
+  .red { color: var(--red); }
+
+  /* Footer */
+  .slide-footer {
+    position: absolute;
+    bottom: 2rem;
+    left: 6rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+
+  /* Keyframe for entrance */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slide.active > * {
+    animation: fadeUp 0.4s ease forwards;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ SLIDE 1: TITLE ═══════════════════════════ -->
+<div class="slide" id="s1">
+  <h1>Going for Audit</h1>
+  <p class="subtitle">nuMetrix Audit Readiness Assessment</p>
+  <p style="margin-top: 2rem;">
+    Where we stand today, what's missing,<br>
+    and how to get to 100% auditability.
+  </p>
+  <p class="small" style="margin-top: 3rem;">February 2026</p>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 2: THE QUESTION ═══════════════════════════ -->
+<div class="slide" id="s2">
+  <h2>The Question</h2>
+  <p style="font-size: 1.6rem; margin-bottom: 2rem;">
+    Can an external auditor trace any finding<br>
+    back to its source data, understand why it was flagged,<br>
+    and verify the rules haven't changed since?
+  </p>
+  <div class="columns" style="margin-top: 2rem;">
+    <div>
+      <h3 class="green">What auditors need</h3>
+      <ul>
+        <li>Complete data lineage (source to finding)</li>
+        <li>Deterministic, reproducible results</li>
+        <li>Versioned rules with change history</li>
+        <li>Temporal tracking (when did this appear?)</li>
+        <li>Exception trail (who reviewed what?)</li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="accent">What nuMetrix provides</h3>
+      <ul class="check-list">
+        <li>Source file + row number on every record</li>
+        <li>MD5 deterministic finding IDs</li>
+        <li>Probe version strings on findings</li>
+        <li style="opacity: 0.35;">No temporal tracking yet</li>
+        <li style="opacity: 0.35;">No exception management yet</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 3: OVERALL SCORE ═══════════════════════════ -->
+<div class="slide" id="s3">
+  <h2>Overall Readiness</h2>
+  <div style="display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1.5rem;">
+    <span class="big-number amber">3.4</span>
+    <span style="font-size: 2rem; color: var(--muted);">/ 5</span>
+  </div>
+  <p style="font-size: 1.3rem; margin-bottom: 2rem;">
+    Strong analytical foundations.<br>
+    Weak operational audit trail.
+  </p>
+  <div class="progress-bar" style="width: 60%; height: 12px;">
+    <div class="progress-fill" style="width: 68%; background: linear-gradient(90deg, var(--green), var(--amber));"></div>
+  </div>
+  <p class="small" style="margin-top: 1rem;">
+    7 of 12 capabilities scored 4 or 5 &mdash; the data pipeline is solid.<br>
+    5 capabilities scored 1 or 2 &mdash; the operational layer needs work.
+  </p>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 4: MATURITY MATRIX ═══════════════════════════ -->
+<div class="slide" id="s4">
+  <h2>Maturity Matrix</h2>
+  <table class="matrix">
+    <thead>
+      <tr><th>Capability</th><th></th><th>Evidence</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="cap">Source lineage</td>
+        <td><span class="score score-5">5</span></td>
+        <td class="evidence">source_file + row_number on all 9 Bronze models</td>
+      </tr>
+      <tr>
+        <td class="cap">Validation trail</td>
+        <td><span class="score score-5">5</span></td>
+        <td class="evidence">is_valid + invalid_reason per Silver row; 34 rules documented</td>
+      </tr>
+      <tr>
+        <td class="cap">Validation rule registry</td>
+        <td><span class="score score-5">5</span></td>
+        <td class="evidence">lineage_validation_rules + lineage_validation_counts queryable</td>
+      </tr>
+      <tr>
+        <td class="cap">Finding determinism</td>
+        <td><span class="score score-5">5</span></td>
+        <td class="evidence">MD5(probe_id | tenant_id | entity_id | time_bucket)</td>
+      </tr>
+      <tr>
+        <td class="cap">Evidence chain</td>
+        <td><span class="score score-4">4</span></td>
+        <td class="evidence">Probes &rarr; Hypotheses &rarr; Diagnoses fully linked</td>
+      </tr>
+      <tr>
+        <td class="cap">Pipeline metrics</td>
+        <td><span class="score score-4">4</span></td>
+        <td class="evidence">Row counts per layer; no timestamps</td>
+      </tr>
+      <tr>
+        <td class="cap">Audit reports (PDF)</td>
+        <td><span class="score score-4">4</span></td>
+        <td class="evidence">4 report types &times; 3 languages, stored in DuckDB</td>
+      </tr>
+      <tr>
+        <td class="cap">Finding lifecycle</td>
+        <td><span class="score score-2">2</span></td>
+        <td class="evidence">Rebuilt each run &mdash; no created_at or state tracking</td>
+      </tr>
+      <tr>
+        <td class="cap">Rule version history</td>
+        <td><span class="score score-2">2</span></td>
+        <td class="evidence">Version string exists; no changelog</td>
+      </tr>
+      <tr>
+        <td class="cap">Column-level lineage</td>
+        <td><span class="score score-2">2</span></td>
+        <td class="evidence">Implicit in macros; not queryable</td>
+      </tr>
+      <tr>
+        <td class="cap">Execution metadata</td>
+        <td><span class="score score-1">1</span></td>
+        <td class="evidence">No run_id, no executed_at on findings</td>
+      </tr>
+      <tr>
+        <td class="cap">Exception management</td>
+        <td><span class="score score-1">1</span></td>
+        <td class="evidence">No false-positive marking, no review trail</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 5: WHAT'S SOLID ═══════════════════════════ -->
+<div class="slide" id="s5">
+  <h2>What's Already Solid</h2>
+  <div class="columns">
+    <div>
+      <h3>Data Pipeline</h3>
+      <ul class="check-list">
+        <li><strong>No silent filtering</strong> &mdash; invalid rows flagged, not dropped, until Gold</li>
+        <li><strong>source_file + row_number</strong> on every Bronze row &mdash; full CSV traceability</li>
+        <li><strong>Surrogate keys</strong> via dbt_utils &mdash; deterministic, reproducible</li>
+        <li><strong>34 validation rules</strong> documented in lineage_validation_rules</li>
+        <li><strong>Pipeline metrics</strong> &mdash; row counts at every layer, loss percentages</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Diagnostic System</h3>
+      <ul class="check-list">
+        <li><strong>Deterministic finding IDs</strong> &mdash; MD5 hash, idempotent per run</li>
+        <li><strong>Evidence chain</strong> &mdash; Probes &rarr; Hypotheses &rarr; Diagnoses linked</li>
+        <li><strong>Weighted verdicts</strong> &mdash; primary/supporting/context/counter roles</li>
+        <li><strong>4 contracts</strong> &mdash; Gold, Silver, Findings, Diagnosis (all versioned)</li>
+        <li><strong>PDF audit reports</strong> &mdash; data quality, financial risk, entity health, analytics readiness</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 6: THE PYRAMID ═══════════════════════════ -->
+<div class="slide" id="s6">
+  <h2>The Audit Trail Today</h2>
+  <p class="small" style="margin-bottom: 2rem;">Every layer is traceable to the one below it. The chain is complete &mdash; but only as a snapshot.</p>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+    <div class="pyramid-level" style="background: #7c3aed; width: 220px;">Diagnosis</div>
+    <div style="color: var(--muted);">&darr; gates on confirmed hypothesis</div>
+    <div class="pyramid-level" style="background: #6366f1; width: 300px;">Hypothesis Verdicts</div>
+    <div style="color: var(--muted);">&darr; aggregates evidence from probes</div>
+    <div class="pyramid-level" style="background: #3b82f6; width: 400px;">Probe Findings</div>
+    <div style="color: var(--muted);">&darr; queries Gold entities</div>
+    <div class="pyramid-level" style="background: #0ea5e9; width: 500px;">Gold (valid rows only)</div>
+    <div style="color: var(--muted);">&darr; filters is_valid = true</div>
+    <div class="pyramid-level" style="background: #06b6d4; width: 600px;">Silver (all rows + is_valid + invalid_reason)</div>
+    <div style="color: var(--muted);">&darr; validates + surrogate keys</div>
+    <div class="pyramid-level" style="background: #14b8a6; width: 700px;">Bronze (source_file + row_number)</div>
+    <div style="color: var(--muted);">&darr; reads CSV</div>
+    <div class="pyramid-level" style="background: var(--border); width: 800px;">Source CSVs (tenants/{id}/{system}/csv/)</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 7: GAP ANALYSIS ═══════════════════════════ -->
+<div class="slide" id="s7">
+  <h2>Gap Analysis</h2>
+  <div class="columns">
+    <div>
+      <p style="margin-bottom: 1rem;"><span class="tier tier-1">Tier 1</span> <strong>Must-have for audit</strong></p>
+      <ul class="gap-list">
+        <li><strong>Execution metadata</strong> &mdash; No run_id or timestamp on findings. Can't answer "when was this finding generated?"</li>
+        <li><strong>Finding lifecycle</strong> &mdash; Findings rebuilt each run. Can't track when a finding first appeared or was resolved.</li>
+        <li><strong>Score transparency</strong> &mdash; Hypothesis verdict shows 0.65 but not which probes contributed what weight.</li>
+      </ul>
+
+      <p style="margin-top: 1.5rem; margin-bottom: 1rem;"><span class="tier tier-2">Tier 2</span> <strong>Should-have for external audit</strong></p>
+      <ul class="gap-list">
+        <li><strong>Rule change history</strong> &mdash; Probe YAML changes not tracked in queryable form.</li>
+        <li><strong>Exception management</strong> &mdash; No way to mark findings as false-positive or reviewed.</li>
+        <li><strong>Evidence schema</strong> &mdash; Evidence JSON unstructured; varies by probe type.</li>
+      </ul>
+    </div>
+    <div>
+      <p style="margin-bottom: 1rem;"><span class="tier tier-3">Tier 3</span> <strong>Nice-to-have</strong></p>
+      <ul class="gap-list">
+        <li><strong>Column-level lineage</strong> &mdash; Source-to-target column mapping not queryable (implicit in macros).</li>
+        <li><strong>Finding &rarr; source rows</strong> &mdash; Can't trace a finding back to specific Bronze rows.</li>
+        <li><strong>Cross-entity impact</strong> &mdash; A bad material record affects billing, usage, and cases &mdash; no unified view.</li>
+      </ul>
+
+      <div style="margin-top: 3rem; padding: 1.5rem; background: var(--surface); border-radius: 10px; border-left: 4px solid var(--amber);">
+        <p style="font-size: 1.1rem;"><strong>Key insight:</strong> The analytical layer (what happened, why) is strong. The operational layer (when, by whom, status changes) is almost absent.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 8: PHASE 1 ═══════════════════════════ -->
+<div class="slide" id="s8">
+  <h2>Phase 1: Execution Context</h2>
+  <div class="phase-card">
+    <span class="phase-label effort-low">Low effort</span>
+    <h3>Add run_id + timestamp to every finding</h3>
+    <p>Modify the probe compiler (<code>probecompile.py</code>) to inject two columns into every generated SQL model:</p>
+    <ul style="margin-top: 0.75rem;">
+      <li><strong>execution_id</strong> &mdash; dbt's <code>invocation_id</code> (UUID per run)</li>
+      <li><strong>executed_at</strong> &mdash; <code>current_timestamp</code> at build time</li>
+    </ul>
+    <p style="margin-top: 0.75rem;">Same change to <code>hypothesiscompile.py</code> and <code>diagnosiscompile.py</code>.</p>
+  </div>
+  <div style="margin-top: 1rem;">
+    <h3>What this unlocks</h3>
+    <ul>
+      <li>Answer "when was this finding generated?" for any finding</li>
+      <li>Group findings by run &mdash; compare two builds side by side</li>
+      <li>Detect stale findings (last execution was 3 weeks ago)</li>
+    </ul>
+  </div>
+  <p class="small" style="margin-top: 2rem;">
+    Files: <code>scripts/probecompile.py</code>, <code>scripts/hypothesiscompile.py</code>, <code>scripts/diagnosiscompile.py</code>, <code>contracts/findings_contract.v1.json</code>
+  </p>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 9: PHASE 2 ═══════════════════════════ -->
+<div class="slide" id="s9">
+  <h2>Phase 2: Score Transparency</h2>
+  <div class="phase-card">
+    <span class="phase-label effort-low">Low effort</span>
+    <h3>Show the math behind every verdict</h3>
+    <p>Add an <code>evidence_breakdown</code> JSON column to <code>hypothesis_verdicts</code>:</p>
+    <pre style="background: var(--bg); padding: 1rem; border-radius: 6px; margin-top: 0.75rem; font-size: 0.9rem; color: var(--accent); overflow-x: auto;">
+[
+  {"probe_id": "probe_revenue_leakage",  "role": "primary",    "weight": 3, "findings": 42, "signal": 1.0,  "contribution": 0.43},
+  {"probe_id": "probe_orphan_billing",   "role": "supporting", "weight": 2, "findings": 18, "signal": 0.89, "contribution": 0.25},
+  {"probe_id": "probe_duplicate_billing", "role": "context",   "weight": 1, "findings": 0,  "signal": 0.0,  "contribution": 0.0}
+]</pre>
+  </div>
+  <div style="margin-top: 1rem;">
+    <p>Same for <code>diagnosis_verdicts</code>: add <code>confidence_breakdown</code> showing base + each conditional boost.</p>
+    <p style="margin-top: 0.5rem;">Explorer hypothesis detail page renders the breakdown as a table.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 10: PHASE 3 ═══════════════════════════ -->
+<div class="slide" id="s10">
+  <h2>Phase 3: Finding Lifecycle</h2>
+  <div class="phase-card">
+    <span class="phase-label effort-med">Medium effort</span>
+    <h3>Track when findings appear, persist, and resolve</h3>
+    <p>New dbt incremental model: <code>finding_snapshots</code></p>
+    <ul style="margin-top: 0.75rem;">
+      <li><strong>finding_id</strong> &mdash; FK to probe findings</li>
+      <li><strong>first_seen</strong> &mdash; timestamp of first appearance</li>
+      <li><strong>last_seen</strong> &mdash; updated on every run where finding still exists</li>
+      <li><strong>run_count</strong> &mdash; how many consecutive runs this appeared</li>
+      <li><strong>state</strong> &mdash; detected &rarr; acknowledged &rarr; resolved</li>
+    </ul>
+  </div>
+  <div style="margin-top: 1rem;">
+    <h3>What this unlocks</h3>
+    <ul>
+      <li>"This finding has been active for 47 days" &mdash; urgency signal</li>
+      <li>"12 findings resolved since last month" &mdash; progress tracking</li>
+      <li>Auditor can see the full lifecycle, not just current state</li>
+    </ul>
+  </div>
+  <p class="small" style="margin-top: 1.5rem;">
+    Requires: dbt incremental materialization (merge strategy on finding_id). New pattern for the project.
+  </p>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 11: PHASE 4 ═══════════════════════════ -->
+<div class="slide" id="s11">
+  <h2>Phase 4: Exception Management</h2>
+  <div class="phase-card">
+    <span class="phase-label effort-med">Medium effort</span>
+    <h3>Let humans annotate findings</h3>
+    <p>New table: <code>finding_exceptions</code></p>
+    <ul style="margin-top: 0.75rem;">
+      <li><strong>finding_id</strong> &mdash; which finding</li>
+      <li><strong>status</strong> &mdash; false_positive | investigated | accepted_risk</li>
+      <li><strong>reason</strong> &mdash; free-text justification</li>
+      <li><strong>created_by</strong> &mdash; who made the call</li>
+      <li><strong>created_at</strong> &mdash; when</li>
+    </ul>
+  </div>
+  <div style="margin-top: 1rem;">
+    <h3>Explorer changes</h3>
+    <ul>
+      <li>Finding detail page: "Mark as false positive" / "Mark as investigated" buttons</li>
+      <li>API endpoint: <code>POST /api/findings/{finding_id}/exception</code></li>
+      <li>New pattern: Explorer gets write access (currently read-only)</li>
+    </ul>
+  </div>
+  <p class="small" style="margin-top: 1.5rem;">
+    This is the bridge from "analytics tool" to "audit workflow."
+  </p>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 12: TIMELINE ═══════════════════════════ -->
+<div class="slide" id="s12">
+  <h2>Roadmap to 5/5</h2>
+  <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+    <!-- Phase 1 -->
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 120px; text-align: right; color: var(--muted); font-size: 0.9rem;">Phase 1</div>
+      <div style="flex: 1; display: flex; align-items: center;">
+        <div style="background: var(--green); height: 40px; width: 15%; border-radius: 6px; display: flex; align-items: center; padding: 0 1rem; font-weight: 600; font-size: 0.9rem; color: #052e16;">
+          Execution context
+        </div>
+      </div>
+      <div style="width: 100px; color: var(--muted); font-size: 0.85rem;">3.4 &rarr; 3.8</div>
+    </div>
+    <!-- Phase 2 -->
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 120px; text-align: right; color: var(--muted); font-size: 0.9rem;">Phase 2</div>
+      <div style="flex: 1; display: flex; align-items: center;">
+        <div style="background: #86efac; height: 40px; width: 15%; border-radius: 6px; display: flex; align-items: center; padding: 0 1rem; font-weight: 600; font-size: 0.9rem; color: #052e16;">
+          Score transparency
+        </div>
+      </div>
+      <div style="width: 100px; color: var(--muted); font-size: 0.85rem;">3.8 &rarr; 4.2</div>
+    </div>
+    <!-- Phase 3 -->
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 120px; text-align: right; color: var(--muted); font-size: 0.9rem;">Phase 3</div>
+      <div style="flex: 1; display: flex; align-items: center;">
+        <div style="background: var(--amber); height: 40px; width: 25%; border-radius: 6px; display: flex; align-items: center; padding: 0 1rem; font-weight: 600; font-size: 0.9rem; color: #451a03;">
+          Finding lifecycle
+        </div>
+      </div>
+      <div style="width: 100px; color: var(--muted); font-size: 0.85rem;">4.2 &rarr; 4.6</div>
+    </div>
+    <!-- Phase 4 -->
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div style="width: 120px; text-align: right; color: var(--muted); font-size: 0.9rem;">Phase 4</div>
+      <div style="flex: 1; display: flex; align-items: center;">
+        <div style="background: var(--amber); height: 40px; width: 25%; border-radius: 6px; display: flex; align-items: center; padding: 0 1rem; font-weight: 600; font-size: 0.9rem; color: #451a03;">
+          Exception management
+        </div>
+      </div>
+      <div style="width: 100px; color: var(--muted); font-size: 0.85rem;">4.6 &rarr; 5.0</div>
+    </div>
+  </div>
+
+  <div style="margin-top: 2.5rem; padding: 1.5rem; background: var(--surface); border-radius: 10px; display: flex; gap: 3rem;">
+    <div>
+      <p class="small" style="margin-bottom: 0.25rem;">Phases 1+2</p>
+      <p style="font-size: 1.3rem; font-weight: 600;" class="green">Compiler-only changes</p>
+      <p class="small">No new dbt models. No Explorer changes.</p>
+    </div>
+    <div>
+      <p class="small" style="margin-bottom: 0.25rem;">Phases 3+4</p>
+      <p style="font-size: 1.3rem; font-weight: 600;" class="amber">New dbt models + Explorer write</p>
+      <p class="small">Incremental materialization. API endpoints.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ SLIDE 13: CLOSING ═══════════════════════════ -->
+<div class="slide" id="s13">
+  <h2>Summary</h2>
+  <div class="columns">
+    <div>
+      <h3 class="green">Today (3.4 / 5)</h3>
+      <ul class="check-list">
+        <li>Full source-to-Gold lineage</li>
+        <li>No silent filtering anywhere</li>
+        <li>Deterministic finding IDs</li>
+        <li>Evidence chain: Probes &rarr; Hypotheses &rarr; Diagnoses</li>
+        <li>PDF audit reports in 3 languages</li>
+        <li>Calibration harness with recall metrics</li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="accent">After 4 phases (5.0 / 5)</h3>
+      <ul class="check-list">
+        <li>Every finding timestamped with run_id</li>
+        <li>Full score transparency on verdicts</li>
+        <li>Finding lifecycle: first_seen, age, state</li>
+        <li>Exception trail: who reviewed, when, why</li>
+        <li>Auditor can reconstruct any finding's full history</li>
+      </ul>
+    </div>
+  </div>
+  <div style="margin-top: 3rem; text-align: center;">
+    <p style="font-size: 1.5rem; font-weight: 600;">
+      The data tells the truth.<br>
+      <span class="accent">Now we make the trail visible.</span>
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ NAVIGATION ═══════════════════════════ -->
+<div class="nav">
+  <button id="prev" onclick="navigate(-1)">&larr; Prev</button>
+  <span class="counter" id="counter">1 / 13</span>
+  <button id="next" onclick="navigate(1)">Next &rarr;</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let current = 0;
+
+  function show(n) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[n].classList.add('active');
+    document.getElementById('counter').textContent = `${n + 1} / ${slides.length}`;
+    document.getElementById('prev').disabled = n === 0;
+    document.getElementById('next').disabled = n === slides.length - 1;
+  }
+
+  function navigate(dir) {
+    const next = current + dir;
+    if (next >= 0 && next < slides.length) {
+      current = next;
+      show(current);
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); navigate(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); navigate(-1); }
+    if (e.key === 'Home') { current = 0; show(current); }
+    if (e.key === 'End') { current = slides.length - 1; show(current); }
+  });
+
+  show(0);
+</script>
+
+</body>
+</html>

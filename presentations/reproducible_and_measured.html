@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- jinflow — reproducible by construction. Source of record: docs/presentations/. -->
+<title>jinflow — reproducible by construction</title>
+<style>
+  :root {
+    --ink:#0e1622; --paper:#f6f8fa; --panel:#fff; --slate:#55637a; --faint:#8b97a8;
+    --hair:#e0e5ec; --cyan:#0e7490; --cyan-br:#0891b2; --amber:#b45309; --amber-br:#d97706; --violet:#6d28d9;
+    --grid:rgba(14,116,144,.06);
+    --shadow:0 1px 2px rgba(15,23,42,.04),0 12px 32px -12px rgba(15,23,42,.12);
+    --bg:var(--paper); --fg:var(--ink); --card:var(--panel);
+  }
+  @media (prefers-color-scheme: dark){:root{
+    --ink:#eaeff5;--paper:#0b1119;--panel:#111a25;--slate:#9aa7ba;--faint:#6b7789;--hair:#1e2a3a;
+    --cyan:#22d3ee;--cyan-br:#67e8f9;--amber:#f59e0b;--amber-br:#fbbf24;--violet:#a78bfa;
+    --grid:rgba(34,211,238,.06);--shadow:0 1px 2px rgba(0,0,0,.3),0 20px 40px -16px rgba(0,0,0,.6);}}
+  :root[data-theme="dark"]{--ink:#eaeff5;--paper:#0b1119;--panel:#111a25;--slate:#9aa7ba;--faint:#6b7789;--hair:#1e2a3a;
+    --cyan:#22d3ee;--cyan-br:#67e8f9;--amber:#f59e0b;--amber-br:#fbbf24;--violet:#a78bfa;
+    --grid:rgba(34,211,238,.06);--shadow:0 1px 2px rgba(0,0,0,.3),0 20px 40px -16px rgba(0,0,0,.6);}
+  :root[data-theme="light"]{--ink:#0e1622;--paper:#f6f8fa;--panel:#fff;--slate:#55637a;--faint:#8b97a8;--hair:#e0e5ec;
+    --cyan:#0e7490;--cyan-br:#0891b2;--amber:#b45309;--amber-br:#d97706;--violet:#6d28d9;
+    --grid:rgba(14,116,144,.06);--shadow:0 1px 2px rgba(15,23,42,.04),0 12px 32px -12px rgba(15,23,42,.12);}
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; } html, body { height:100%; }
+  body { margin:0; background:var(--bg); color:var(--fg); overflow:hidden;
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased; }
+  .mono { font-family:ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace; }
+
+  #deck { position:fixed; inset:0;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:42px 42px; }
+  .slide { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+    padding:clamp(1.5rem,5vw,6rem); padding-bottom:clamp(4rem,8vh,6rem);
+    opacity:0; transform:translateY(14px) scale(.995); transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);
+    pointer-events:none; overflow-y:auto; }
+  .slide.active { opacity:1; transform:none; pointer-events:auto; }
+  .wrap { width:100%; max-width:1080px; margin:0 auto; }
+
+  .eyebrow { font-family:ui-monospace,Menlo,monospace; font-size:.72rem; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--cyan); font-weight:600; margin:0 0 1.1rem; display:flex; align-items:center; gap:.7rem; }
+  .eyebrow::before { content:""; width:26px; height:1px; background:var(--cyan); opacity:.6; }
+  h1.title { font-size:clamp(2.6rem,7.5vw,5.6rem); font-weight:800; letter-spacing:-.04em; line-height:.96; margin:0; text-wrap:balance;
+    background:linear-gradient(180deg,var(--fg),color-mix(in oklab,var(--fg) 62%,var(--cyan))); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  h2 { font-size:clamp(1.7rem,4.2vw,3.2rem); font-weight:750; letter-spacing:-.025em; line-height:1.05; margin:0 0 1.2rem; text-wrap:balance; max-width:22ch; }
+  .lede { font-size:clamp(1.02rem,1.6vw,1.32rem); line-height:1.5; color:var(--slate); max-width:60ch; margin:0; }
+  .lede.tight { max-width:50ch; }
+  p { margin:0; } strong { color:var(--fg); font-weight:650; } em { font-style:italic; }
+  .term { font-family:ui-monospace,Menlo,monospace; font-size:.9em; font-weight:600; color:var(--cyan);
+    background:color-mix(in oklab,var(--cyan) 12%,transparent); border:1px solid color-mix(in oklab,var(--cyan) 30%,transparent);
+    border-radius:5px; padding:.08em .4em; white-space:nowrap; }
+  .term.amber { color:var(--amber-br); background:color-mix(in oklab,var(--amber-br) 12%,transparent); border-color:color-mix(in oklab,var(--amber-br) 30%,transparent); }
+
+  .grid { display:grid; gap:1rem; } .g2 { grid-template-columns:1fr 1fr; } .g3 { grid-template-columns:repeat(3,1fr); }
+  @media (max-width:820px){ .g2,.g3 { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--hair); border-radius:14px; padding:1.3rem 1.4rem; box-shadow:var(--shadow); }
+  .card h3 { font-size:1.08rem; font-weight:700; margin:0 0 .5rem; letter-spacing:-.01em; }
+  .card p { font-size:.95rem; line-height:1.48; color:var(--slate); }
+  .card .n { font-family:ui-monospace,Menlo,monospace; font-size:.7rem; letter-spacing:.14em; color:var(--faint); text-transform:uppercase; }
+
+  /* code / declaration block */
+  .code { font-family:ui-monospace,Menlo,monospace; font-size:clamp(.72rem,1.2vw,.92rem); line-height:1.6;
+    background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:1.1rem 1.3rem; box-shadow:var(--shadow); overflow-x:auto; }
+  .code .k { color:var(--cyan); } .code .s { color:var(--amber-br); } .code .c { color:var(--faint); }
+
+  /* the annotated readout */
+  .readout { text-align:center; margin:1rem 0 1.3rem; }
+  .readout .val { font-family:ui-monospace,Menlo,monospace; font-size:clamp(2rem,6vw,3.6rem); font-weight:700; letter-spacing:-.02em; }
+  .readout .val .num { color:var(--fg); }
+  .readout .val .unit { color:var(--cyan); }
+  .readout .val .unc { color:var(--amber-br); }
+  .chips { display:flex; gap:.7rem; flex-wrap:wrap; justify-content:center; margin-top:1.3rem; }
+  .chip { border:1px solid var(--hair); border-radius:10px; padding:.55rem .8rem; background:var(--card); box-shadow:var(--shadow); text-align:left; min-width:120px; }
+  .chip .lab { font-family:ui-monospace,Menlo,monospace; font-size:.6rem; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); }
+  .chip .v { font-size:.92rem; font-weight:600; margin-top:.15rem; }
+  .chip.u .v { color:var(--cyan); } .chip.n .v { color:var(--amber-br); }
+
+  .li { display:flex; gap:.8rem; align-items:baseline; margin-bottom:.9rem; font-size:1.05rem; line-height:1.42; }
+  .li .m { flex:none; width:8px; height:8px; border-radius:2px; background:var(--cyan); transform:rotate(45deg) translateY(-1px); }
+  .li b { font-weight:650; }
+
+  #bar { position:fixed; left:0; top:0; height:3px; background:linear-gradient(90deg,var(--cyan),var(--cyan-br)); width:0; transition:width .45s ease; z-index:40; }
+  #brand { position:fixed; left:clamp(1.2rem,3vw,2.4rem); top:clamp(1rem,2.6vh,1.8rem); z-index:30; display:flex; align-items:center; gap:.55rem; font-weight:700; letter-spacing:-.02em; }
+  #brand .d { width:9px; height:9px; background:var(--cyan); border-radius:2px; transform:rotate(45deg); }
+  #brand small { font-family:ui-monospace,Menlo,monospace; font-weight:500; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); }
+  #foot { position:fixed; right:clamp(1.2rem,3vw,2.4rem); bottom:clamp(1rem,2.6vh,1.6rem); left:clamp(1.2rem,3vw,2.4rem); z-index:30;
+    display:flex; justify-content:space-between; align-items:center; font-family:ui-monospace,Menlo,monospace; font-size:.7rem; letter-spacing:.1em; color:var(--faint); }
+  #dots { display:flex; gap:.5rem; } #dots button { width:7px; height:7px; border-radius:50%; border:none; background:var(--hair); padding:0; cursor:pointer; transition:all .3s; }
+  #dots button.on { background:var(--cyan); transform:scale(1.35); }
+  #hint b { color:var(--slate); }
+  @media (prefers-reduced-motion: reduce){ * { transition:none !important; } }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="brand"><span class="d"></span> jinflow <small>a jazzisnow engine</small></div>
+
+<div id="deck">
+
+  <!-- 1 · Title -->
+  <section class="slide active">
+    <div class="wrap">
+      <p class="eyebrow">Reproducible by construction</p>
+      <h1 class="title">Reproducible.<br>And measured.</h1>
+      <p class="lede" style="margin-top:1.6rem;max-width:52ch;">
+        Two promises most tools quietly break — that a result carries the method that made it, and that
+        a number remembers it is a <strong>measurement</strong>. jinflow keeps both by construction.
+      </p>
+    </div>
+  </section>
+
+  <!-- 2 · Two silent losses -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">Two silent losses</p>
+      <h2 style="max-width:24ch;">Between the raw file and the published figure, two things usually vanish.</h2>
+      <div class="grid g2" style="margin-top:1.3rem;">
+        <div class="card"><div class="n">Loss 1 · the method</div><h3>How the number was made</h3>
+          <p>The recipe lives in a chain of clicks, a spreadsheet macro, a one-off script — untracked, unversioned, and gone the day the author leaves.</p></div>
+        <div class="card"><div class="n">Loss 2 · the measurement</div><h3>What the number <em>is</em></h3>
+          <p>The unit becomes a column header at best; the uncertainty is dropped; and a mean gets taken of quantities that must never be averaged.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · Reproducible — the method is a declaration -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">Reproducible · the method is written down</p>
+      <h2 style="max-width:22ch;">Your analysis is a declaration, not a memory.</h2>
+      <div class="grid g2" style="align-items:center;">
+        <p class="lede">
+          A finding is a few lines of <span class="term">YAML</span> — a <strong>Signal</strong>, a
+          <strong>Thesis</strong> — that the engine compiles to SQL and runs. The method is an
+          <em>artifact</em>: reviewable, versioned, diffable. No black box, no lost macro.
+        </p>
+        <div class="code"><span class="c"># signal_pm25_annual.yaml</span><br>
+          <span class="k">type:</span> ratio<br>
+          <span class="k">entity:</span> Measurement<br>
+          <span class="k">numerator:</span> mean_pm25<br>
+          <span class="k">denominator:</span> <span class="s">who_limit_pm25</span><br>
+          <span class="k">flag_when:</span> ratio <span class="s">&gt; 1</span></div>
+      </div>
+      <p class="lede tight" style="margin-top:1.2rem;font-size:1rem;">Change a threshold, and <span class="term">git diff</span> shows exactly what moved — and why the numbers did.</p>
+    </div>
+  </section>
+
+  <!-- 4 · Reproducible — the Imprint -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">Reproducible · the store carries its own method</p>
+      <h2 style="max-width:22ch;">Hand over the result — and the whole recipe travels with it.</h2>
+      <p class="lede">
+        Every built store carries the <em>exact</em> framework that produced it — the
+        <span class="term">Imprint</span> — stamped to a git commit: this data, this declared method,
+        this engine version, frozen together.
+      </p>
+      <div class="grid g3" style="margin-top:1.3rem;">
+        <div class="card"><h3 style="color:var(--cyan)">See it</h3><p>Open the store and read the method that made every number.</p></div>
+        <div class="card"><h3 style="color:var(--cyan)">Re-run it</h3><p>Rebuild from the same commit and get the same result, byte for byte.</p></div>
+        <div class="card"><h3 style="color:var(--cyan)">Trust it</h3><p>Peer review can reproduce your figure — not take it on faith.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · Measured — a number that knows what it is -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">Measured · a number that knows what it is</p>
+      <div class="readout">
+        <div class="val"><span class="num">35.1</span> <span class="unit">µg/m³</span> <span class="unc">± 2.3</span></div>
+        <div class="chips">
+          <div class="chip"><div class="lab">Kind</div><div class="v">mass concentration</div></div>
+          <div class="chip u"><div class="lab">Unit · UCUM</div><div class="v">µg/m³</div></div>
+          <div class="chip n"><div class="lab">Uncertainty · GUM</div><div class="v">± 2.3 (1σ)</div></div>
+          <div class="chip"><div class="lab">Roll-up</div><div class="v">averageable</div></div>
+        </div>
+      </div>
+      <p class="lede" style="text-align:center;margin:0 auto;">
+        Every column declares what it <em>is</em> — its kind, its unit (<span class="term">UCUM</span>),
+        how it may roll up, and its uncertainty (<span class="term">GUM</span>). Not a naked float — a measurement.
+      </p>
+    </div>
+  </section>
+
+  <!-- 6 · Measured — so the engine won't lie -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">Measured · so the engine cannot lie</p>
+      <h2 style="max-width:22ch;">It acts on what a number is — not just its digits.</h2>
+      <div class="grid g3" style="margin-top:1.2rem;">
+        <div class="card"><div class="n">Roll-up</div><h3>Won't average the un-averageable</h3><p>A concentration averages; a count sums; a pH does neither. The engine knows the difference and refuses the wrong one.</p></div>
+        <div class="card"><div class="n">Conversion</div><h3>Carries units, with a citation</h3><p>A change of unit is a typed edge — the standard that authorises it travels with the value, never a silent multiply.</p></div>
+        <div class="card"><div class="n">Standards</div><h3>Cites, doesn't assume</h3><p>UCUM, ISO&nbsp;8601, GUM, and the rest live in a registry — the <span class="term">Codex</span> — that the engine checks against.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · What it buys you -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">What it buys you</p>
+      <h2 style="max-width:18ch;">The dividend, in a scientist's terms.</h2>
+      <div style="margin-top:1.2rem;max-width:56ch;">
+        <div class="li"><span class="m"></span><span><b>Every figure reproducible from a commit</b> — the method is in the store, not in someone's head.</span></div>
+        <div class="li"><span class="m"></span><span><b>Peer review can re-run you</b> — reproducibility becomes the default, not a special request.</span></div>
+        <div class="li"><span class="m"></span><span><b>Units and error bars never dropped</b> — they ride every value, through every step.</span></div>
+        <div class="li"><span class="m"></span><span><b>Provenance to the raw reading</b> — a value can be traced back to the measurement it came from.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · Close -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">The discipline</p>
+      <h2 style="max-width:22ch;">Say exactly what the data supports — and let anyone check.</h2>
+      <p class="lede" style="max-width:50ch;">
+        Reproducible by construction, honest as a measurement. Not a feature you switch on — the shape of
+        the thing. The number remembers where it came from, what it is, and how sure we are of it.
+      </p>
+      <p class="lede" style="margin-top:2rem;font-size:1rem;color:var(--faint);">jinflow — reproducible by construction. A jazzisnow engine.</p>
+    </div>
+  </section>
+
+</div>
+
+<div id="foot">
+  <div id="dots"></div>
+  <div id="hint"><b>←</b> / <b>→</b> to move</div>
+</div>
+
+<script>
+  (function () {
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const bar = document.getElementById('bar');
+    const dotsWrap = document.getElementById('dots');
+    let i = 0;
+    slides.forEach((_, n) => { const b = document.createElement('button'); b.addEventListener('click', () => go(n)); dotsWrap.appendChild(b); });
+    const dots = Array.from(dotsWrap.children);
+    function go(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach((sl, k) => sl.classList.toggle('active', k === i));
+      dots.forEach((d, k) => d.classList.toggle('on', k === i));
+      bar.style.width = (i / (slides.length - 1) * 100) + '%';
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(i + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(i - 1); }
+      else if (e.key === 'Home') go(0); else if (e.key === 'End') go(slides.length - 1);
+    });
+    document.getElementById('deck').addEventListener('click', (e) => {
+      if (e.target.closest('a,button')) return;
+      (e.clientX / window.innerWidth < 0.28) ? go(i - 1) : go(i + 1);
+    });
+    go(0);
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>jinflow — Make, Explore, Evolve</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+    --rose: #e11d48;
+    --rose-soft: #fff1f2;
+    --cyan: #0891b2;
+    --cyan-soft: #ecfeff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout { display: flex; width: 100%; height: 100%; }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+  .thumb.jin-thumb { background: linear-gradient(135deg, #1a3a4a 0%, #0f2938 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label,
+  .thumb.jin-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area { flex: 1; position: relative; height: 100%; overflow: hidden; }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 7vh 10vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 2vh;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2.5vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 2.8vw, 2.3rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.95rem, 1.6vw, 1.3rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+  .indigo { color: var(--indigo); font-weight: 500; }
+  .purple { color: var(--purple); }
+  .amber { color: var(--amber); }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 2vh 0;
+  }
+
+  /* ── Section slides ── */
+  .section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+  }
+  .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .section-slide .logo { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  .jin-slide {
+    background: linear-gradient(135deg, #1a3a4a 0%, #0f2938 100%);
+  }
+  .jin-slide h1, .jin-slide h2 { color: var(--white); }
+  .jin-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .jin-slide .logo { color: var(--teal-light); }
+  .jin-slide .divider { background: var(--teal-light); }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.5vw; margin-top: 2vh;
+  }
+
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.5vh 2vw;
+    font-weight: 600; font-size: clamp(0.82rem, 1.1vw, 1rem);
+    color: var(--navy); text-align: center; min-width: 100px;
+  }
+  .flow-box.filled { background: var(--navy); border-color: var(--navy); color: var(--white); }
+  .flow-box.teal-filled { background: var(--teal); border-color: var(--teal); color: var(--white); }
+  .flow-box.indigo-filled { background: var(--indigo); border-color: var(--indigo); color: var(--white); }
+  .flow-box.purple-filled { background: var(--purple); border-color: var(--purple); color: var(--white); }
+
+  .flow-arrow {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Stat cards ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2.5vh 1.5vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.6vh;
+  }
+
+  .stat-label {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Impact list ── */
+  .impacts {
+    list-style: none; max-width: 750px; width: 100%; margin-top: 1.5vh;
+  }
+  .impacts li {
+    font-size: clamp(0.9rem, 1.4vw, 1.15rem);
+    line-height: 1.7; color: var(--navy);
+    padding: 0.7vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.1);
+    display: flex; align-items: baseline; gap: 0.8rem;
+  }
+  .impacts li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block; width: 8px; height: 8px; min-width: 8px;
+    border-radius: 50%; margin-top: 0.5em;
+  }
+  .bullet.teal { background: var(--teal); }
+  .bullet.indigo { background: var(--indigo); }
+  .bullet.purple { background: var(--purple); }
+  .bullet.amber { background: var(--amber); }
+  .bullet.green { background: var(--green); }
+
+  /* ── Comparison cards ── */
+  .compare {
+    display: flex; gap: 2.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .compare-card {
+    flex: 1; border-radius: 12px; padding: 2.5vh 2vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+  .compare-card.engine { background: var(--indigo-soft); border: 1px solid #c7d2fe; }
+  .compare-card.domain { background: var(--amber-soft); border: 1px solid #fde68a; }
+  .compare-card.ai { background: var(--purple-soft); border: 1px solid #c4b5fd; }
+  .compare-card.good { background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .compare-card.cyan { background: var(--cyan-soft); border: 1px solid #a5f3fc; }
+
+  .compare-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; margin-bottom: 0.8vh;
+  }
+  .compare-card.engine .compare-title { color: #3730a3; }
+  .compare-card.domain .compare-title { color: #92400e; }
+  .compare-card.ai .compare-title { color: #5b21b6; }
+  .compare-card.good .compare-title { color: #166534; }
+  .compare-card.cyan .compare-title { color: #155e75; }
+
+  .compare-text {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--slate); line-height: 1.5;
+  }
+  .compare-text strong { color: var(--navy); }
+  .compare-text code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9em; background: rgba(0,0,0,0.06);
+    padding: 0.1em 0.4em; border-radius: 3px;
+  }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2vw; max-width: 960px; width: 100%; margin-top: 2vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-icon {
+    font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+    margin-bottom: 0.8vh;
+  }
+  .card-title {
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+  .card-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Cycle diagram ── */
+  .cycle {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; margin-top: 3vh; max-width: 900px;
+  }
+
+  .cycle-phase {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2.5vh 3vw;
+    border-radius: 16px; min-width: 180px;
+    position: relative;
+  }
+
+  .cycle-phase.make { background: var(--indigo-soft); border: 2px solid #c7d2fe; }
+  .cycle-phase.explore { background: var(--cyan-soft); border: 2px solid #a5f3fc; }
+  .cycle-phase.evolve { background: var(--purple-soft); border: 2px solid #c4b5fd; }
+
+  .cycle-verb {
+    font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+    font-weight: 700; margin-bottom: 0.5vh;
+  }
+  .cycle-phase.make .cycle-verb { color: #3730a3; }
+  .cycle-phase.explore .cycle-verb { color: #155e75; }
+  .cycle-phase.evolve .cycle-verb { color: #5b21b6; }
+
+  .cycle-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--slate); text-align: center; line-height: 1.5;
+  }
+
+  .cycle-arrow {
+    font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+    color: var(--teal); font-weight: 300;
+    padding: 0 1vw;
+  }
+
+  /* ── Store cards ── */
+  .store-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2vw; max-width: 960px; width: 100%; margin-top: 2vh;
+  }
+
+  .store-card {
+    border-radius: 12px; padding: 2.5vh 2vw; text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .store-card.afs { background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .store-card.kls { background: var(--indigo-soft); border: 1px solid #c7d2fe; }
+  .store-card.sis { background: var(--amber-soft); border: 1px solid #fde68a; }
+
+  .store-acr {
+    font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+    font-weight: 700; margin-bottom: 0.3vh;
+  }
+  .store-card.afs .store-acr { color: #166534; }
+  .store-card.kls .store-acr { color: #3730a3; }
+  .store-card.sis .store-acr { color: #92400e; }
+
+  .store-name {
+    font-size: clamp(0.82rem, 1.1vw, 0.95rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.5vh;
+  }
+
+  .store-tech {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    font-weight: 500; color: var(--teal); margin-bottom: 0.8vh;
+  }
+
+  .store-desc {
+    font-size: clamp(0.7rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Branding + counter ── */
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 5vh 5vw; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .compare { flex-direction: column; }
+    .card-grid { grid-template-columns: 1fr; }
+    .store-grid { grid-template-columns: 1fr; }
+    .cycle { flex-direction: column; }
+    .cycle-arrow { transform: rotate(90deg); }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<div class="sidebar" id="sidebar"></div>
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- TITLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide active jin-slide">
+    <div class="logo fade-in">jinflow</div>
+    <h1 class="fade-in">Make. Explore. Evolve.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      A framework for analytical knowledge systems.<br>
+      Three phases. Three stores. One continuous cycle.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE IDEA -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Idea</div>
+    <div class="quote fade-in">
+      Knowledge isn&rsquo;t built once.<br>
+      It&rsquo;s made, explored, and evolved.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Every analytical system follows the same rhythm:<br>
+      build a view of reality, look at what it reveals, refine it.<br><br>
+      jinflow gives this rhythm a name &mdash; and a structure.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE CYCLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Cycle</div>
+    <h2 class="fade-in">Three phases, endlessly repeated</h2>
+    <div class="cycle fade-in">
+      <div class="cycle-phase make">
+        <div class="cycle-verb">Make</div>
+        <div class="cycle-desc">Compile artifacts.<br>Build the database.<br>Validate everything.</div>
+      </div>
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-phase explore">
+        <div class="cycle-verb">Explore</div>
+        <div class="cycle-desc">See the findings.<br>Understand patterns.<br>Ask new questions.</div>
+      </div>
+      <div class="cycle-arrow">&rarr;</div>
+      <div class="cycle-phase evolve">
+        <div class="cycle-verb">Evolve</div>
+        <div class="cycle-desc">Refine artifacts.<br>Author new probes.<br>Capture knowledge.</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Evolve feeds back into Make. The cycle never ends.<br>
+      <span class="highlight">Each turn produces a richer, more accurate analytical system.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: THE THREE APPLICATIONS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Applications</div>
+    <h2 class="fade-in">One Phase, One Tool</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Each phase is a standalone, deployable application.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- jinflow make -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Phase 1</div>
+    <h2 class="fade-in">jinflow make</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">The Builder</div>
+        <div class="compare-text">
+          UI-less processing engine. Pure transformation.<br><br>
+          Takes <strong>artifacts</strong> (CSVs, YAML definitions, contracts)<br>
+          and produces a <strong>built DuckDB</strong>.<br><br>
+          Validates. Compiles. Builds. Done.<br><br>
+          <code>jinflow make --artifact-dir ./content</code>
+        </div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">Key Properties</div>
+        <div class="compare-text">
+          <strong>No UI.</strong> No interactivity. No AI.<br><br>
+          <strong>Workspace isolation.</strong> Never mutates source files.<br><br>
+          <strong>Deterministic.</strong> Same artifacts in &rarr; same DuckDB out.<br><br>
+          <strong>Deployable anywhere.</strong> Laptop. CI. Cloud function.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- jinflow explore -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Phase 2</div>
+    <h2 class="fade-in">jinflow explore</h2>
+    <div class="compare fade-in">
+      <div class="compare-card cyan">
+        <div class="compare-title">The Explorer</div>
+        <div class="compare-text">
+          Visual desktop application.<br><br>
+          Opens the DuckDB that <strong>make</strong> built.<br>
+          Browse dimensions, findings, verdicts, expert knowledge.<br><br>
+          See what the data says. Understand patterns.<br>
+          Form new questions.
+        </div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">Key Properties</div>
+        <div class="compare-text">
+          <strong>Read-only.</strong> Never writes to the DuckDB.<br><br>
+          <strong>No AI.</strong> Human exploration, human insight.<br><br>
+          <strong>Desktop or web.</strong> macOS, Linux, Windows, browser.<br><br>
+          <strong>Any DuckDB.</strong> File picker or env var. No path assumptions.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- jinflow evolve -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Phase 3</div>
+    <h2 class="fade-in">jinflow evolve</h2>
+    <div class="compare fade-in">
+      <div class="compare-card ai">
+        <div class="compare-title">The Evolver</div>
+        <div class="compare-text">
+          AI-powered REPL that closes the cycle.<br><br>
+          Queries what <strong>make</strong> built.<br>
+          Understands what <strong>explore</strong> revealed.<br>
+          Authors the next generation of <strong>artifacts</strong>.<br><br>
+          <code>jinflow evolve</code>
+        </div>
+      </div>
+      <div class="compare-card good">
+        <div class="compare-title">Key Properties</div>
+        <div class="compare-text">
+          <strong>The only tool with AI.</strong> Claude as co-pilot.<br><br>
+          <strong>Reads</strong> the DuckDB. <strong>Writes</strong> artifacts.<br><br>
+          <strong>Suggest, validate, compile.</strong> Full authoring workflow.<br><br>
+          <strong>Human confirms.</strong> AI proposes, human approves.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE CYCLE REVISITED -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Loop</div>
+    <h2 class="fade-in">Evolve writes artifacts.<br>Make builds them. Explore reveals what changed.</h2>
+    <div class="flow fade-in">
+      <div class="flow-box purple-filled"><strong>Evolve</strong><br><small>new probe YAML</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box indigo-filled"><strong>Make</strong><br><small>compile + build</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>Explore</strong><br><small>see new findings</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box purple-filled"><strong>Evolve</strong><br><small>refine thresholds</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box" style="border-style: dashed;">&hellip;</div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Every turn through the cycle refines understanding.<br>
+      <span class="highlight">The system gets smarter because the artifacts get better.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: THE THREE STORES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Stores</div>
+    <h2 class="fade-in">AFS &middot; KLS &middot; SIS</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Three named stores. Each with a clear owner.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- STORE OVERVIEW -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Three Stores</div>
+    <h2 class="fade-in">Every piece of state has a home</h2>
+    <div class="store-grid fade-in">
+      <div class="store-card afs">
+        <div class="store-acr">AFS</div>
+        <div class="store-name">Artifact Store</div>
+        <div class="store-tech">Git</div>
+        <div class="store-desc">
+          All domain content.<br>
+          CSVs, YAML definitions,<br>
+          contracts, tenant configs.<br><br>
+          Version-controlled.<br>
+          Separate from engine code.
+        </div>
+      </div>
+      <div class="store-card kls">
+        <div class="store-acr">KLS</div>
+        <div class="store-name">Knowledge Store</div>
+        <div class="store-tech">DuckDB</div>
+        <div class="store-desc">
+          The analytical database.<br>
+          Built product of <strong>make</strong>.<br><br>
+          Medallion layers, findings,<br>
+          verdicts, expert knowledge.<br>
+          Read-only for explore &amp; evolve.
+        </div>
+      </div>
+      <div class="store-card sis">
+        <div class="store-acr">SIS</div>
+        <div class="store-name">System Information Store</div>
+        <div class="store-tech">SQLite &rarr; D1</div>
+        <div class="store-desc">
+          Operational state.<br>
+          Build journal, instrument<br>
+          lifecycle, compilation logs.<br><br>
+          Strictly optional.<br>
+          Everything works without it.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- STORES + APPLICATIONS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Who Touches What</div>
+    <h2 class="fade-in">Clear ownership. No ambiguity.</h2>
+    <div class="flow fade-in" style="flex-wrap: nowrap; gap: 1vw;">
+      <div class="flow-box" style="background: var(--green-soft); border-color: #bbf7d0; min-width: 80px;"><strong>AFS</strong><br><small>artifacts</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box indigo-filled"><strong>make</strong><br><small>reads AFS<br>writes KLS</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box" style="background: var(--indigo-soft); border-color: #c7d2fe; min-width: 80px;"><strong>KLS</strong><br><small>database</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>explore</strong><br><small>reads KLS</small></div>
+    </div>
+    <div class="flow fade-in" style="margin-top: 2vh; flex-wrap: nowrap; gap: 1vw;">
+      <div class="flow-box" style="background: var(--indigo-soft); border-color: #c7d2fe; min-width: 80px;"><strong>KLS</strong><br><small>database</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box purple-filled"><strong>evolve</strong><br><small>reads KLS<br>writes AFS</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box" style="background: var(--green-soft); border-color: #bbf7d0; min-width: 80px;"><strong>AFS</strong><br><small>artifacts</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box indigo-filled"><strong>make</strong><br><small>rebuilds</small></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      <span class="highlight">AFS is the input to make. KLS is the output.</span><br>
+      Evolve reads the output and writes the input. The cycle closes.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: DESIGN PRINCIPLES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Principles</div>
+    <h2 class="fade-in">What jinflow Believes</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Five commitments that shape every design decision.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- PRINCIPLES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Five Principles</div>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><strong>Domain agnosticism.</strong> jinflow knows about artifacts, compilers, tenants, and layers &mdash; not about hospitals, materials, or billing. The domain is content, not framework.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Engine / content separation.</strong> The engine ships as a versioned package. Domain-specific content lives in a separate git repo &mdash; the AFS.</span></li>
+      <li><span class="bullet teal"></span><span><strong>DuckDB as the universal contract.</strong> Make writes the KLS. Explore reads it. Evolve queries it. No other shared state between the three applications.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Workspace isolation.</strong> Make never mutates source directories. Temp workspace &rarr; compile &rarr; build &rarr; output.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Cloud readiness.</strong> Same Python library locally and in Lambda. Different callers, same engine.</span></li>
+    </ul>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION: nuMETRIX -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The First Application</div>
+    <h2 class="fade-in">nuMetrix on jinflow</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Hospital material flow analytics &mdash; built on the cycle.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- nuMETRIX DETAILS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">nuMetrix</div>
+    <h2 class="fade-in">jinflow provides the how.<br>nuMetrix provides the what.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card engine">
+        <div class="compare-title">jinflow (framework)</div>
+        <div class="compare-text">
+          Medallion pipeline (Bronze &rarr; Silver &rarr; Gold)<br>
+          YAML &rarr; SQL compilers<br>
+          Multi-tenant isolation<br>
+          Taxonomy engine<br>
+          Explorer shell<br>
+          AI-powered REPL<br><br>
+          <strong>The machinery. Domain-agnostic.</strong>
+        </div>
+      </div>
+      <div class="compare-card domain">
+        <div class="compare-title">nuMetrix (domain)</div>
+        <div class="compare-text">
+          Cases, procedures, materials, billing<br>
+          OPALE, SAP, Navision mappings<br>
+          47 probes, 11 hypotheses, 10 diagnoses<br>
+          55 SMEbits, 15 BitBundles<br>
+          Gold contract (7 entities)<br>
+          3 source systems<br><br>
+          <strong>The knowledge. All in the AFS.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- nuMETRIX CYCLE IN ACTION -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Cycle in Action</div>
+    <h2 class="fade-in">A real example from nuMetrix</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet indigo"></span><span><strong>Make:</strong> Compile 47 probe YAMLs into SQL. Build DuckDB for hospital_zeta. 68K cases, 2.4M billing rows.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Explore:</strong> Open the Explorer. See that &ldquo;Revenue Leakage from Unbilled Materials&rdquo; is confirmed at CHF 2.8M.</span></li>
+      <li><span class="bullet purple"></span><span><strong>Evolve:</strong> Ask Claude: &ldquo;Which cost centers drive the leakage?&rdquo; &mdash; AI queries KLS, identifies top 5 cost centers, suggests a new probe targeting OR documentation gaps.</span></li>
+      <li><span class="bullet indigo"></span><span><strong>Make:</strong> Rebuild with the new probe. Now the system detects OR-specific billing gaps.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Explore:</strong> See the new findings. The hypothesis evidence score shifts. Understanding deepens.</span></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- TERMINOLOGY -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Terminology</div>
+    <h2 class="fade-in">The jinflow vocabulary</h2>
+    <div class="card-grid fade-in">
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--indigo);">M</div>
+        <div class="card-title">Make</div>
+        <div class="card-desc">The builder phase. Artifacts in, DuckDB out. Validate, compile, build. No UI, no AI.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--cyan);">E</div>
+        <div class="card-title">Explore</div>
+        <div class="card-desc">The discovery phase. Visual, read-only, human-driven. See what the data says.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--purple);">V</div>
+        <div class="card-title">Evolve</div>
+        <div class="card-desc">The refinement phase. AI-assisted. Query the KLS, author new artifacts into the AFS.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--green);">AFS</div>
+        <div class="card-title">Artifact Store</div>
+        <div class="card-desc">Git repo with all domain content. CSVs, YAMLs, contracts. Input to make, output of evolve.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: #3730a3;">KLS</div>
+        <div class="card-title">Knowledge Store</div>
+        <div class="card-desc">DuckDB. The built analytical database. Sole output of make. Read-only for explore and evolve.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--amber);">SIS</div>
+        <div class="card-title">System Information Store</div>
+        <div class="card-desc">SQLite. Operational state: build journal, instrument lifecycle. Optional. Cloud path: D1.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- CLOSING -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide jin-slide">
+    <div class="logo fade-in">jinflow</div>
+    <h1 class="fade-in" style="line-height: 1.3;">Make it.<br>Explore it.<br>Evolve it.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Three applications. Three stores.<br>
+      One continuous cycle of understanding.<br><br>
+      <span style="color: var(--teal-light); font-weight: 500;">The knowledge system that gets better every time you use it.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+</div>
+
+<div class="brand">jinflow.io</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    var isJin = slide.classList.contains('jin-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (isJin) thumb.classList.add('jin-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = 'jinflow';
+    } else {
+      var title = slide.querySelector('h1, h2');
+      var logo = slide.querySelector('.logo');
+      if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var n = 0;
+    for (var j = 0; j <= index; j++) {
+      if (!slides[j].classList.contains('breathing')) n++;
+    }
+    counter.textContent = n + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

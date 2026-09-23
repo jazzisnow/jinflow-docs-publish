@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>hrcentral — pitch</title>
+<style>
+  :root {
+    --accent: #dc6e3a;
+    --ink: #0f172a;
+    --paper: #fafafa;
+    --muted: #64748b;
+    --rule: #e2e8f0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink); background: var(--paper); line-height: 1.45;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  }
+  .deck { position: relative; width: 100vw; height: 100vh; }
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 7vh 8vw 11vh;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+  .eyebrow {
+    font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin-bottom: 1.5rem;
+  }
+  .headline {
+    font-size: clamp(2.2rem, 5vw, 4.2rem);
+    font-weight: 700; line-height: 1.08; letter-spacing: -0.02em;
+    max-width: 24ch;
+  }
+  .headline em { font-style: normal; color: var(--accent); }
+  .subhead {
+    font-size: clamp(1.05rem, 1.4vw, 1.4rem);
+    color: var(--muted); margin-top: 1.6rem;
+    max-width: 56ch; line-height: 1.55;
+  }
+  .body { margin-top: 3rem; max-width: 1200px; }
+  .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; }
+  .cols.four { grid-template-columns: repeat(4, 1fr); gap: 2rem; }
+  .col strong {
+    display: block; font-size: 0.72rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--accent);
+    font-weight: 600; margin-bottom: 0.6rem;
+  }
+  .col p { font-size: 1rem; line-height: 1.55; color: var(--ink); }
+  .stats { display: flex; gap: 4.5rem; margin-top: 2.5rem; flex-wrap: wrap; }
+  .stat .num {
+    font-size: clamp(2rem, 3.5vw, 3.2rem); font-weight: 700;
+    color: var(--accent); line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat .lbl {
+    font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem;
+    text-transform: uppercase; letter-spacing: 0.12em;
+  }
+  .cta {
+    display: inline-block; margin-top: 2rem;
+    padding: 0.95rem 2rem;
+    background: var(--ink); color: var(--paper);
+    text-decoration: none; font-weight: 600; letter-spacing: 0.02em;
+    transition: transform 0.15s ease;
+  }
+  .cta:hover { transform: translateY(-1px); }
+  .nav {
+    position: fixed; bottom: 1.8rem; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 2rem; font-size: 0.72rem;
+    color: var(--muted); letter-spacing: 0.12em;
+    pointer-events: none;
+  }
+  .brand { font-weight: 700; color: var(--ink); letter-spacing: 0.02em; font-size: 0.85rem; }
+  .brand .powered { font-weight: 400; color: var(--muted); margin-left: 0.5rem; letter-spacing: 0.05em; }
+  .dots { display: flex; gap: 0.5rem; pointer-events: auto; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted); opacity: 0.3; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .dot.active { background: var(--accent); opacity: 1; width: 24px; border-radius: 3px; }
+  .progress { font-variant-numeric: tabular-nums; min-width: 4ch; text-align: right; }
+  .signature {
+    margin-top: 1.5rem; font-size: 0.95rem; color: var(--muted);
+    border-top: 1px solid var(--rule); padding-top: 1rem; max-width: 50ch;
+  }
+  .signature a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--accent); }
+  .badge {
+    display: inline-block; margin-top: 1rem;
+    padding: 0.35rem 0.75rem; font-size: 0.7rem;
+    background: var(--accent); color: var(--paper);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    font-weight: 600; border-radius: 3px;
+  }
+
+  @media print {
+    html, body { overflow: visible; height: auto; }
+    .slide { opacity: 1 !important; pointer-events: auto !important;
+      position: relative; height: 100vh; page-break-after: always;
+      transition: none !important;
+    }
+    .nav { display: none; }
+  }
+  @media (max-width: 720px) {
+    .cols, .cols.four { grid-template-columns: 1fr; gap: 1.5rem; }
+    .body { margin-top: 2rem; }
+    .stats { gap: 2rem; }
+    .slide { padding: 6vh 6vw 12vh; }
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <section class="slide active">
+    <div class="eyebrow">hrcentral</div>
+    <h1 class="headline">People as entities. <em>The whole HR story</em> in one model.</h1>
+    <p class="subhead">Joiners, leavers, cohorts, performance, sentiment — atomized so you can ask anything, and trace every answer back to a person.</p>
+    <span class="badge">In formation · VAI launch partner</span>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Why HR analytics is broken</div>
+    <h1 class="headline">Workday tells you who. Power BI tells you when. <em>Nobody tells you why.</em></h1>
+    <div class="body">
+      <div class="cols">
+        <div class="col">
+          <strong>Tools don't talk</strong>
+          <p>Recruiting, onboarding, performance, exit interviews — six systems, six exports, six versions of the truth.</p>
+        </div>
+        <div class="col">
+          <strong>Why people leave is locked in PDFs</strong>
+          <p>The exit interview captured it. Three years later it's a SharePoint folder nobody reads. The pattern stays invisible.</p>
+        </div>
+        <div class="col">
+          <strong>Cohort questions take weeks</strong>
+          <p>"How are the Q3-2024 joiners performing?" is a custom report request. Six weeks later, the answer is stale.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">What hrcentral does</div>
+    <h1 class="headline">One model. People as the <em>atomic unit.</em> Subject Matter for what HR knows.</h1>
+    <div class="body">
+      <div class="cols">
+        <div class="col">
+          <strong>Three Questions</strong>
+          <p>Who joined, who left, who's at risk. Everything else is a slice of these three. Coherent navigation, not a maze of dashboards.</p>
+        </div>
+        <div class="col">
+          <strong>Cohorts are first-class</strong>
+          <p>Define a cohort by any rule — hire date, role, manager, tenure band. See it move through every metric, every quarter.</p>
+        </div>
+        <div class="col">
+          <strong>Subject Matter captures the why</strong>
+          <p>The HR business partner's notes — about a team, a manager, a process — live next to the data. Travel with the build.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">What you see</div>
+    <h1 class="headline">An Explorer where every person is <em>a clickable story.</em></h1>
+    <div class="body">
+      <div class="cols">
+        <div class="col">
+          <strong>Persons as Atomic</strong>
+          <p>One row per employee. Every event, every metric, every note attached. Walk a career in one view.</p>
+        </div>
+        <div class="col">
+          <strong>Joiners Lab</strong>
+          <p>Watch each cohort's first twelve months. Compare to last year's. Spot the early-attrition signal before it becomes the late-attrition number.</p>
+        </div>
+        <div class="col">
+          <strong>Cohorts pivot</strong>
+          <p>Slice by department, role, manager, tenure. Save your slice as a URL. Share it with the team that needs to act.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">Status</div>
+    <h1 class="headline">Forming with <em>Val d'Oria Academic Institutions</em> as launch partner.</h1>
+    <p class="subhead">The engine runs today on synthetic data. Joiners Lab and the Cohorts pivot are live in development. The VAI HR partnership is in design — entity model agreed, first import scoped.</p>
+    <div class="stats">
+      <div class="stat"><div class="num">1</div><div class="lbl">launch partner</div></div>
+      <div class="stat"><div class="num">3</div><div class="lbl">questions, one model</div></div>
+      <div class="stat"><div class="num">∞</div><div class="lbl">cohorts you can define</div></div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div class="eyebrow">If you run HR for an organization</div>
+    <h1 class="headline">Be among the first three tenants. <em>Help us shape</em> what HR analytics should look like.</h1>
+    <p class="subhead">hrcentral runs on jinflow — sovereign by construction. Your data stays where it is. We bring the engine, the model, and the experience of building this for a fifth domain.</p>
+    <div class="signature">
+      <strong>Michael Gassmann</strong> · jazzisnow / hrcentral<br>
+      <a href="mailto:michael.gassmann@gmail.com">michael.gassmann@gmail.com</a>
+    </div>
+  </section>
+
+</div>
+
+<nav class="nav">
+  <span class="brand">hrcentral <span class="powered">· powered by jinflow</span></span>
+  <div class="dots" id="dots"></div>
+  <span class="progress" id="progress">1 / 6</span>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  const progress = document.getElementById('progress');
+  let i = 0;
+
+  slides.forEach((_, j) => {
+    const d = document.createElement('span');
+    d.className = 'dot' + (j === 0 ? ' active' : '');
+    d.addEventListener('click', () => show(j));
+    dotsEl.appendChild(d);
+  });
+  const dots = document.querySelectorAll('.dot');
+
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, j) => s.classList.toggle('active', j === i));
+    dots.forEach((d, j) => d.classList.toggle('active', j === i));
+    progress.textContent = (i + 1) + ' / ' + slides.length;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) { show(i + 1); e.preventDefault(); }
+    else if (['ArrowLeft', 'PageUp'].includes(e.key)) { show(i - 1); e.preventDefault(); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+  });
+
+  document.addEventListener('click', e => {
+    if (e.target.closest('a, .dot, .cta')) return;
+    const half = window.innerWidth / 2;
+    show(e.clientX > half ? i + 1 : i - 1);
+  });
+</script>
+</body>
+</html>

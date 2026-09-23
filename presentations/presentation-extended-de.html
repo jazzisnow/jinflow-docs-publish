@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix — Erweitert</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --accent-glow: rgba(42, 143, 143, 0.08);
+    --red-soft: #fef2f2;
+    --green-soft: #f0fdf4;
+    --amber-soft: #fffbeb;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Slide container ── */
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 7vh 10vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  /* ── Typography ── */
+  .logo {
+    font-size: clamp(1.1rem, 1.8vw, 1.5rem);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 2.5vh;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 3vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 820px;
+  }
+
+  .subtitle {
+    font-size: clamp(1rem, 1.8vw, 1.4rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 700px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+
+  /* ── Staggered fade-in ── */
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  /* ── Decorative line ── */
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 2vh 0;
+  }
+
+  /* ── Step cards ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 2vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+
+  .step {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2.5vh 1.8vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .step-num {
+    font-size: clamp(1.8rem, 2.8vw, 2.8rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.8vh;
+  }
+
+  .step-title {
+    font-size: clamp(0.9rem, 1.3vw, 1.1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.6vh;
+  }
+
+  .step-desc {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Pyramid ── */
+  .pyramid {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0.7vh; margin-top: 2vh; width: 100%; max-width: 700px;
+  }
+
+  .pyramid-layer {
+    display: flex; align-items: center; justify-content: center;
+    height: clamp(42px, 6vh, 56px); border-radius: 8px;
+    font-weight: 600; font-size: clamp(0.8rem, 1.2vw, 1rem);
+    color: var(--white); text-align: center; letter-spacing: 0.03em;
+  }
+
+  .pyramid-layer.future {
+    border: 2px dashed rgba(42, 143, 143, 0.4);
+    color: var(--teal); background: transparent;
+  }
+
+  .pyr-1 { width: 32%; background: var(--navy); }
+  .pyr-2 { width: 42%; background: #234060; }
+  .pyr-3 { width: 55%; background: var(--teal); }
+  .pyr-4 { width: 68%; background: #2a8f8f; }
+  .pyr-5 { width: 84%; background: #1a7070; }
+
+  .pyramid-label {
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    color: var(--warm-gray); margin-top: 0.2vh; font-weight: 400;
+  }
+
+  /* ── Medallion pipeline ── */
+  .medallion {
+    display: flex; align-items: stretch; justify-content: center;
+    gap: 2vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .medal-stage {
+    flex: 1; background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+    border-top: 4px solid var(--teal);
+    display: flex; flex-direction: column; gap: 0.8vh;
+  }
+
+  .medal-stage:nth-child(1) { border-top-color: #b87333; }
+  .medal-stage:nth-child(2) { border-top-color: #c0c0c0; }
+  .medal-stage:nth-child(3) { border-top-color: #d4af37; }
+
+  .medal-name {
+    font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+    font-weight: 700; letter-spacing: 0.04em;
+  }
+  .medal-stage:nth-child(1) .medal-name { color: #b87333; }
+  .medal-stage:nth-child(2) .medal-name { color: #808080; }
+  .medal-stage:nth-child(3) .medal-name { color: #b8960c; }
+
+  .medal-desc {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  .medal-arrow {
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(1.4rem, 2vw, 1.8rem);
+    color: var(--teal); flex-shrink: 0; align-self: center;
+  }
+
+  /* ── Valid / Invalid row example ── */
+  .row-example {
+    display: flex; gap: 2vw; max-width: 800px; width: 100%; margin-top: 2vh;
+  }
+
+  .row-card {
+    flex: 1; border-radius: 12px; padding: 2.5vh 2vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .row-card.valid {
+    background: var(--green-soft);
+    border: 1px solid #bbf7d0;
+  }
+
+  .row-card.invalid {
+    background: var(--red-soft);
+    border: 1px solid #fecaca;
+  }
+
+  .row-card-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; margin-bottom: 0.8vh;
+  }
+
+  .row-card.valid .row-card-title { color: #166534; }
+  .row-card.invalid .row-card-title { color: #991b1b; }
+
+  .row-card-text {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--slate); line-height: 1.5;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  /* ── Three populations ── */
+  .populations {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .pop-card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .pop-icon {
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    margin-bottom: 1vh;
+  }
+
+  .pop-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.6vh;
+  }
+
+  .pop-desc {
+    font-size: clamp(0.75rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Bullet list ── */
+  .features {
+    list-style: none; max-width: 700px; width: 100%; margin-top: 1vh;
+  }
+
+  .features li {
+    font-size: clamp(0.95rem, 1.5vw, 1.2rem);
+    line-height: 1.7; color: var(--navy);
+    padding: 0.8vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.1);
+    display: flex; align-items: baseline; gap: 1rem;
+  }
+  .features li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block; width: 8px; height: 8px; min-width: 8px;
+    background: var(--teal); border-radius: 50%; margin-top: 0.5em;
+  }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.5vw; margin-top: 2vh;
+  }
+
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.5vh 2vw;
+    font-weight: 600; font-size: clamp(0.85rem, 1.2vw, 1.05rem);
+    color: var(--navy); text-align: center; min-width: 110px;
+  }
+
+  .flow-arrow {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Locale badges ── */
+  .locales { display: flex; gap: 1.5vw; margin-top: 2vh; }
+
+  .locale-badge {
+    font-size: clamp(1.6rem, 3vw, 2.4rem); font-weight: 700;
+    color: var(--white); background: var(--teal);
+    width: clamp(60px, 7vw, 85px); height: clamp(60px, 7vw, 85px);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  }
+  .locale-badge:nth-child(2) { background: var(--navy); }
+  .locale-badge:nth-child(3) { background: #234060; }
+
+  /* ── Hypothesis + engine layout ── */
+  .hyp-meets-engine {
+    display: flex; align-items: center; justify-content: center;
+    gap: 3vw; width: 100%; max-width: 960px; margin-top: 2vh;
+  }
+
+  .hyp-side { flex: 1; max-width: 380px; }
+
+  .hyp-speech {
+    font-size: clamp(0.95rem, 1.5vw, 1.25rem);
+    font-weight: 300; font-style: italic; line-height: 1.55;
+    color: var(--navy); padding: 2.5vh 2.2vw;
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.2);
+    border-radius: 16px; position: relative;
+    box-shadow: 0 2px 16px rgba(26, 39, 68, 0.05);
+  }
+
+  .hyp-speech::after {
+    content: ''; position: absolute;
+    right: -12px; top: 50%; transform: translateY(-50%);
+    width: 0; height: 0;
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    border-left: 12px solid var(--white);
+    filter: drop-shadow(2px 0 1px rgba(42, 143, 143, 0.1));
+  }
+
+  .hyp-source {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    font-weight: 500; font-style: normal;
+    color: var(--warm-gray); margin-top: 1vh; text-align: right;
+  }
+
+  .hyp-connector {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.5vh; flex-shrink: 0;
+  }
+
+  .hyp-connector-arrow {
+    font-size: clamp(1.6rem, 2.5vw, 2.2rem); color: var(--teal);
+  }
+
+  .hyp-connector-label {
+    font-size: clamp(0.65rem, 0.85vw, 0.78rem);
+    font-weight: 600; color: var(--teal);
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+
+  .engine-side {
+    flex: 1; max-width: 340px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.5vh;
+  }
+
+  .engine-layer {
+    display: flex; align-items: center; justify-content: center;
+    height: clamp(36px, 5vh, 48px); border-radius: 7px;
+    font-weight: 600; font-size: clamp(0.72rem, 1vw, 0.9rem);
+    color: var(--white); text-align: center; letter-spacing: 0.03em;
+  }
+
+  .engine-verdict {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.8vw; margin-top: 1vh;
+  }
+
+  .engine-verdict-line { width: 40px; height: 2px; background: rgba(42, 143, 143, 0.3); }
+
+  .engine-verdict-label {
+    font-size: clamp(0.78rem, 1.05vw, 0.9rem);
+    font-weight: 600; color: var(--teal);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  /* ── Verdict cards ── */
+  .verdicts {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 1.5vw; max-width: 800px; width: 100%; margin-top: 2vh;
+  }
+
+  .verdict-card {
+    background: var(--white); border-radius: 12px;
+    padding: 2vh 1.5vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .verdict-icon { font-size: clamp(1.6rem, 2.5vw, 2.2rem); margin-bottom: 0.8vh; }
+
+  .verdict-status {
+    font-size: clamp(0.82rem, 1.1vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+
+  .verdict-desc {
+    font-size: clamp(0.68rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Calibration visual ── */
+  .calibration {
+    display: flex; gap: 3vw; max-width: 700px; width: 100%;
+    margin-top: 2vh; align-items: center; justify-content: center;
+  }
+
+  .cal-step {
+    display: flex; flex-direction: column; align-items: center; gap: 0.8vh;
+  }
+
+  .cal-circle {
+    width: clamp(70px, 9vw, 100px); height: clamp(70px, 9vw, 100px);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: clamp(0.75rem, 1vw, 0.9rem); font-weight: 600;
+    color: var(--white); text-align: center; line-height: 1.2;
+  }
+
+  .cal-label {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); text-align: center;
+  }
+
+  .cal-arrow {
+    font-size: clamp(1.2rem, 1.8vw, 1.6rem);
+    color: var(--teal); flex-shrink: 0;
+  }
+
+  /* ── Tenant isolation ── */
+  .tenants-visual {
+    display: flex; gap: 1.5vw; margin-top: 2vh;
+    align-items: flex-end; justify-content: center;
+  }
+
+  .tenant-box {
+    width: clamp(80px, 10vw, 120px);
+    background: var(--white);
+    border: 2px solid var(--teal);
+    border-radius: 10px;
+    padding: 1.5vh 1vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .tenant-box-label {
+    font-size: clamp(0.7rem, 0.9vw, 0.82rem);
+    font-weight: 600; color: var(--navy);
+  }
+
+  .tenant-box-schema {
+    font-size: clamp(0.6rem, 0.78vw, 0.72rem);
+    color: var(--warm-gray); margin-top: 0.3vh;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+
+  .tenant-wall {
+    width: 2px; height: clamp(50px, 7vh, 70px);
+    background: repeating-linear-gradient(
+      to bottom, var(--teal) 0px, var(--teal) 4px, transparent 4px, transparent 8px
+    );
+    flex-shrink: 0;
+  }
+
+  /* ── Output showcase ── */
+  .outputs-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 2vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .output-card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .output-icon {
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    margin-bottom: 1vh; color: var(--teal);
+  }
+
+  .output-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.5vh;
+  }
+
+  .output-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Progress bar ── */
+  .progress-track {
+    position: fixed; bottom: 0; left: 0;
+    width: 100%; height: 3px;
+    background: rgba(42, 143, 143, 0.12); z-index: 100;
+  }
+
+  .progress-bar {
+    height: 100%; background: var(--teal);
+    width: 0%; transition: width 0.3s linear;
+  }
+
+  /* ── Branding ── */
+  .brand {
+    position: fixed; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  /* ── Slide counter ── */
+  .slide-counter {
+    position: fixed; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .slide { padding: 5vh 5vw; }
+    .steps { grid-template-columns: 1fr 1fr; }
+    .flow, .medallion { flex-direction: column; }
+    .flow-arrow, .medal-arrow { transform: rotate(90deg); }
+    .verdicts, .populations, .outputs-grid { grid-template-columns: 1fr 1fr; }
+    .hyp-meets-engine { flex-direction: column; }
+    .hyp-speech::after { display: none; }
+    .row-example { flex-direction: column; }
+    .calibration { flex-direction: column; }
+    .cal-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ═══ 1: Titel ═══ -->
+  <div class="slide active">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">Diagnostische Intelligenz<br>f&uuml;r den Materialfluss im Spital</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Ihr ERP hat die Daten. Wir bringen sie zum Sprechen.
+    </p>
+  </div>
+
+  <!-- ═══ 2: Das Problem ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Das Problem</div>
+    <h2 class="fade-in">Jedes Spital hat die Daten.<br>Kein Spital kann sie lesen.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Materialien werden empfangen, bewegt, verbraucht und verrechnet &mdash; &uuml;ber voneinander getrennte Systeme hinweg.
+      Die L&uuml;cken zwischen diesen Systemen sind dort, wo Erl&ouml;se versickern.
+    </p>
+  </div>
+
+  <!-- ═══ 3: Die Datenlandschaft ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Die Datenlandschaft</div>
+    <h2 class="fade-in">Sieben Systeme. Drei Sprachen.<br>Zwei Jahrzehnte Schemadrift.</h2>
+    <div class="flow fade-in">
+      <div class="flow-box">Lager</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Station</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">OP</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Verrechnung</div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Die Materialwirtschaft sieht die Verrechnung nicht. Die Verrechnung sieht die Logistik nicht.<br>
+      Der CFO erh&auml;lt einen Abweichungsbericht ohne Erkl&auml;rung.
+    </p>
+  </div>
+
+  <!-- ═══ 4: Unser Ansatz ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Unser Ansatz</div>
+    <h2 class="fade-in">Von Rohdaten zu zertifizierten Befunden</h2>
+    <div class="steps fade-in">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">Einlesen</div>
+        <div class="step-desc">Jede Zeile aus jedem ERP laden. Nichts wird bewertet, nichts wird verworfen.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">&Uuml;bersetzen</div>
+        <div class="step-desc">Herstellerspezifische Spalten auf ein kanonisches Schema abbilden. Einmalig.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Validieren</div>
+        <div class="step-desc">Jede Zeile als g&uuml;ltig oder ung&uuml;ltig kennzeichnen &mdash; mit lesbarer Begr&uuml;ndung.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">Diagnostizieren</div>
+        <div class="step-desc">Probes ausf&uuml;hren, Entit&auml;tsgesundheit bewerten, Gesch&auml;ftshypothesen testen.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 5: Die Medaillon-Pipeline ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Die Medaillon-Pipeline</div>
+    <h2 class="fade-in">Drei Schichten. Eine Wahrheit.</h2>
+    <div class="medallion fade-in">
+      <div class="medal-stage">
+        <div class="medal-name">Bronze</div>
+        <div class="medal-desc">Rohdaten, originalgetreu geladen. Jede Zeile, jede Spalte, genau wie sie angekommen ist. Mit Quelldatei und Zeilennummer versehen.</div>
+      </div>
+      <div class="medal-arrow">&rarr;</div>
+      <div class="medal-stage">
+        <div class="medal-name">Silver</div>
+        <div class="medal-desc">Validierte Wahrheit. Jede Zeile als g&uuml;ltig oder ung&uuml;ltig gekennzeichnet, mit lesbarer Begr&uuml;ndung. Nichts wird still verworfen.</div>
+      </div>
+      <div class="medal-arrow">&rarr;</div>
+      <div class="medal-stage">
+        <div class="medal-name">Gold</div>
+        <div class="medal-desc">Das zertifizierte Produkt. Nur g&uuml;ltige Zeilen. Versionierter Vertrag. Alles Nachgelagerte arbeitet gegen Gold.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 6: Kein stilles Filtern ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Kein stilles Filtern</div>
+    <h2 class="fade-in">Ung&uuml;ltige Zeilen werden nicht gel&ouml;scht.<br>Sie werden diagnostiziert.</h2>
+    <div class="row-example fade-in">
+      <div class="row-card valid">
+        <div class="row-card-title">is_valid: true</div>
+        <div class="row-card-text">
+          Fall existiert. Material in Stammdaten.<br>
+          Menge positiv. Status erkannt.<br>
+          &rarr; Geht weiter zu Gold.
+        </div>
+      </div>
+      <div class="row-card invalid">
+        <div class="row-card-title">is_valid: false</div>
+        <div class="row-card-text">
+          invalid_reason:<br>
+          &laquo;case_token not found in silver_cases&raquo;<br>
+          &rarr; Bleibt in Silver. Abfragbar. Z&auml;hlbar.
+        </div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2.5vh;">
+      Datenqualit&auml;t ist keine Voraussetzung f&uuml;r die Analyse. Sie <em>ist</em> die Analyse.
+    </p>
+  </div>
+
+  <!-- ═══ 7: Quellsystem-agnostisch ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Quellsystem-agnostisch</div>
+    <h2 class="fade-in">Eine Pipeline. Jedes ERP.</h2>
+    <div class="flow fade-in">
+      <div class="flow-box">OPALE</div>
+      <div class="flow-box">SAP</div>
+      <div class="flow-box">Navision</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box" style="border-color: var(--navy); background: var(--navy); color: var(--white);">
+        Kanonisches Modell
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Die Quellsystem-&Uuml;bersetzung passiert einmalig, an der Grenze.<br>
+      Ab diesem Punkt sieht jedes Spital gleich aus.<br>
+      Ein neues ERP anbinden bedeutet eine &Uuml;bersetzungsschicht &mdash; kein Neubau.
+    </p>
+  </div>
+
+  <!-- ═══ 8: Die Diagnostik-Engine ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Die Diagnostik-Engine</div>
+    <h2 class="fade-in">Eine bestehende Infrastruktur.<br>Immer aktiv. Immer bewertend.</h2>
+    <div class="pyramid fade-in">
+      <div class="pyramid-layer pyr-1 future fade-in">Massnahmenlisten</div>
+      <div class="pyramid-label fade-in">verordnete Behebung</div>
+      <div class="pyramid-layer pyr-2 future fade-in">Diagnose</div>
+      <div class="pyramid-label fade-in">Ursachenanalyse</div>
+      <div class="pyramid-layer pyr-4 fade-in">Assessments</div>
+      <div class="pyramid-label fade-in">Gesundheitsbewertung pro Entit&auml;t</div>
+      <div class="pyramid-layer pyr-5 fade-in">Probes</div>
+      <div class="pyramid-label fade-in">Symptome in Daten erkennen</div>
+    </div>
+  </div>
+
+  <!-- ═══ 9: Dann kommt eine Frage ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Dann kommt eine Frage</div>
+    <h2 class="fade-in">Von aussen. Eine Ahnung. Eine Sorge.</h2>
+    <div class="hyp-meets-engine fade-in">
+      <div class="hyp-side fade-in">
+        <div class="hyp-speech">
+          &laquo;Ich habe die Ahnung, dass wir nicht alles verrechnen,
+          was wir in einem Fall tats&auml;chlich verwenden&hellip;&raquo;
+        </div>
+        <div class="hyp-source">&mdash; ein CFO, der nicht schlafen kann</div>
+      </div>
+      <div class="hyp-connector fade-in">
+        <div class="hyp-connector-label">aktiviert</div>
+        <div class="hyp-connector-arrow">&rarr;</div>
+      </div>
+      <div class="engine-side fade-in">
+        <div class="engine-layer pyr-4" style="width: 70%;">Assessments</div>
+        <div class="engine-layer pyr-5" style="width: 90%;">Probes</div>
+        <div class="engine-verdict">
+          <div class="engine-verdict-line"></div>
+          <div class="engine-verdict-label">Verdikt</div>
+          <div class="engine-verdict-line"></div>
+        </div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2.5vh;">
+      Die Hypothese treibt die Untersuchung. Die Engine liefert die Evidenz.<br>
+      Das Verdikt entsteht, wo beide zusammentreffen.
+    </p>
+  </div>
+
+  <!-- ═══ 10: Das Verdikt ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Das Verdikt</div>
+    <h2 class="fade-in">Die Engine antwortet.<br>Auf vier Arten.</h2>
+    <div class="verdicts fade-in">
+      <div class="verdict-card">
+        <div class="verdict-icon" style="color: #dc2626;">&#9679;</div>
+        <div class="verdict-status">Best&auml;tigt</div>
+        <div class="verdict-desc">Starke Evidenz st&uuml;tzt die Vermutung</div>
+      </div>
+      <div class="verdict-card">
+        <div class="verdict-icon" style="color: #f59e0b;">&#9679;</div>
+        <div class="verdict-status">Plausibel</div>
+        <div class="verdict-desc">Teilweise Evidenz, Untersuchung empfohlen</div>
+      </div>
+      <div class="verdict-card">
+        <div class="verdict-icon" style="color: #10b981;">&#9679;</div>
+        <div class="verdict-status">Nicht beobachtet</div>
+        <div class="verdict-desc">Die Daten st&uuml;tzen die Vermutung nicht</div>
+      </div>
+      <div class="verdict-card">
+        <div class="verdict-icon" style="color: #94a3b8;">&#9679;</div>
+        <div class="verdict-status">Unzureichend</div>
+        <div class="verdict-desc">Nicht gen&uuml;gend Daten f&uuml;r ein Urteil</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      Jedes Verdikt ist durch gewichtete Evidenz belegt &mdash; r&uuml;ckverfolgbar bis zu konkreten Probes und Befunden.
+    </p>
+  </div>
+
+  <!-- ═══ 11: Probes ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Probes</div>
+    <h2 class="fade-in">Automatisierte Pr&uuml;fer, die nie schlafen</h2>
+    <div class="divider fade-in"></div>
+    <ul class="features fade-in">
+      <li><span class="bullet"></span> Erl&ouml;sl&uuml;cken &mdash; Verbrauch ohne Verrechnung</li>
+      <li><span class="bullet"></span> Fehlende Implantate &mdash; Operation ohne Dokumentation</li>
+      <li><span class="bullet"></span> Kostenstellen-Fehlzuordnung &mdash; Geld in der falschen Erfolgsrechnung</li>
+      <li><span class="bullet"></span> Doppelte Verrechnung &mdash; derselbe Vorgang zweimal fakturiert</li>
+      <li><span class="bullet"></span> Veraltete Preise &mdash; Katalogpreise, die nicht mehr der Realit&auml;t entsprechen</li>
+      <li><span class="bullet"></span> I/O-Koeffizient &mdash; Lager- vs. patientenbezogener Verbrauch</li>
+    </ul>
+  </div>
+
+  <!-- ═══ 12: Kalibrierung ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Kalibriert, nicht nur getestet</div>
+    <h2 class="fade-in">Wir testen unsere eigenen Detektoren.</h2>
+    <div class="calibration fade-in">
+      <div class="cal-step fade-in">
+        <div class="cal-circle" style="background: #b87333;">Fehler<br>einpflanzen</div>
+        <div class="cal-label">Bekannte Fehler<br>mit bekannten Raten</div>
+      </div>
+      <div class="cal-arrow fade-in">&rarr;</div>
+      <div class="cal-step fade-in">
+        <div class="cal-circle" style="background: var(--teal);">Probes<br>ausf&uuml;hren</div>
+        <div class="cal-label">Probes kennen die<br>L&ouml;sung nicht</div>
+      </div>
+      <div class="cal-arrow fade-in">&rarr;</div>
+      <div class="cal-step fade-in">
+        <div class="cal-circle" style="background: var(--navy);">Genauigkeit<br>messen</div>
+        <div class="cal-label">Precision &amp; Recall<br>pro Probe</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Wenn wir sagen, ein Probe erkennt einen bestimmten Prozentsatz der F&auml;lle,<br>
+      dann ist das eine reproduzierbare, &uuml;berpr&uuml;fbare Aussage &mdash; keine Marketing-Zahl.
+    </p>
+  </div>
+
+  <!-- ═══ 13: An echten Daten bewiesen ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">An echten Daten bewiesen</div>
+    <h2 class="fade-in">Kein Prototyp.<br>Ein funktionierendes System.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Getestet an echten Schweizer Spitaldaten &mdash; echte F&auml;lle, echte Materialien, echte Verrechnungen.
+      Mehrere Standorte, mehrere Jahre.
+      Die Probes finden Dinge. Die Befunde haben reale Konsequenzen.
+    </p>
+  </div>
+
+  <!-- ═══ 14: Zwei Lieferketten ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Was wir entdeckt haben</div>
+    <h2 class="fade-in">Das Spital hat nicht eine Lieferkette.<br>Es hat zwei.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Lagerlogistik und patientenbezogener Verbrauch funktionieren als Parallelsysteme.
+      Manche Materialien erscheinen in beiden. Viele nur in einem.
+      Niemand hatte die L&uuml;cke gemessen &mdash; bis jetzt.
+    </p>
+  </div>
+
+  <!-- ═══ 15: Drei Populationen ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Drei Populationen</div>
+    <h2 class="fade-in">Jedes Material f&auml;llt in eine von drei Gruppen</h2>
+    <div class="populations fade-in">
+      <div class="pop-card fade-in">
+        <div class="pop-icon" style="color: #2a8f8f;">&#8644;</div>
+        <div class="pop-title">Beide Systeme</div>
+        <div class="pop-desc">Erfasst in Lagertransfers <em>und</em> Patientenverbrauch. Die einzige Gruppe, in der der I/O-Koeffizient aussagekr&auml;ftig ist.</div>
+      </div>
+      <div class="pop-card fade-in">
+        <div class="pop-icon" style="color: #b87333;">&#8594;</div>
+        <div class="pop-title">Nur Transfer</div>
+        <div class="pop-desc">An Stationen geliefert, aus Stationsbestand verbraucht. Pflegepersonal entnimmt ohne Scannen. Erwartet bei Verbrauchsmaterial.</div>
+      </div>
+      <div class="pop-card fade-in">
+        <div class="pop-icon" style="color: #6366f1;">&#8592;</div>
+        <div class="pop-title">Nur Verbrauch</div>
+        <div class="pop-desc">Direkt aus der Apotheke abgegeben. Ber&uuml;hrt nie das Lager. Regulatorisch korrekt f&uuml;r Spezialmedikamente.</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      Das ist kein Fehler. So funktioniert Spitallogistik in der Realit&auml;t.<br>
+      Aber niemand hatte es zuvor gemessen.
+    </p>
+  </div>
+
+  <!-- ═══ 16: Gleiches Produkt ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Das aufschlussreiche Detail</div>
+    <h2 class="fade-in">Gleiches Produkt. Zwei Packungsgr&ouml;ssen.<br>Komplett unterschiedliche Erfassung.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Die kleinere Gr&ouml;sse, im Operationssaal verwendet, wird perfekt erfasst &mdash;
+      jede gelieferte Einheit wird als verbraucht registriert.<br><br>
+      Die gr&ouml;ssere Gr&ouml;sse, auf der Station verwendet, zeigt nur einen Bruchteil.
+      Stabil von Monat zu Monat, von Jahr zu Jahr.<br><br>
+      Kein Fehler. Ein strukturelles Merkmal der Spitallogistik &mdash;
+      jetzt erstmals sichtbar.
+    </p>
+  </div>
+
+  <!-- ═══ 17: Architektonische Konstante ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Eine neue Art von Erkenntnis</div>
+    <h2 class="fade-in">Der Koeffizient ist kein KPI zum Optimieren.<br>Er ist eine architektonische Konstante.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Er misst, wie eng zwei Parallelsysteme gekoppelt sind.<br>
+      Der Operationssaal zeigt, wie perfekte Erfassung aussieht.<br>
+      Die Station zeigt, wie Normalit&auml;t aussieht.<br><br>
+      Die Frage, die nuMetrix beantwortet:<br>
+      <span class="highlight">Welche Materialien <em>sollten</em> wie der OP aussehen &mdash; und tun es nicht?</span>
+    </p>
+  </div>
+
+  <!-- ═══ 18: Mandanten-Isolation ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Mandanten-Isolation</div>
+    <h2 class="fade-in">Jedes Spital ist eine Insel.</h2>
+    <div class="tenants-visual fade-in">
+      <div class="tenant-box fade-in">
+        <div class="tenant-box-label">Spital A</div>
+        <div class="tenant-box-schema">schema_a.*</div>
+      </div>
+      <div class="tenant-wall fade-in"></div>
+      <div class="tenant-box fade-in">
+        <div class="tenant-box-label">Spital B</div>
+        <div class="tenant-box-schema">schema_b.*</div>
+      </div>
+      <div class="tenant-wall fade-in"></div>
+      <div class="tenant-box fade-in">
+        <div class="tenant-box-label">Spital C</div>
+        <div class="tenant-box-schema">schema_c.*</div>
+      </div>
+      <div class="tenant-wall fade-in"></div>
+      <div class="tenant-box fade-in">
+        <div class="tenant-box-label">Spital D</div>
+        <div class="tenant-box-schema">schema_d.*</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Gleiche Pipeline. Gleiche Probes. Gleiche Modelle.<br>
+      Aber die Daten ber&uuml;hren sich nie. Die Isolationsgrenze ist absolut.<br>
+      Eine Plattformschicht vereinigt Spit&auml;ler f&uuml;r Benchmarking &mdash; wenn erlaubt.
+    </p>
+  </div>
+
+  <!-- ═══ 19: Dreisprachig ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Dreisprachig von Grund auf</div>
+    <h2 class="fade-in">Alles spricht Ihre Sprache</h2>
+    <div class="locales fade-in">
+      <div class="locale-badge">DE</div>
+      <div class="locale-badge">FR</div>
+      <div class="locale-badge">EN</div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Jeder Probe-Befund, jedes Hypothesen-Verdikt, jeder PDF-Bericht.<br>
+      Deutsch. Franz&ouml;sisch. Englisch. Von Anfang an. Nicht nachtr&auml;glich angebaut.
+    </p>
+  </div>
+
+  <!-- ═══ 20: Datenschutz ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Datenschutz von Grund auf</div>
+    <h2 class="fade-in">Wir sehen nie Patientennamen.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Alle Identifikatoren sind pseudonymisierte Tokens.
+      Das System verfolgt Materialien, Kosten und Prozesse &mdash;
+      nie Personen. Die Daten jedes Spitals sind vollst&auml;ndig isoliert.
+    </p>
+  </div>
+
+  <!-- ═══ 21: Was Sie erhalten ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Was Sie erhalten</div>
+    <h2 class="fade-in">Drei Wege, Ihre Daten zu sehen</h2>
+    <div class="outputs-grid fade-in">
+      <div class="output-card fade-in">
+        <div class="output-icon">&#9776;</div>
+        <div class="output-title">Explorer (Browser)</div>
+        <div class="output-desc">Drill-down pro Spital in Dimensionen, Befunde und Hypothesen-Verdikte. Jeder moderne Browser, keine Installation.</div>
+      </div>
+      <div class="output-card fade-in">
+        <div class="output-icon">&#9109;</div>
+        <div class="output-title">Explorer (Desktop)</div>
+        <div class="output-desc">Native Desktop-App. &Ouml;ffnet die Datenbank lokal, funktioniert offline. Kein Server, keine Browser-Abh&auml;ngigkeit.</div>
+      </div>
+      <div class="output-card fade-in">
+        <div class="output-icon">&#9112;</div>
+        <div class="output-title">PDF-Berichte</div>
+        <div class="output-desc">Datenqualit&auml;t. Finanzrisiko. Gesundheitskarten. Dreisprachig. Bereit f&uuml;r das Audit-Komitee.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 22: Revisionssicher ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Revisionssicher</div>
+    <h2 class="fade-in">Jeder Befund ist nachvollziehbar.<br>Jedes Ergebnis ist reproduzierbar.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Probes haben Versionsnummern. Befunde haben Evidenzketten.<br>
+      Ein externer Revisor kann dieselbe Pipeline auf denselben Daten ausf&uuml;hren<br>
+      und zu denselben Zahlen gelangen.
+    </p>
+  </div>
+
+  <!-- ═══ 23: Kein IT-Projekt ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Kein IT-Projekt</div>
+    <h2 class="fade-in">Wir sitzen ausserhalb des ERP.<br>Wir lesen Exporte. Das ist alles.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Keine Schnittstellenentwicklung. Keine Middleware. Keine Installation.<br>
+      Kein Zugang zum Produktivsystem. Kein Risiko f&uuml;r den Betrieb.<br><br>
+      Ein Datenexport ist der Ausgangspunkt.
+    </p>
+  </div>
+
+  <!-- ═══ 24: Erste Schritte ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Erste Schritte</div>
+    <h2 class="fade-in">Wir brauchen eines von Ihnen.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Einen CSV-Export aus Ihrem bestehenden ERP.<br>
+      Wir erstellen Ihren validierten Datensatz.<br>
+      Wir f&uuml;hren die Probes aus.<br>
+      Wir &uuml;bergeben Ihnen einen Bericht &mdash; in Ihrer Sprache,<br>
+      mit Ihren Materialien und Abteilungen namentlich benannt.
+    </p>
+  </div>
+
+  <!-- ═══ 25: Abschluss ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">nuMetrix</div>
+    <div class="quote fade-in">
+      Wurde jedes verbrauchte Material<br>korrekt erfasst und verrechnet?
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Wir beantworten diese Frage. Im grossen Massstab. System&uuml;bergreifend. Heute.
+    </p>
+  </div>
+
+  <!-- ═══ 26: Breathing ═══ -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+</div>
+
+<!-- Progress bar -->
+<div class="progress-track">
+  <div class="progress-bar" id="progress"></div>
+</div>
+
+<div class="brand">nuMetrix</div>
+<div class="slide-counter" id="counter"></div>
+
+<script>
+(function() {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const progress = document.getElementById('progress');
+  const counter = document.getElementById('counter');
+  let current = 0;
+  let timer = null;
+  let elapsed = 0;
+  const TICK = 50;
+  const BREATHING_MS = 12000;
+
+  // Content slides = all except breathing slides
+  const contentTotal = slides.filter(s => !s.classList.contains('breathing')).length;
+
+  /**
+   * Compute display duration from slide content complexity.
+   * Breathing slides get a fixed long pause.
+   * Content slides: base + reading time + structural element bonus, clamped.
+   */
+  function computeDuration(slide) {
+    if (slide.classList.contains('breathing')) return BREATHING_MS;
+
+    const text = slide.textContent.replace(/\s+/g, ' ').trim();
+    const chars = text.length;
+    const elements = slide.querySelectorAll(
+      'li, .step, .verdict-card, .pyramid-layer, .engine-layer, ' +
+      '.flow-box, .locale-badge, .medal-stage, .pop-card, .output-card, ' +
+      '.row-card, .cal-step, .tenant-box'
+    ).length;
+
+    const base = 4500;
+    const reading = Math.min(chars * 25, 8000);
+    const structure = elements * 900;
+    return Math.max(5500, Math.min(base + reading + structure, 16000));
+  }
+
+  const durations = slides.map(computeDuration);
+
+  function updateCounter(index) {
+    const isBreathing = slides[index].classList.contains('breathing');
+    if (isBreathing) {
+      counter.classList.add('hidden');
+      return;
+    }
+    counter.classList.remove('hidden');
+    // Compute content slide number (skip breathing slides in count)
+    let num = 0;
+    for (let i = 0; i <= index; i++) {
+      if (!slides[i].classList.contains('breathing')) num++;
+    }
+    counter.textContent = num + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[index].classList.add('active');
+    elapsed = 0;
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function tick() {
+    const dur = durations[current];
+    elapsed += TICK;
+    progress.style.width = Math.min((elapsed / dur) * 100, 100) + '%';
+    if (elapsed >= dur) advance();
+  }
+
+  let paused = false;
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      current = (current - 1 + slides.length) % slides.length;
+      show(current);
+    } else if (e.key === 'p') {
+      paused = !paused;
+      if (paused) { clearInterval(timer); timer = null; }
+      else { timer = setInterval(tick, TICK); }
+    }
+  });
+
+  document.addEventListener('click', advance);
+
+  show(0);
+  timer = setInterval(tick, TICK);
+})();
+</script>
+
+</body>
+</html>

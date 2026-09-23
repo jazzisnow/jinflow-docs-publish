@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Senses of jinflow</title>
+<meta name="last-updated" content="2026-07-11">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+    --indigo: #4f46e5;
+    --indigo-soft: #eef2ff;
+    --rose: #e11d48;
+    --rose-soft: #fff1f2;
+    --cyan: #0891b2;
+    --cyan-soft: #ecfeff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .layout { display: flex; width: 100%; height: 100%; }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+  .thumb.jin-thumb { background: linear-gradient(135deg, #1a3a4a 0%, #0f2938 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label,
+  .thumb.jin-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area { flex: 1; position: relative; height: 100%; overflow: hidden; }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 7vh 10vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 2vh;
+  }
+
+  .sense-num {
+    font-size: clamp(0.78rem, 1vw, 0.95rem);
+    font-weight: 500; letter-spacing: 0.18em;
+    color: var(--warm-gray); text-transform: uppercase;
+    margin-bottom: 1vh;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2.5vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 2.8vw, 2.3rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.95rem, 1.6vw, 1.3rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .essence {
+    font-size: clamp(0.9rem, 1.45vw, 1.15rem);
+    font-weight: 400; line-height: 1.7;
+    text-align: center; color: var(--slate);
+    max-width: 760px;
+    margin-top: 1vh;
+  }
+  .essence strong { color: var(--navy); font-weight: 600; }
+  .essence em { color: var(--teal); font-style: normal; font-weight: 500; }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.2s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.5s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 0.8s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.4s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 1.7s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 2vh 0;
+  }
+
+  .section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+  }
+  .section-slide h1, .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.7); }
+  .section-slide .essence { color: rgba(255,255,255,0.7); }
+  .section-slide .essence strong { color: var(--white); }
+  .section-slide .logo, .section-slide .sense-num { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  .jin-slide {
+    background: linear-gradient(135deg, #1a3a4a 0%, #0f2938 100%);
+  }
+  .jin-slide h1, .jin-slide h2 { color: var(--white); }
+  .jin-slide .subtitle { color: rgba(255,255,255,0.7); }
+  .jin-slide .essence { color: rgba(255,255,255,0.7); }
+  .jin-slide .essence strong { color: var(--white); }
+  .jin-slide .logo, .jin-slide .sense-num { color: var(--teal-light); }
+  .jin-slide .divider { background: var(--teal-light); }
+
+  .quote {
+    font-size: clamp(1.2rem, 2.4vw, 1.95rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 800px;
+  }
+  .jin-slide .quote, .section-slide .quote { color: var(--white); }
+
+  .quote-small {
+    font-size: clamp(1rem, 1.8vw, 1.5rem);
+    font-weight: 300; font-style: italic; line-height: 1.55;
+    text-align: center; color: var(--navy); max-width: 780px;
+    margin-bottom: 1.5vh;
+  }
+  .jin-slide .quote-small, .section-slide .quote-small { color: rgba(255,255,255,0.92); }
+
+  .sense-tag {
+    display: inline-block;
+    padding: 0.35em 0.9em;
+    border-radius: 999px;
+    background: var(--indigo-soft);
+    color: var(--indigo);
+    font-size: clamp(0.7rem, 0.95vw, 0.85rem);
+    font-weight: 600; letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1.5vh;
+  }
+  .sense-tag.canvas    { background: var(--indigo-soft); color: var(--indigo); }
+  .sense-tag.signal    { background: var(--teal); color: var(--white); }
+  .sense-tag.typed     { background: var(--cyan-soft); color: #155e75; }
+  .sense-tag.observe   { background: var(--purple-soft); color: var(--purple); }
+  .sense-tag.p2p2p     { background: var(--rose-soft); color: var(--rose); }
+  .sense-tag.cathedral { background: var(--amber-soft); color: var(--amber); }
+  .sense-tag.ledger    { background: var(--green-soft); color: #166534; }
+  .sense-tag.sim       { background: #fde68a; color: #92400e; }
+  .sense-tag.seam      { background: var(--navy); color: var(--white); }
+  .sense-tag.heartbeat { background: var(--rose); color: var(--white); }
+  .sense-tag.legend     { background: var(--purple); color: var(--white); }
+  .sense-tag.engineseam { background: var(--slate); color: var(--white); }
+  .sense-tag.steward    { background: var(--green); color: var(--white); }
+  .sense-tag.workshop   { background: var(--amber); color: var(--white); }
+  .sense-tag.funnel     { background: var(--cyan); color: var(--white); }
+  .sense-tag.directline { background: var(--indigo); color: var(--white); }
+  .sense-tag.atelier    { background: var(--teal-light); color: var(--white); }
+  .sense-tag.wire       { background: var(--cyan-soft); color: var(--cyan); }
+  .sense-tag.pass       { background: var(--rose-soft); color: var(--rose); }
+  .sense-tag.inlet      { background: var(--cyan); color: var(--white); }
+  .sense-tag.chores     { background: var(--amber-soft); color: var(--amber); }
+  .sense-tag.bell       { background: var(--rose); color: var(--white); }
+  .sense-tag.breeze     { background: var(--cyan-soft); color: #155e75; }
+  .sense-tag.drift      { background: var(--slate); color: var(--white); }
+  .sense-tag.lineage    { background: var(--green); color: var(--white); }
+  .sense-tag.snapshot   { background: var(--navy); color: var(--white); }
+  .sense-tag.scribe     { background: var(--purple-soft); color: var(--purple); }
+  .sense-tag.governance { background: var(--green-soft); color: #166534; }
+  .sense-tag.metamodel  { background: var(--indigo); color: var(--white); }
+  .sense-tag.relevance  { background: var(--purple-soft); color: var(--purple); }
+  .sense-tag.pipes      { background: var(--teal); color: var(--white); }
+  .sense-tag.cascade    { background: var(--indigo-soft); color: var(--indigo); }
+  .sense-tag.forge      { background: var(--amber); color: var(--white); }
+  .sense-tag.loom       { background: var(--green-soft); color: #166534; }
+  .sense-tag.roster     { background: var(--rose-soft); color: var(--rose); }
+  .sense-tag.log        { background: var(--slate); color: var(--white); }
+  .sense-tag.stage      { background: var(--navy); color: var(--white); }
+  .sense-tag.branch     { background: var(--green); color: var(--white); }
+  .sense-tag.beacon     { background: var(--amber); color: var(--white); }
+  .sense-tag.skill      { background: var(--purple); color: var(--white); }
+  .sense-tag.cartography { background: var(--cyan); color: var(--white); }
+  .sense-tag.codex      { background: var(--indigo-soft); color: var(--indigo); }
+
+  /* discrete per-slide status — the deck's own thesis, made checkable */
+  .sense-head {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0.7em; margin-bottom: 1.5vh;
+  }
+  .sense-head .sense-tag { margin-bottom: 0; }
+  .sense-status {
+    font-size: clamp(0.55rem, 0.7vw, 0.68rem);
+    font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(15,23,42,0.40);
+  }
+  .jin-slide .sense-status, .section-slide .sense-status { color: rgba(255,255,255,0.5); }
+  .sense-status::before {
+    content: ""; display: inline-block;
+    width: 0.45em; height: 0.45em; border-radius: 50%;
+    margin-right: 0.4em; vertical-align: middle;
+    background: #94a3b8; opacity: 0.85;
+  }
+  /* one dot per state — a maturity ramp, not three buckets:
+     idea → draft → roadmap → building → partially landed → done */
+  .sense-status.concept::before      { background: #94a3b8; } /* faint slate */
+  .sense-status.drafted::before      { background: #64748b; } /* slate */
+  .sense-status.proposed::before     { background: #4f46e5; } /* indigo — on the roadmap */
+  .sense-status.implementing::before { background: #d97706; } /* amber — in motion */
+  /* shipping vs shipped: same green, distinguished by FILL not hue —
+     a hollow ring reads as "a phase landed, not yet whole"; a solid
+     disc reads as "done". The difference is completeness. */
+  .sense-status.shipping::before     { background: transparent; box-shadow: inset 0 0 0 1.6px #16a34a; }
+  .sense-status.shipped::before      { background: #16a34a; } /* green — done */
+  .sense-status.forming::before      { background: #c4b5fd; } /* faint indigo — earlier than drafted */
+  .sense-status.folded::before       { background: transparent; box-shadow: inset 0 0 0 1.6px #94a3b8; } /* hollow slate — the sense was absorbed elsewhere */
+
+  .grid-2x6 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5vw 2vw;
+    max-width: 920px; width: 100%; margin-top: 2vh;
+  }
+  .micro-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 10px;
+    padding: 1.5vh 1vw;
+    text-align: center;
+  }
+  .micro-card .micro-num {
+    font-size: clamp(0.7rem, 0.9vw, 0.82rem);
+    font-weight: 600; letter-spacing: 0.1em;
+    color: var(--teal-light); text-transform: uppercase;
+    margin-bottom: 0.4vh;
+  }
+  .micro-card .micro-name {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; color: var(--white);
+  }
+
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 5vh 5vw; }
+    .grid-2x6 { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+<div class="sidebar" id="sidebar"></div>
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══ TITLE ═══ -->
+  <div class="slide active jin-slide">
+    <div class="logo fade-in">jinflow.io</div>
+    <h1 class="fade-in">The Senses<br>of jinflow.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Fifty-three design instincts that shape how the system thinks,<br>
+      collected one at a time, named when they earned it.
+    </p>
+  </div>
+
+  <!-- ═══ WHAT IS A SENSE ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">What is a Sense?</div>
+    <div class="quote fade-in">
+      A Sense is not a feature.<br>
+      It is a shape that, once named,<br>
+      lets many features agree on what they are doing.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Each Sense begins as a tension. The team lives with it,
+      sometimes for weeks, until the right word makes the
+      contradiction collapse. Only then is it written down.<br><br>
+      <span class="highlight">The catalogue grows slowly. That's the point.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══ FOUNDATION SECTION ═══ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Senses 1 — 12</div>
+    <h2 class="fade-in">The Foundation</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Twelve earlier instincts shaped the engine before it had a name to call them.
+      They live in the architecture, the contracts, the layered model — and now
+      in code that has settled. They are the ground we stand on.
+    </p>
+  </div>
+
+  <!-- ═══ FOUNDATION GRID ═══ -->
+  <div class="slide section-slide">
+    <div class="sense-num fade-in">The First Twelve</div>
+    <h2 class="fade-in">Settled instincts, written into the bones</h2>
+    <div class="grid-2x6 fade-in">
+      <div class="micro-card"><div class="micro-num">Sense 1</div><div class="micro-name">Layered Truth</div></div>
+      <div class="micro-card"><div class="micro-num">Sense 2</div><div class="micro-name">Tenant Isolation</div></div>
+      <div class="micro-card"><div class="micro-num">Sense 3</div><div class="micro-name">Declarative First</div></div>
+      <div class="micro-card"><div class="micro-num">Sense 4</div><div class="micro-name">Contracts at Boundaries</div></div>
+      <div class="micro-card"><div class="micro-num">Sense 5</div><div class="micro-name">No Silent Filtering</div></div>
+      <div class="micro-card"><div class="micro-num">Sense 6</div><div class="micro-name">Rebuildable by Default</div></div>
+      <div class="micro-card"><div class="micro-num">Sense 7</div><div class="micro-name">Make / Explore Split</div></div>
+      <div class="micro-card"><div class="micro-num">Sense 8</div><div class="micro-name">Source-System Agnosticism</div></div>
+      <div class="micro-card"><div class="micro-num">Sense 9</div><div class="micro-name">Quality is Queryable</div></div>
+      <div class="micro-card"><div class="micro-num">Sense 10</div><div class="micro-name">Computed Aggregates</div></div>
+      <div class="micro-card"><div class="micro-num">Sense 11</div><div class="micro-name">AI in the Studio, not the Pipeline</div></div>
+      <div class="micro-card"><div class="micro-num">Sense 12</div><div class="micro-name">Form follows Data</div></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2.5vh; font-size: 0.95rem; opacity: 0.7;">
+      Each one earned by writing the wrong version first.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══ MODERN SECTION ═══ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Senses 13 — 53</div>
+    <h2 class="fade-in">The Modern Senses</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Each one written down the moment its name finally fit.<br>
+      What follows is one Sense per page — the way the team thinks
+      about the work, in the order the realisations arrived.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 13 — THE CANVAS ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag canvas">Sense 13</span><span class="sense-status concept">concept</span></div>
+    <h1 class="fade-in">The Canvas</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">"A page is a composition, not a program."</div>
+    <p class="essence fade-in">
+      Every analytical page used to be hand-coded Svelte. Hundreds of lines for
+      each new perspective. The Canvas turns pages into <strong>YAML
+      compositions</strong> — declared, not coded. A new lab, a new salon, a new
+      studio is a configuration, not a deployment.<br><br>
+      <em>Form follows data. The artifacts get better; the system follows.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 14 — THE SIGNAL ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag signal">Sense 14</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">The Signal</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Not every finding is a problem.<br>
+      A signal is an observation. Its meaning depends on context."
+    </div>
+    <p class="essence fade-in">
+      The original framework only saw problems. Every detection was an anomaly.
+      Every severity said <em>how bad</em>. Sense 14 retypes the entire
+      analytical layer: <strong>Signal, Perspective, Thesis, Verdict</strong> —
+      a vocabulary for findings that can be positive, negative, contextual, or
+      neutral. The system stops asking "what's wrong" and starts asking
+      "what is true."
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 14.2 — TYPED SIGNALS ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag typed">Sense 14.2</span><span class="sense-status shipping">shipping</span></div>
+    <h1 class="fade-in">Typed Signals</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A signal without a type is a claim without a unit.<br>
+      A unit without a standard is a convention waiting to break."
+    </div>
+    <p class="essence fade-in">
+      Every signal output gets a real type, grounded in international standards:
+      <strong>UCUM for quantities, ISO 4217 for currencies, ISO 8601 for time,
+      ISO 80000 for dimensions</strong>. The compiler refuses to sum kilograms
+      and Swiss francs. The Explorer renders units correctly. The Ledger narrates
+      precisely. <em>No invented vocabulary, ever.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 15 — OBSERVATION & EXPLANATION ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag observe">Sense 15</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">Observation &amp; Explanation</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "The CEO does not want to read <em>signal_revenue_leakage fired 247
+      times</em>.<br>
+      The CEO wants to hear <em>'we observe money leaking in ward 3'</em><br>
+      — and then ask <em>'show me'</em> and <em>'why?'</em>"
+    </div>
+    <p class="essence fade-in">
+      The taxonomy had no top. Sense 15 adds the layer above the machinery:
+      <strong>signed strategic Observations</strong>, supported by Validations,
+      explained by Contributing Factors. <em>Three moves, three answers, one
+      conversation.</em> The front door for the C-suite — live in delta with
+      quadrilingual observations authored by named field staff, each anchored
+      to signal findings and traceable to the exact reading that provoked
+      them.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 16 — P2P2P ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag p2p2p">Sense 16</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">P2P2P</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Your data. Your machine. Their browser."
+    </div>
+    <p class="essence fade-in">
+      Healthcare data is sensitive. Many organisations cannot upload a knowledge
+      store to someone else's cloud. P2P2P — <strong>Peer-to-Peer-to-People</strong>
+      — keeps the data on the owner's machine and routes the Explorer through a
+      Cloudflare Tunnel. The CFO opens a browser; the data never moves.
+      <em>Ctrl+C unplugs the proxy and the data disappears from the internet
+      instantly.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 17 — THE HOUSE (folded into Sense 42) ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag cathedral">Sense 17</span><span class="sense-status folded">folded into Sense 42</span></div>
+    <h1 class="fade-in">The House</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "You don't understand a home by reading the floor plan.<br>
+      You understand it by walking through the front door."
+    </div>
+    <p class="essence fade-in">
+      The House proposed a <strong>guided 3D tour</strong> of the pipeline
+      — a scripted camera, eight stops, progressive reveal. Then
+      <em>Sense 42, The Pipes,</em> arrived and absorbed the goal:
+      a diagram that <em>earns the right to be looked at,</em> minus the
+      3D-engine cost. The narrative ambition lives on; the implementation
+      moved next door. The House is now a doorway into The Pipes.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 18 — THE LEDGER ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag ledger">Sense 18</span><span class="sense-status implementing">implementing</span></div>
+    <!-- Sense 18: still in flight; provenance narration surfaces exist but the full ledger view remains partial. -->
+    <h1 class="fade-in">The Ledger</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Every number in jinflow has a story. The Ledger tells it."
+    </div>
+    <p class="essence fade-in">
+      A user sees <strong>CHF −5,095,660</strong> and asks: how do you know?
+      The Ledger is <strong>computational provenance rendered as narrative</strong>
+      — every headline traceable from source delivery through extraction, bronze,
+      silver, gold, signal, thesis, verdict.
+      <em>Each step narrated: what went in, what came out, what was filtered,
+      what was assumed, what could change the result.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 19 — THE SIMULATION ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag sim">Sense 19</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">The Simulation</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Don't guess. Model it.<br>
+      Build the future before you live it."
+    </div>
+    <p class="essence fade-in">
+      The system stopped at the Suggestion. "Tighten the threshold to 5%" —
+      okay, but what <em>happens</em>? Sense 19 closes the loop with four new
+      terms: <strong>Suggestion → Intervention → Scenario → Simulation</strong>.
+      A recommendation becomes a deterministic edit, applied to a branched AFS,
+      compared against the baseline. <em>The leap of faith becomes a measured
+      step.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 20 — THE SEAM ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag seam">Sense 20</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">The Seam</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A pack is a starter kit. A tenant is a life.<br>
+      They touch each other at a seam, and the seam has its own rules."
+    </div>
+    <p class="essence fade-in">
+      Where pack and tenant meet, simple file diff is too coarse. The Seam names
+      five concepts the merge has been missing: <strong>Pack Scope, Provenance,
+      Merge Base, Conflict Taxonomy, Promotion &amp; Demotion</strong>.
+      <em>A tenant's learning can flow back to the pack without leaking its
+      identity. A pack's evolution can flow forward without overwriting tenant
+      sovereignty.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 21 — THE HEARTBEAT ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag heartbeat">Sense 21</span><span class="sense-status shipping">shipping</span></div>
+    <h1 class="fade-in">The Heartbeat</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A heartbeat is regular, observable, one-way per beat.<br>
+      The system needs one."
+    </div>
+    <p class="essence fade-in">
+      A user types answers into a notebook cell. Six days later it is still
+      stranded — never written from the messenger up to the durable layer,
+      invisible almost everywhere. The incident named a missing organ. The
+      Heartbeat is the discipline that gives jinflow its rhythm — six discrete
+      beats: <strong>make, capture, publish, sync, pulse, reconcile</strong>.
+      Each with its own command, its own log, its own UI surface.
+      <em>No circles. Every beat observable. The absence of a beat is itself
+      a signal.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 22 — THE LEGEND ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag legend">Sense 22</span><span class="sense-status implementing">implementing</span></div>
+    <h1 class="fade-in">The Legend</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Today our enum columns are signs.<br>
+      The Legend says: every sign must carry its story."
+    </div>
+    <p class="essence fade-in">
+      A label is data; its explanation lives somewhere else. <em>severity = 'high'</em>,
+      <em>status = 'proposed'</em>, <em>spread_signature = 'mis_channeled'</em> — strings
+      the system produces and the user has to reverse-engineer from SQL. The
+      Legend makes every label a self-describing artifact, travelling with its
+      <strong>rule, threshold, description, action, icon &amp; colour</strong>,
+      declared next to the artifact that owns the column. <em>Hover on a badge
+      and the system tells you what it means and what to do — in your language,
+      with provenance.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 23 — THE ENGINE'S SEAM ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag engineseam">Sense 23</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Engine's Seam</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "The pack is a starter kit. The tenant is a life.<br>
+      The engine, it turns out, is a third party at the table."
+    </div>
+    <p class="essence fade-in">
+      Sense 20 named the boundary between pack and tenant. Sense 23 notices
+      a third party in the room: the <strong>engine</strong>. Compilers grow
+      new fields, registry tables gain columns, macros rename themselves —
+      none of it is pack/tenant territory. The engine moves on its own
+      cadence, and a tenant frozen at last year's engine cannot read this
+      year's pack. <em>Three actors, three cadences, one seam each.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 24 — THE STEWARD ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag steward">Sense 24</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Steward</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "The analyst has the Canvas. The CFO has Observations.<br>
+      The Steward is the third native habitat."
+    </div>
+    <p class="essence fade-in">
+      There is a third person in the room and we have given them no front
+      door. The <strong>Steward</strong> runs the estate — make, capture,
+      publish, sync, pulse, reconcile. Sense 24 builds the surface for the
+      person who operates jinflow on jinflow itself. <em>The system that
+      inspects everyone else now inspects itself.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 25 — THE PASS ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag pass">Sense 25</span><span class="sense-status shipping">shipping</span></div>
+    <h1 class="fade-in">The Pass</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Who am I right now, where am I right now,<br>
+      and what can I do here?"
+    </div>
+    <p class="essence fade-in">
+      The Explorer's sidebar was full of strings like
+      <em>cap: 'view:overview'</em> — scattered across Svelte files,
+      jinflow-specific, written before anyone asked the question they're
+      now expected to answer. The Pass replaces all of it with a
+      product-agnostic access model: four levels —
+      <strong>Identity → Roles → Passes → Capabilities</strong> — over a
+      single scope tree. Auth providers swap; the model doesn't.
+      <em>A pass is what you carry that says, in this scope, you may do
+      this set of things.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 26 — THE WORKSHOP ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag workshop">Sense 26</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">The Workshop</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A pack is not a product.<br>
+      It is the thinking that produced the analytics."
+    </div>
+    <p class="essence fade-in">
+      A pack is the encoded result of a months-long analytical conversation.
+      By the time it ships, the conversation is over — the <em>thinking</em>
+      lives in scattered drafts, chat logs, commits, someone's head. The
+      Workshop says: <strong>every pack ships with its own design notes —
+      browseable, searchable, translated, updatable like any other note.</strong>
+      A clone of the pack is a workshop. The analytics are the side effect.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 27 — THE FUNNEL ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag funnel">Sense 27</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">The Funnel</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "The cloud should never hold the dataset.<br>
+      It should hold the picture of the dataset."
+    </div>
+    <p class="essence fade-in">
+      A 512&nbsp;MB proxy was killed mid-render of a Material Map — a
+      single loader pulled enough rows to exhaust the cloud machine. The
+      bug wasn't proxy-specific; it was the <strong>shape</strong> of
+      every loader: pull rows over the wire, aggregate in the cloud. The
+      Funnel inverts it — <em>aggregate at the source, ship the picture.</em>
+      Narrow where the data lives. Never widen on the way out.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 28 — THE DIRECT LINE ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag directline">Sense 28</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Direct Line</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Sense 27: the cloud holds the picture, not the dataset.<br>
+      Sense 28: the cloud doesn't even hold the picture."
+    </div>
+    <p class="essence fade-in">
+      Sense 16 (P2P2P) gave us <em>your data, your machine, their browser</em>.
+      Sense 27 narrowed the middle. Sense 28 removes it. Query results travel
+      <strong>browser → laptop → browser</strong>, never resident in cloud
+      memory. The Sovereignty Principle taken to its limit — <em>the proxy
+      is a wire, not a buffer.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 29 — THE ATELIER ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag atelier">Sense 29</span><span class="sense-status shipping">shipping</span></div>
+    <h1 class="fade-in">The Atelier</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A workshop for the AFS.<br>
+      Intelligent, git-aware, role-gated. The place where craft happens."
+    </div>
+    <p class="essence fade-in">
+      Editing the AFS today happens in a text editor with no domain
+      awareness. Cross-references fail at <em>jin make</em>, not while
+      typing. The Atelier joins CLI and editor as a Studio-mode
+      inhabitant — five layers, each optional:
+      <strong>structural forms, schema validation, cross-reference
+      completion, KLS-grounded preview, LLM suggestion</strong>.
+      Save is a git commit; identity and intent travel with the change.
+      <em>The promise is not "you must use this." The promise is "if you do,
+      everything is validated and tracked."</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 30 — THE WIRE ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag wire">Sense 30</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Wire</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "There is no <em>jinflow &harr; jinflow</em> surface.<br>
+      There is one outward contract — same wire for everyone."
+    </div>
+    <p class="essence fade-in">
+      A jinflow tenant has exactly one consumer today: its own Explorer.
+      Auditors, regulators, benchmarking services, scientific reproductions
+      &mdash; and yes, other jinflows &mdash; have no contract to code against.
+      The Wire names that boundary with four invariants:
+      <strong>Contracted, Identified, Reasoned, Rate-aware</strong>.
+      Three surfaces: <em>read</em> (artifacts + lineage + schemas), <em>write</em>
+      (Subject Matter, Suggestions, Citations), <em>stream</em> (Heartbeat events).
+      <em>When both ends speak jinflow, no semantic loss in transit &mdash; a
+      richer affordance over the same wire, not a different wire.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 31 — THE INLET ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag inlet">Sense 31</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">The Inlet</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "The engine doesn't know where its data was born.<br>
+      A supplier delivery and a synthetic generation meet at the DLZ &mdash;
+      from there forward, jinflow cannot tell them apart."
+    </div>
+    <p class="essence fade-in">
+      <em>pipeline.yml</em> had four competing keys
+      (<em>extract_entries, channels, generate, pre_sync</em>) answering
+      the same question: how does data get into this tenant's
+      <em>source/</em>? The Inlet names the <strong>channel</strong> as
+      the unit — six channel types (supplier delivery, synthetic
+      generation, web fetch, manual seed, computed, fixture) — each
+      governed by the same lifecycle. <em>Where bytes come from is the
+      channel's business; the engine reads only what the inlet produces.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 32 — THE CHORES ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag chores">Sense 32</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">The Chores</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Sense 21 named the automated pulse.<br>
+      Some pulses come from cron. Others come from a Sunday morning
+      and a human who remembered."
+    </div>
+    <p class="essence fade-in">
+      Heartbeat names the system's pulse — make, capture, publish, sync,
+      pulse, reconcile. But systems run themselves only as far as their
+      chores are tended. The Chores names the <strong>human-cadenced
+      upkeep</strong>: weekly journals, monthly retros, incident sweeps,
+      certificate runways, name scrubs. Chores get a name, a cadence, an
+      owner role, a procedure, a registry. <em>Retired chores stay
+      visible — a retired chore says "this used to be your problem;
+      now it isn't."</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 33 — THE BELL ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag bell">Sense 33</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">The Bell</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "The pipeline already notices many things.<br>
+      Today it whispers them into tables nobody reads.<br>
+      The Bell is where the noticing becomes a sound."
+    </div>
+    <p class="essence fade-in">
+      Five feeds notice things on every build &mdash; Subject Matter
+      checks, engine diagnostics, invalid Silver rows, data gaps,
+      curated actions &mdash; and none of them share a surface. Important
+      findings stay buried until somebody happens to land on the right
+      page. The Bell names a <strong>Notification</strong>: a typed
+      record that lets the system speak to the person without forcing
+      the person to come looking. <em>Not every noticing wants the same
+      hearing &mdash; severity (info &middot; heads-up &middot; concern
+      &middot; alarm) sets the volume; each one rings where it belongs.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 34 — THE BREEZE ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag breeze">Sense 34</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">The Breeze</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "The Wire blows outward. The Inlet pulls inward.<br>
+      The Breeze blows sideways &mdash; along the clicks,
+      through the jinflow void.<br>
+      A breeze passes through; the leaves decide whether to flutter."
+    </div>
+    <p class="essence fade-in">
+      One ad-hoc <em>BroadcastChannel</em> &mdash; born of Our House &mdash;
+      quietly carries every cross-tab signal we have: room navigation,
+      read-state, bookmark sync. The mechanism works; its shape was
+      unstated. The Breeze gives the pattern a <strong>name, a contract,
+      and a principle</strong>: <em>a breeze announces; the receiver
+      decides.</em> A publisher says "this happened" without prescribing
+      what any listener must do; each tab weighs the announcement against
+      its own policy. Announcement, never command.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 35 — THE DRIFT ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag drift">Sense 35</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">The Drift</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "The data has moved.<br>
+      Whoever was looking decides what to do."
+    </div>
+    <p class="essence fade-in">
+      When something happens at the <em>system</em> layer that open
+      windows might care about &mdash; a KLS re-attached, a tenant config
+      changed, a deploy completed &mdash; the Explorer had no way to say
+      so. The Bell is wrong (that's in-data, persistent, actionable);
+      the Breeze is wrong (tab&harr;tab, the server can't push in). The
+      Drift is the missing direction: <strong>server &rarr; browser,
+      ambient</strong>. The server says "the data has moved" to whichever
+      windows are open &mdash; <em>nothing persisted in the KLS, nothing
+      commanded; the room itself decides whether to show anything.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 36 — THE LINEAGE ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag lineage">Sense 36</span><span class="sense-status shipping">shipping</span></div>
+    <h1 class="fade-in">The Lineage</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A pack is a starter kit. A tenant is autonomous after birth.<br>
+      But autonomy is not amnesia."
+    </div>
+    <p class="essence fade-in">
+      <em>afs update</em> did a two-way filesystem diff: it could not
+      classify pack-managed from tenant-managed files, could not show
+      <em>why</em> either side made an edit, and kept no memory of origin
+      &mdash; a <em>--force</em> re-baseline erased the trace back to the
+      pack-init moment. The Seam (Sense 20) named the <em>boundary</em>;
+      the Lineage names the <strong>relationship the boundary protects</strong>:
+      the durable, anchored record of where a tenant came from, from which
+      everything else can be derived. <em>An immutable birth record. The
+      tenant remembers.</em> (Phase 1 shipped.)
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 37 — THE SNAPSHOT ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag snapshot">Sense 37</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Snapshot</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A working KLS witnesses <em>what is</em>.<br>
+      A snapshot witnesses <em>what was, as of when we said it was</em>.<br>
+      Photograph, not livestream."
+    </div>
+    <p class="essence fade-in">
+      Every KLS already carries its own provenance &mdash; git breadcrumbs,
+      the source AFS as a blob, the extract audit, the build log. The
+      Snapshot names what <strong>deliberately stopping the clock</strong>
+      does to those breadcrumbs: a witness someone froze so it could be
+      cited later. The working copy is overwritten on every <em>jin make</em>
+      &mdash; "the model as of now", it moves. A snapshot is immutable,
+      refuses overwrite, has no <em>--force</em> by design. <em>The
+      difference between the two isn't the format &mdash; it's the
+      commitment to be cited later.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 38 — THE SCRIBE ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag scribe">Sense 38</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Scribe</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "The author writes the words. The Scribe carries them past the walls.<br>
+      They sign with different ink, and that's the point."
+    </div>
+    <p class="essence fade-in">
+      Sense 25 names <em>who the user is</em> and <em>what they're
+      allowed to do</em>. The Scribe names the other half of the pair:
+      <em>who carries their action</em> past a credential boundary
+      the user themselves cannot cross. A Reader leaves a Bell
+      comment, a notebook cell saves, a smebit lands; the user's
+      <strong>intent</strong> is theirs, but the physical push to
+      git, R2, an HTTP endpoint is performed by a deployment that
+      holds the credential the user doesn't have. <strong>Authoriser
+      and Carrier. User and Scribe.</strong> Two names where there
+      used to be one &mdash; so the audit trail no longer has to lie
+      about whose hand pushed the bytes.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 39 — THE GOVERNANCE ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag governance">Sense 39</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Governance</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A rule is a sentence with a calendar.<br>
+      An institution is a chain of decisions, each made under the rules
+      in force at the time, by the people authorised at the time,
+      against the data observable at the time."
+    </div>
+    <p class="essence fade-in">
+      The analytical pyramid is <em>a-temporal in evaluation</em>:
+      every signal runs against current state, every <em>jin make</em>
+      re-evaluates against today. For <em>"what's wrong now?"</em>
+      that's right. For three other questions it breaks:
+      <strong>retrospective</strong> ("what was true on 2024-Q3,
+      with today's lens?"), <strong>reproductive</strong> ("what did
+      the institution actually see <em>then</em>, under the rules
+      and lens in force <em>then</em>?"), and <strong>compliance</strong>
+      ("did we adhere to the rules in force during this period?").
+      A rule that changed in 2020 cannot be re-evaluated as today's
+      rule against historical data without lying. The Governance
+      names the bi-temporal discipline &mdash; rules, lenses, and
+      authorities each carrying their own calendar &mdash; that lets
+      jinflow answer all three honestly.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 40 — THE METAMODEL ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag metamodel">Sense 40</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Metamodel</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A pack describes its world.<br>
+      The engine describes the language used to describe worlds.<br>
+      Mixing the two looks fine until two packs need the same sentence
+      and have to copy-paste it. Then it's drift waiting to happen."
+    </div>
+    <p class="essence fade-in">
+      A small incident exposed a quiet conflation:
+      <em>signal_contract.v1.json</em>, <em>verdict_contract.v1.json</em>,
+      <em>smebit_contract.v1.json</em>, <em>bitbundle_contract.v1.json</em>
+      are <strong>byte-identical</strong> across packs because they
+      describe how the engine names signals, verdicts, etc. &mdash;
+      not what numetrix's or hr/central's <em>world</em> looks like.
+      Only <em>gold_contract</em> and <em>silver_contract</em> are
+      genuinely pack-shaped; the other four are engine-shaped,
+      masquerading as pack files and drifting waiting to happen. The
+      Metamodel names the line: <strong>the engine's vocabulary lives
+      in the engine; only the world-shape lives in the pack.</strong>
+      Same lesson the Three Vocabularies docs page made visible &mdash;
+      now applied to the contracts directory.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 41 — THE RELEVANCE ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag relevance">Sense 41</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Relevance</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Severity says how loud.<br>
+      Capability says who may act.<br>
+      Relevance answers the question the other two leave open: <em>who is this for?</em>"
+    </div>
+    <p class="essence fade-in">
+      The Bell gave us a notification substrate where five plugins
+      produce rings into a single per-tenant Inbox. Every ring with a
+      <em>view:bell</em> audience sees every other ring &mdash; capability
+      gates whether you can read, but not <em>what is for you</em>. As
+      tenants grow past a single team, that one-size-fits-all Inbox stops
+      working: the controller doesn't need the data-engineer's CSV-schema
+      breakage; the clinical lead doesn't need the cloud deploy ping.
+      The Relevance names the missing predicate &mdash; <strong>per-person
+      filter, computed at ring time, queryable in the Log</strong> &mdash;
+      so the right rings reach the right inboxes without anyone curating
+      a subscription list by hand.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 42 — THE PIPES ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag pipes">Sense 42</span><span class="sense-status shipping">shipping</span></div>
+    <h1 class="fade-in">The Pipes</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Every pipeline tells a story.<br>
+      Most diagrams of pipelines tell no story at all &mdash;<br>
+      they just admit that the artifacts exist.<br>
+      The Pipes is the diagram that earns the right to be looked at."
+    </div>
+    <p class="essence fade-in">
+      The pipeline graph used to be a wall of boxes &mdash; complete,
+      correct, unreadable. The Pipes is the same data <em>animated as
+      narrative</em>: layers fade in by stage; the camera moves with the
+      reader's filter; positions persist across sessions; an auto-layout
+      computes only when the saved positions don't fit the current view.
+      Sense 17's ambition (a guided tour) folds in here, minus the 3D
+      cost. The pipeline gets its <strong>voice</strong>: a visual
+      language whose default is <em>"this is the story so far,"</em>
+      not <em>"here is every artefact we have."</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 43 — THE CASCADE ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag cascade">Sense 43</span><span class="sense-status shipping">shipping</span></div>
+    <h1 class="fade-in">The Cascade</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "One mechanism. Multiple namespaces.<br>
+      Each authority &mdash; engine, pack, tenant, entity, explorer &mdash;<br>
+      can speak on any key. The chosen value carries its provenance."
+    </div>
+    <p class="essence fade-in">
+      Configuration in jinflow is <strong>layered authority</strong>. The
+      resolver consults engine &rarr; pack &rarr; tenant &rarr; entity
+      &rarr; explorer top-down at the latest possible moment; the KLS
+      bakes the resolution so every snapshot is self-describing about
+      what value won and where it came from. Two parallel namespaces
+      &mdash; <em>analytical_defaults</em> (numbers that change findings)
+      and <em>display</em> (pure presentation) &mdash; share the same
+      cascade machinery so the rules are <strong>learned once</strong>
+      and apply everywhere. The Sense names what makes the rules safe to
+      depend on: <em>provenance is part of the value.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 44 — THE FORGE ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag forge">Sense 44</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Forge</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "The Workshop carries the <em>why</em>.<br>
+      The Forge carries the <em>what</em>.<br>
+      Eighteen universal subsystems. The seventh pack shouldn't have to discover them one missing piece at a time."
+    </div>
+    <p class="essence fade-in">
+      Every domain pack &mdash; numetrix, hrcentral, alptrack, interlogic,
+      lexflow, the planned seventh &mdash; ends up needing the same
+      structural pieces: signal catalogue, scenario harness, narrative
+      compiler, severity rules, etc. The first six packs found this list
+      <em>by hitting each gap in production</em>. The Forge proposes
+      that list <strong>as a contract</strong>: eighteen subsystems each
+      pack must answer for, with an opinionated default so a new pack
+      stands up reading-empty rather than missing pieces it doesn't
+      know about. <em>Pack authoring becomes filling in answers, not
+      discovering the questions.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 45 — THE LOOM ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag loom">Sense 45</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Loom</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A corpus is read both as a chronicle and as a curation.<br>
+      The reader stands at one crossing of warp and weft."
+    </div>
+    <p class="essence fade-in">
+      We kept hitting the same shape on surface after surface &mdash;
+      the senses index, the journal index, the registry of theses &mdash;
+      the user wants <em>both</em> a chronological feed and a thematic
+      grouping, in the same view. The Loom names the pattern: <strong>two
+      axes, woven</strong>. Warp is time (the chronicle); weft is theme
+      (the curation). The reader picks which axis runs vertical and the
+      other becomes lateral context. One mechanism applies to any
+      time-stamped, tag-rich corpus &mdash; senses, releases, notebooks,
+      Subject Matter. Different surfaces, same loom.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 46 — THE ROSTER ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag roster">Sense 46</span><span class="sense-status shipping">shipping</span></div>
+    <h1 class="fade-in">The Roster</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "The list of who belongs lives where identity already lives.<br>
+      The book of names on the wall is a copy, not the truth."
+    </div>
+    <p class="essence fade-in">
+      A pattern that kept tripping us across Sense 25 (Identity &amp;
+      Passes): the AFS carried a <em>principals.yaml</em> that purported
+      to be the source of truth for who could do what &mdash; while the
+      actual identity provider (Clerk) carried its own roster, invited
+      its own users, revoked its own access. Two rosters drift; one wins.
+      The Roster names which: <strong>Clerk authors, AFS materialises</strong>.
+      Identity decisions happen where identity already lives; the AFS
+      is a deterministic projection, not a competing truth. <em>The
+      book of names on the wall is a record, not a writable register.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 47 — THE LOG ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag log">Sense 47</span><span class="sense-status shipping">shipping</span></div>
+    <h1 class="fade-in">The Log</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Every executed action leaves a row.<br>
+      The row is append-only, attributable, queryable, replayable.<br>
+      The Log is the substrate; the Senses above it consume it."
+    </div>
+    <p class="essence fade-in">
+      Every Sense that has a verb &mdash; the Bell rang, the Pulse
+      noticed, the Scribe carried, the Roster materialised, the
+      Cascade resolved &mdash; needs a place to write down <em>"this
+      happened, by whom, at what time, with what input"</em>. The Log
+      is the substrate underneath all of them: <strong>append-only,
+      attributable, queryable, replayable</strong>. Senses 33-46 each
+      describe how an action moves through the system; The Log
+      describes how the action <em>remembers itself</em> after it
+      moved. Without it, every Sense above is an event without a tape
+      &mdash; impossible to audit, impossible to replay, impossible
+      to learn from.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 48 — THE STAGE ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag stage">Sense 48</span><span class="sense-status implementing">implementing</span></div>
+    <h1 class="fade-in">The Stage</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Prod is the system.<br>
+      Dev is a controlled affordance for developers."
+    </div>
+    <p class="essence fade-in">
+      Until 2026-06, jinflow ran a single Fly app, a single R2 bucket,
+      a single Clerk app. Every experiment landed on customer surfaces
+      the moment it shipped &mdash; there was no real distinction
+      between "what's in production" and "what's being tested." On
+      2026-06-13 that monolith split: <strong>a second Fly app, a
+      second R2 bucket, a second Clerk instance</strong>. The Stage
+      names the spec that has to flow through <em>every</em> layer
+      &mdash; auth, app, data, membership, every CLI command &mdash;
+      so a developer can never accidentally touch production. Two
+      planes, one system.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 49 — THE BRANCH ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag branch">Sense 49</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Branch</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A pack is a trunk.<br>
+      Branches are opt-in modules the tenant grafts.<br>
+      Same pack. Different weight per tenant."
+    </div>
+    <p class="essence fade-in">
+      A pack today ships every concern it has ever contemplated &mdash;
+      a tenant that only cares about workforce visibility still carries
+      the credential-compliance shape, the data-protection shape, the
+      publication-productivity shape. The Branch reframes the pack as
+      a <strong>trunk with opt-in branches</strong>. Each branch
+      carries its own Anchors, Facts, source systems, Gold contract
+      entries, and the themes that stand on them. A tenant grafts the
+      branches it needs; leaving one out leaves its concerns invisible.
+      <em>Weight per tenant, not one-size-fits-all.</em>
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 50 — THE BEACON ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag beacon">Sense 50</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Beacon</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A showcase tenant should declare itself.<br>
+      Publishing to a subdomain should be one command,<br>
+      not eleven declarations across four repositories."
+    </div>
+    <p class="essence fade-in">
+      Publishing delta.jinflow.io took eleven declarations, five hours,
+      and three separate silent-failure modes. Each declaration
+      &mdash; DNS, Fly route, R2 prefix, Clerk allowed origin, tenant
+      config, welcome copy &mdash; had to be edited by hand in a
+      different repository, and the failure modes were quiet: the
+      subdomain resolved, the app booted, the login worked, the tenant
+      list was empty. The Beacon proposes a <strong>single artifact
+      carried inside the KLS</strong> that the cloud discovers, routes
+      to, gates, and renders automatically. Born of the delta
+      incident, 2026-07-07 &rarr; 2026-07-08.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 51 — THE SKILL ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag skill">Sense 51</span><span class="sense-status proposed">proposed</span></div>
+    <h1 class="fade-in">The Skill</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "A Skill is a <em>what</em> that many packs can answer.<br>
+      A pack is a <em>how</em> that answers many Skills."
+    </div>
+    <p class="essence fade-in">
+      Domain packs today ship self-contained diamonds &mdash; nuMetrix
+      for hospitals, hrcentral for workforce, interlogic for freight
+      &mdash; each grounded in the pack's Gold entities. What the
+      packs don't share is the <strong>analytical intent</strong>.
+      When a hospital CFO asks "how is our cost efficiency?", the
+      answer is nuMetrix-flavoured; when a vineyard owner asks it, the
+      answer is Millésime-flavoured. Same Skill, different pack. The
+      Skill names the portable layer above pack-specific instrumentation
+      so analytical patterns travel between domains without being
+      re-invented every time.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 52 — THE CARTOGRAPHY ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag cartography">Sense 52</span><span class="sense-status shipping">shipping</span></div>
+    <h1 class="fade-in">The Cartography</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "When the field team looks at delta.jinflow.io<br>
+      they should see their sensors where they actually are,<br>
+      not a scatter plot pretending to be a map."
+    </div>
+    <p class="essence fade-in">
+      Map Salon already gave us a generic visual-encoding room, but
+      when the entity carries latitude, longitude, and altitude, a
+      scatter plot flattens what the geography is telling you. The
+      Cartography is the <strong>real</strong> map: real base tiles,
+      real projections, geodesic distance, switchable overlay layers,
+      per-point rich content, a 3D path forward. Declared as
+      first-class Explorer artifacts &mdash; a tenant with coordinates
+      in its Gold contract gets a real map for free, and the observation
+      about three sites where cattle cross becomes obvious the moment
+      you overlay the pastoral routes.
+    </p>
+  </div>
+
+  <!-- ═══ SENSE 53 — THE CODEX ═══ -->
+  <div class="slide">
+    <div class="sense-head fade-in"><span class="sense-tag codex">Sense 53</span><span class="sense-status shipped">shipped</span></div>
+    <h1 class="fade-in">The Codex</h1>
+    <div class="divider fade-in"></div>
+    <div class="quote-small fade-in">
+      "Industry-recognised standards live in the platform,<br>
+      not in packs or tenants."
+    </div>
+    <p class="essence fade-in">
+      We already do this. We just never named it. UCUM validates every
+      quantity aggregate. ISO 4217 validates every currency aggregate.
+      ISO 8601 governs every timestamp. Sense 14.2 Phase 5 baked them
+      into the engine without a name. The Codex names the pattern:
+      <strong>jinflow declares which standards it speaks, exposes
+      them uniformly, and lets packs opt in by reference</strong>.
+      Thirteen standards as of 2026-07-11 &mdash; including JCGM 100:2008
+      (GUM) for measurement uncertainty and the engine's own
+      <em>jinflow_naming</em> standard. Standards are business-independent
+      &mdash; an ISO code means the same thing in a hospital, a
+      vineyard, a freight forwarder, and a freshwater sensor network.
+      <em>Naming them, hosting them once, exposing them: technical
+      trustworthiness made legible.</em>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+  <!-- ═══ THE PATTERN ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Pattern</div>
+    <h2 class="fade-in">A Sense earns its number<br>by being lived first.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Each Sense above began as an irritation in real work — a regression
+      that kept coming back, a question the system could not yet answer,
+      a vocabulary gap that made the next conversation harder than it
+      should have been.<br><br>
+      Naming the Sense is what stops the loop. Building the feature is
+      easy after that. <span class="highlight">The hard part is the
+      naming.</span>
+    </p>
+  </div>
+
+  <!-- ═══ CLOSING ═══ -->
+  <div class="slide jin-slide">
+    <div class="logo fade-in">jinflow.io</div>
+    <h1 class="fade-in" style="line-height: 1.3;">Fifty-Three Senses.<br>And the next one<br>is being lived right now.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      The Canvas, The Signal, Typed Signals, Observation &amp; Explanation,<br>
+      P2P2P, The House (folded), The Ledger, The Simulation,<br>
+      The Seam, The Heartbeat, The Legend, The Engine's Seam,<br>
+      The Steward, The Pass, The Workshop, The Funnel, The Direct Line,<br>
+      The Atelier, The Wire, The Inlet, The Chores,<br>
+      The Bell, The Breeze, The Drift, The Lineage, The Snapshot,<br>
+      The Scribe, The Governance, The Metamodel, The Relevance,<br>
+      The Landscape, The Cascade, The Forge, The Loom, The Roster, The Log,<br>
+      The Stage, The Branch, The Beacon, The Skill, The Cartography, The Codex.<br><br>
+      <span style="color: var(--teal-light); font-weight: 500;">
+        We don't predict the next one. We let it surface.
+      </span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">jinflow</div>
+  </div>
+
+</div>
+
+<div class="brand">jinflow.io</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  var slides = Array.from(document.querySelectorAll('.slide'));
+  var sidebar = document.getElementById('sidebar');
+  var counter = document.getElementById('counter');
+  var current = 0;
+
+  var contentTotal = slides.filter(function(s) { return !s.classList.contains('breathing'); }).length;
+
+  var contentNum = 0;
+  slides.forEach(function(slide, i) {
+    var isBreathing = slide.classList.contains('breathing');
+    var isSection = slide.classList.contains('section-slide');
+    var isJin = slide.classList.contains('jin-slide');
+    if (!isBreathing) contentNum++;
+
+    var thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (isJin) thumb.classList.add('jin-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    var inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    var label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = 'jinflow';
+    } else {
+      var title = slide.querySelector('h1, h2');
+      var senseTag = slide.querySelector('.sense-tag');
+      if (senseTag && title) {
+        label.textContent = senseTag.textContent.trim() + ' · ' + title.textContent.trim();
+      } else if (title) {
+        label.textContent = title.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      var num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  var thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var n = 0;
+    for (var j = 0; j <= index; j++) {
+      if (!slides[j].classList.contains('breathing')) n++;
+    }
+    counter.textContent = n + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- jinflow — hope for DataDesk expats. Source of record: docs/presentations/. -->
+<title>jinflow — hope for DataDesk expats</title>
+<style>
+  :root {
+    --ink:#0e1622; --paper:#f6f8fa; --panel:#fff; --slate:#55637a; --faint:#8b97a8;
+    --hair:#e0e5ec; --cyan:#0e7490; --cyan-br:#0891b2; --amber:#b45309; --amber-br:#d97706;
+    --g:#16a34a; --y:#ca8a04; --o:#ea580c; --r:#dc2626;
+    --grid:rgba(14,116,144,.06);
+    --shadow:0 1px 2px rgba(15,23,42,.04),0 12px 32px -12px rgba(15,23,42,.12);
+    --bg:var(--paper); --fg:var(--ink); --card:var(--panel);
+  }
+  @media (prefers-color-scheme: dark){:root{
+    --ink:#eaeff5;--paper:#0b1119;--panel:#111a25;--slate:#9aa7ba;--faint:#6b7789;--hair:#1e2a3a;
+    --cyan:#22d3ee;--cyan-br:#67e8f9;--amber:#f59e0b;--amber-br:#fbbf24;
+    --g:#22c55e;--y:#eab308;--o:#f97316;--r:#f87171;--grid:rgba(34,211,238,.06);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 20px 40px -16px rgba(0,0,0,.6);}}
+  :root[data-theme="dark"]{--ink:#eaeff5;--paper:#0b1119;--panel:#111a25;--slate:#9aa7ba;--faint:#6b7789;--hair:#1e2a3a;
+    --cyan:#22d3ee;--cyan-br:#67e8f9;--amber:#f59e0b;--amber-br:#fbbf24;--g:#22c55e;--y:#eab308;--o:#f97316;--r:#f87171;
+    --grid:rgba(34,211,238,.06);--shadow:0 1px 2px rgba(0,0,0,.3),0 20px 40px -16px rgba(0,0,0,.6);}
+  :root[data-theme="light"]{--ink:#0e1622;--paper:#f6f8fa;--panel:#fff;--slate:#55637a;--faint:#8b97a8;--hair:#e0e5ec;
+    --cyan:#0e7490;--cyan-br:#0891b2;--amber:#b45309;--amber-br:#d97706;--g:#16a34a;--y:#ca8a04;--o:#ea580c;--r:#dc2626;
+    --grid:rgba(14,116,144,.06);--shadow:0 1px 2px rgba(15,23,42,.04),0 12px 32px -12px rgba(15,23,42,.12);}
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { margin:0; background:var(--bg); color:var(--fg); overflow:hidden;
+    font-family: system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; -webkit-font-smoothing:antialiased; }
+  .mono { font-family: ui-monospace,"SF Mono","JetBrains Mono",Menlo,monospace; }
+  .serif { font-family: ui-serif, Georgia, "Iowan Old Style", "Times New Roman", serif; }
+
+  #deck { position:fixed; inset:0;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:42px 42px; }
+  .slide { position:absolute; inset:0; display:flex; flex-direction:column; justify-content:center;
+    padding:clamp(1.5rem,5vw,6rem); padding-bottom:clamp(4rem,8vh,6rem);
+    opacity:0; transform:translateY(14px) scale(.995); transition:opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);
+    pointer-events:none; overflow-y:auto; }
+  .slide.active { opacity:1; transform:none; pointer-events:auto; }
+  .wrap { width:100%; max-width:1080px; margin:0 auto; }
+
+  .eyebrow { font-family:ui-monospace,Menlo,monospace; font-size:.72rem; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--cyan); font-weight:600; margin:0 0 1.1rem; display:flex; align-items:center; gap:.7rem; }
+  .eyebrow::before { content:""; width:26px; height:1px; background:var(--cyan); opacity:.6; }
+  .eyebrow.warm { color:var(--amber-br); } .eyebrow.warm::before { background:var(--amber-br); }
+  h1.title { font-size:clamp(2.6rem,7.5vw,5.6rem); font-weight:800; letter-spacing:-.04em; line-height:.98; margin:0; text-wrap:balance;
+    background:linear-gradient(180deg,var(--fg),color-mix(in oklab,var(--fg) 62%,var(--cyan))); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  h2 { font-size:clamp(1.8rem,4.4vw,3.4rem); font-weight:750; letter-spacing:-.025em; line-height:1.04; margin:0 0 1.4rem; text-wrap:balance; max-width:22ch; }
+  .lede { font-size:clamp(1.05rem,1.7vw,1.4rem); line-height:1.5; color:var(--slate); max-width:60ch; margin:0; }
+  .lede.tight { max-width:48ch; }
+  p { margin:0; } strong { color:var(--fg); font-weight:650; } em { font-style: italic; }
+  .big-quote { font-size:clamp(1.6rem,3.6vw,2.9rem); line-height:1.25; letter-spacing:-.02em; font-weight:500; max-width:24ch; text-wrap:balance; }
+  .big-quote .hi { color:var(--cyan); } .big-quote .warm { color:var(--amber-br); }
+
+  .term { font-family:ui-monospace,Menlo,monospace; font-size:.92em; font-weight:600; color:var(--cyan);
+    background:color-mix(in oklab,var(--cyan) 12%,transparent); border:1px solid color-mix(in oklab,var(--cyan) 30%,transparent);
+    border-radius:5px; padding:.08em .4em; white-space:nowrap; }
+
+  .grid { display:grid; gap:1rem; } .g3 { grid-template-columns:repeat(3,1fr); } .g2 { grid-template-columns:1fr 1fr; }
+  @media (max-width:820px){ .g3,.g2 { grid-template-columns:1fr; } }
+  .card { background:var(--card); border:1px solid var(--hair); border-radius:14px; padding:1.3rem 1.4rem; box-shadow:var(--shadow); }
+  .card .n { font-family:ui-monospace,Menlo,monospace; font-size:.7rem; letter-spacing:.14em; color:var(--faint); text-transform:uppercase; }
+  .card h3 { font-size:1.1rem; font-weight:700; margin:.5rem 0 .5rem; letter-spacing:-.01em; }
+  .card p { font-size:.96rem; line-height:1.5; color:var(--slate); }
+  .card.warm { border-color:color-mix(in oklab,var(--amber-br) 34%,var(--hair)); }
+  .card.warm h3 { color:var(--amber-br); }
+
+  /* keep / add split */
+  .split { display:grid; grid-template-columns:1fr 1fr; gap:1.6rem; margin-top:1.2rem; }
+  @media (max-width:820px){ .split { grid-template-columns:1fr; } }
+  .col h3.head { font-family:ui-monospace,Menlo,monospace; font-size:.76rem; letter-spacing:.14em; text-transform:uppercase; margin:0 0 .9rem; }
+  .col.keep h3.head { color:var(--amber-br); } .col.add h3.head { color:var(--cyan); }
+  .li { display:flex; gap:.7rem; align-items:baseline; margin-bottom:.8rem; font-size:1.02rem; line-height:1.4; }
+  .li .m { flex:none; width:7px; height:7px; border-radius:2px; transform:rotate(45deg) translateY(-1px); }
+  .keep .m { background:var(--amber-br); } .add .m { background:var(--cyan); }
+  .li b { font-weight:650; }
+
+  /* linked-views demo */
+  .linked { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:.4rem; max-width:640px; }
+  .panel { background:var(--card); border:1px solid var(--hair); border-radius:12px; padding:.7rem .8rem .5rem; box-shadow:var(--shadow); }
+  .panel .pl { font-family:ui-monospace,Menlo,monospace; font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-bottom:.2rem; }
+  .panel svg { width:100%; height:120px; display:block; }
+  .pt { fill: color-mix(in oklab, var(--slate) 55%, transparent); transition: fill .12s, r .12s; cursor: crosshair; }
+  .pt.lit { fill: var(--cyan); }
+  .hintline { font-family:ui-monospace,Menlo,monospace; font-size:.72rem; color:var(--faint); margin-top:.6rem; letter-spacing:.04em; }
+
+  .stats { display:flex; gap:2.4rem; flex-wrap:wrap; margin:.2rem 0 1.4rem; }
+  .stat .v { font-size:clamp(1.6rem,3.6vw,2.6rem); font-weight:800; letter-spacing:-.03em; font-variant-numeric:tabular-nums; }
+  .stat .l { font-family:ui-monospace,Menlo,monospace; font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); }
+
+  #bar { position:fixed; left:0; top:0; height:3px; background:linear-gradient(90deg,var(--cyan),var(--cyan-br)); width:0; transition:width .45s ease; z-index:40; }
+  #brand { position:fixed; left:clamp(1.2rem,3vw,2.4rem); top:clamp(1rem,2.6vh,1.8rem); z-index:30; display:flex; align-items:center; gap:.55rem; font-weight:700; letter-spacing:-.02em; }
+  #brand .d { width:9px; height:9px; background:var(--cyan); border-radius:2px; transform:rotate(45deg); }
+  #brand small { font-family:ui-monospace,Menlo,monospace; font-weight:500; font-size:.64rem; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); }
+  #foot { position:fixed; right:clamp(1.2rem,3vw,2.4rem); bottom:clamp(1rem,2.6vh,1.6rem); left:clamp(1.2rem,3vw,2.4rem); z-index:30;
+    display:flex; justify-content:space-between; align-items:center; font-family:ui-monospace,Menlo,monospace; font-size:.7rem; letter-spacing:.1em; color:var(--faint); }
+  #dots { display:flex; gap:.5rem; }
+  #dots button { width:7px; height:7px; border-radius:50%; border:none; background:var(--hair); padding:0; cursor:pointer; transition:all .3s; }
+  #dots button.on { background:var(--cyan); transform:scale(1.35); }
+  #hint b { color:var(--slate); }
+  @media (prefers-reduced-motion: reduce){ * { transition:none !important; } }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="brand"><span class="d"></span> jinflow <small>a jazzisnow engine</small></div>
+
+<div id="deck">
+
+  <!-- 1 · Title -->
+  <section class="slide active">
+    <div class="wrap">
+      <p class="eyebrow warm">Hope · for DataDesk expats</p>
+      <h1 class="title">You don't have to<br>leave it behind.</h1>
+      <p class="lede" style="margin-top:1.6rem;max-width:50ch;">
+        A successor to the tool that taught a generation to <em>look at the data first</em> —
+        and let you <strong>brush one plot and watch every view answer</strong>.
+      </p>
+    </div>
+  </section>
+
+  <!-- 2 · The love -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow warm">What DataDesk gave us</p>
+      <p class="big-quote serif">
+        Select a cloud of points in one plot, and they light up <span class="warm">everywhere</span> at once.
+        Drag a brush, and every view <span class="warm">answers</span>.
+      </p>
+      <p class="lede" style="margin-top:1.6rem;">
+        This was <strong>Tukey's</strong> idea made kinetic — <em>Exploratory Data Analysis</em>, 1977:
+        look at the data before you model it. Plots over p-values. Curiosity first. DataDesk let you
+        <em>feel</em> your data move.
+      </p>
+    </div>
+  </section>
+
+  <!-- 3 · The grief -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">And now</p>
+      <h2>It's dying on the machine it runs on.</h2>
+      <div class="grid g3" style="margin-top:1.4rem;">
+        <div class="card"><div class="n">Discontinued</div><h3>No new version</h3><p>The software has stopped. What you know how to do lives in an application that no longer moves forward.</p></div>
+        <div class="card"><div class="n">No successor</div><h3>Nothing took its place</h3><p>Four decades on, no modern tool kept the linked, brushed, EDA-first way of seeing. You've been an <em>expat</em> ever since.</p></div>
+        <div class="card"><div class="n">One laptop</div><h3>It ends with the hardware</h3><p>Your method, your muscle memory, your way of looking — all trapped on one aging machine. When it goes, they go.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · The hope / turn -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">The hope</p>
+      <p class="big-quote">
+        jinflow is built to be its <span class="hi">successor</span> —
+        the same way of seeing, alive <span class="hi">beyond one machine.</span>
+      </p>
+      <p class="lede tight" style="margin-top:1.6rem;">
+        We kept the soul on purpose. The vocabulary is DataDesk's: the
+        <span class="term">Brush</span> (the gesture), the <span class="term">Selection</span>
+        (the live set), the <span class="term">Selector</span> (the filter you keep).
+      </p>
+    </div>
+  </section>
+
+  <!-- 5 · What we keep — the linked-views demo -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow warm">What we keep · the brush is still the brush</p>
+      <h2 style="max-width:20ch;">Hover a point. Its twin lights up in the other view.</h2>
+      <div class="linked">
+        <div class="panel"><div class="pl">NO₂ · winter</div><svg id="pa" viewBox="0 0 200 120" preserveAspectRatio="none"></svg></div>
+        <div class="panel"><div class="pl">PM₂.₅ · winter</div><svg id="pb" viewBox="0 0 200 120" preserveAspectRatio="none"></svg></div>
+      </div>
+      <p class="hintline">shared case-ids — one station, lit in both plots. Narrow once; every view follows.</p>
+    </div>
+  </section>
+
+  <!-- 6 · What we add -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">What a 1980s desktop never could</p>
+      <h2 style="max-width:16ch;">Keep the soul. Lose the ceiling.</h2>
+      <div class="split">
+        <div class="col keep">
+          <h3 class="head">DataDesk gave you</h3>
+          <div class="li"><span class="m"></span><span>linked, brushed, dynamic graphics</span></div>
+          <div class="li"><span class="m"></span><span>EDA first — look before you model</span></div>
+          <div class="li"><span class="m"></span><span>the feel of data moving under your hand</span></div>
+        </div>
+        <div class="col add">
+          <h3 class="head">jinflow adds</h3>
+          <div class="li"><span class="m"></span><span><b>It lives</b> — laptop <em>and</em> cloud; it doesn't die with a machine.</span></div>
+          <div class="li"><span class="m"></span><span><b>Reproducible</b> — the exploration is a durable artifact, not clicks lost on quit.</span></div>
+          <div class="li"><span class="m"></span><span><b>Sovereign</b> — your data, your machine, their browser.</span></div>
+          <div class="li"><span class="m"></span><span><b>It scales</b> — millions of rows, not what fits in RAM.</span></div>
+          <div class="li"><span class="m"></span><span><b>It's shared</b> — send a live view, not a screenshot.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · Proof: aeros -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">Proof · aeros</p>
+      <h2 style="max-width:22ch;">An atmospheric-chemistry Study, built for exactly this.</h2>
+      <div class="stats">
+        <div class="stat"><div class="v mono">30.6 M</div><div class="l">measurements</div></div>
+        <div class="stat"><div class="v mono">6</div><div class="l">pollutants</div></div>
+        <div class="stat"><div class="v mono">live</div><div class="l">on the open web</div></div>
+      </div>
+      <p class="lede">
+        Brush a station on the map → its co-located streams light up → open the measured series.
+        The <span class="term">Selection</span> survives as you move from map to table to chart —
+        <strong>narrow once, and everything follows.</strong> The DataDesk gesture, reborn on the web,
+        with the units and uncertainty carried through.
+      </p>
+    </div>
+  </section>
+
+  <!-- 8 · Close -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow warm">Come across</p>
+      <h2 style="max-width:20ch;">The way of seeing outlives the software.</h2>
+      <p class="lede" style="max-width:48ch;">
+        DataDesk doesn't have to end with your laptop. Bring the brush, the linked views, the
+        curiosity-first habit — and set them down somewhere they'll keep working, keep travelling,
+        and keep telling the truth.
+      </p>
+      <p class="lede" style="margin-top:2rem;font-size:1rem;color:var(--faint);">jinflow — EDA, reborn. A jazzisnow engine.</p>
+    </div>
+  </section>
+
+</div>
+
+<div id="foot">
+  <div id="dots"></div>
+  <div id="hint"><b>←</b> / <b>→</b> to move · hover the plots on slide 5</div>
+</div>
+
+<script>
+  (function () {
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const bar = document.getElementById('bar');
+    const dotsWrap = document.getElementById('dots');
+    let i = 0;
+
+    slides.forEach((_, n) => { const b = document.createElement('button'); b.addEventListener('click', () => go(n)); dotsWrap.appendChild(b); });
+    const dots = Array.from(dotsWrap.children);
+
+    // ── Linked-views demo: shared case-ids across two scatter panels ──
+    // 12 stations, each a (no2, pm25) winter pair — correlated, with scatter.
+    const cases = [];
+    for (let k = 0; k < 12; k++) {
+      const t = k / 11;
+      const no2 = 18 + t * 60 + (k % 3 - 1) * 8 + (k % 2 ? 5 : -4);
+      const pm25 = 10 + t * 42 + (k % 4 - 1.5) * 6 + (k % 2 ? -3 : 4);
+      cases.push({ id: k, no2, pm25 });
+    }
+    function scale(v, lo, hi, a, b) { return a + (Math.max(lo, Math.min(hi, v)) - lo) / (hi - lo) * (b - a); }
+    function draw(svg, xKey, yKey, xr, yr) {
+      const ns = 'http://www.w3.org/2000/svg';
+      cases.forEach(c => {
+        const cx = scale(c[xKey], xr[0], xr[1], 14, 186);
+        const cy = scale(c[yKey], yr[0], yr[1], 106, 14);
+        const el = document.createElementNS(ns, 'circle');
+        el.setAttribute('cx', cx.toFixed(1)); el.setAttribute('cy', cy.toFixed(1)); el.setAttribute('r', '5');
+        el.setAttribute('class', 'pt'); el.dataset.id = c.id;
+        el.addEventListener('mouseenter', () => light(c.id, true));
+        el.addEventListener('mouseleave', () => light(c.id, false));
+        svg.appendChild(el);
+      });
+    }
+    function light(id, on) {
+      document.querySelectorAll('.pt[data-id="' + id + '"]').forEach(e => {
+        e.classList.toggle('lit', on); e.setAttribute('r', on ? '7' : '5');
+      });
+    }
+    const pa = document.getElementById('pa'), pb = document.getElementById('pb');
+    // x-axis is station index (same order) so vertical position is what "links" visually;
+    // both plots share case-ids, so hovering lights the same station in both.
+    cases.forEach((c, k) => c.idx = k * (80 / 11) + 8);
+    if (pa) draw(pa, 'idx', 'no2', [0, 90], [10, 82]);
+    if (pb) draw(pb, 'idx', 'pm25', [0, 90], [5, 56]);
+
+    function go(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach((s, k) => s.classList.toggle('active', k === i));
+      dots.forEach((d, k) => d.classList.toggle('on', k === i));
+      bar.style.width = (i / (slides.length - 1) * 100) + '%';
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); go(i + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(i - 1); }
+      else if (e.key === 'Home') go(0); else if (e.key === 'End') go(slides.length - 1);
+    });
+    document.getElementById('deck').addEventListener('click', (e) => {
+      if (e.target.closest('a,button,svg,.panel')) return;   // don't advance when playing with the plots
+      (e.clientX / window.innerWidth < 0.28) ? go(i - 1) : go(i + 1);
+    });
+    go(0);
+  })();
+</script>
+</body>
+</html>

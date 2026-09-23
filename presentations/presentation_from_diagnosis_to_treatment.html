@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix — From Diagnosis to Treatment</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --accent-glow: rgba(42, 143, 143, 0.08);
+    --red-soft: #fef2f2;
+    --green-soft: #f0fdf4;
+    --amber-soft: #fffbeb;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout {
+    display: flex; width: 100%; height: 100%;
+  }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area {
+    flex: 1; position: relative; height: 100%; overflow: hidden;
+  }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 7vh 10vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  /* ── Typography ── */
+  .logo {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 2vh;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2.5vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 2.8vw, 2.3rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.95rem, 1.6vw, 1.3rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+
+  /* ── Staggered fade-in ── */
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 2vh 0;
+  }
+
+  /* ── Step cards ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 2vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+
+  .step {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2.5vh 1.8vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .step-num {
+    font-size: clamp(1.8rem, 2.8vw, 2.8rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.8vh;
+  }
+
+  .step-title {
+    font-size: clamp(0.9rem, 1.3vw, 1.1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.6vh;
+  }
+
+  .step-desc {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Pyramid ── */
+  .pyramid {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0.7vh; margin-top: 2vh; width: 100%; max-width: 700px;
+  }
+
+  .pyramid-layer {
+    display: flex; align-items: center; justify-content: center;
+    height: clamp(42px, 6vh, 56px); border-radius: 8px;
+    font-weight: 600; font-size: clamp(0.8rem, 1.2vw, 1rem);
+    color: var(--white); text-align: center; letter-spacing: 0.03em;
+  }
+
+  .pyramid-layer.future {
+    border: 2px dashed rgba(42, 143, 143, 0.4);
+    color: var(--teal); background: transparent;
+  }
+
+  .pyr-1 { width: 32%; background: var(--navy); }
+  .pyr-2 { width: 42%; background: #234060; }
+  .pyr-3 { width: 55%; background: var(--teal); }
+  .pyr-4 { width: 68%; background: #2a8f8f; }
+  .pyr-5 { width: 84%; background: #1a7070; }
+
+  .pyramid-label {
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    color: var(--warm-gray); margin-top: 0.2vh; font-weight: 400;
+  }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.5vw; margin-top: 2vh;
+  }
+
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.5vh 2vw;
+    font-weight: 600; font-size: clamp(0.82rem, 1.1vw, 1rem);
+    color: var(--navy); text-align: center; min-width: 100px;
+  }
+
+  .flow-box.active-step {
+    background: var(--teal); color: var(--white);
+  }
+
+  .flow-box.human-step {
+    background: var(--navy); color: var(--white);
+    border-color: var(--navy);
+  }
+
+  .flow-arrow {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Human annotation on flow ── */
+  .flow-annotated {
+    position: relative;
+  }
+
+  .flow-annotation {
+    font-size: clamp(0.65rem, 0.85vw, 0.78rem);
+    font-weight: 600; color: var(--navy);
+    letter-spacing: 0.05em; text-transform: uppercase;
+    position: absolute; top: -2.5vh; left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    background: var(--amber-soft);
+    padding: 0.3vh 0.8vw;
+    border-radius: 4px;
+    border: 1px solid #fbbf24;
+  }
+
+  /* ── Root cause cards ── */
+  .root-causes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .root-card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.2vh 1.8vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .root-icon {
+    font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+    margin-bottom: 0.8vh; color: var(--teal);
+  }
+
+  .root-title {
+    font-size: clamp(0.82rem, 1.1vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+
+  .root-desc {
+    font-size: clamp(0.68rem, 0.9vw, 0.82rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Limitation cards ── */
+  .limits {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .limit-card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .limit-icon {
+    font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+    margin-bottom: 1vh;
+  }
+
+  .limit-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.5vh;
+  }
+
+  .limit-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Capability cards ── */
+  .capabilities {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .cap-card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border-top: 4px solid var(--teal);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .cap-icon {
+    font-size: clamp(2rem, 3vw, 2.8rem);
+    margin-bottom: 1vh; color: var(--teal);
+  }
+
+  .cap-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.5vh;
+  }
+
+  .cap-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Example trace ── */
+  .trace {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 1.2vh; max-width: 700px; width: 100%; margin-top: 2vh;
+  }
+
+  .trace-row {
+    display: flex; align-items: center; gap: 1.5vw; width: 100%;
+  }
+
+  .trace-label {
+    width: 140px; min-width: 140px; text-align: right;
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    font-weight: 600; color: var(--teal);
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+
+  .trace-value {
+    flex: 1;
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    color: var(--navy); line-height: 1.4;
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 8px; padding: 1.2vh 1.5vw;
+    box-shadow: 0 1px 6px rgba(26, 39, 68, 0.03);
+  }
+
+  .trace-down {
+    font-size: clamp(1rem, 1.5vw, 1.4rem);
+    color: var(--teal);
+  }
+
+  /* ── Bridge visual ── */
+  .bridge {
+    display: flex; align-items: stretch; justify-content: center;
+    gap: 0; max-width: 800px; width: 100%; margin-top: 2vh;
+  }
+
+  .bridge-side {
+    flex: 1; padding: 2.5vh 2vw;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 0.8vh;
+    border-radius: 12px;
+  }
+
+  .bridge-left {
+    background: var(--accent-glow);
+    border: 1px solid rgba(42, 143, 143, 0.2);
+    border-radius: 12px 0 0 12px;
+  }
+
+  .bridge-right {
+    background: var(--amber-soft);
+    border: 1px solid rgba(217, 119, 6, 0.2);
+    border-radius: 0 12px 12px 0;
+  }
+
+  .bridge-center {
+    width: 60px; min-width: 60px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: linear-gradient(90deg, var(--accent-glow), var(--amber-soft));
+    gap: 0.5vh;
+  }
+
+  .bridge-center-icon {
+    font-size: clamp(1.4rem, 2vw, 1.8rem); color: var(--teal);
+  }
+
+  .bridge-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+
+  .bridge-text {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5; text-align: center;
+  }
+
+  /* ── Branding + counter ── */
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 5vh 5vw; }
+    .steps, .limits { grid-template-columns: 1fr 1fr; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+    .root-causes, .capabilities { grid-template-columns: 1fr 1fr; }
+    .bridge { flex-direction: column; }
+    .bridge-left { border-radius: 12px 12px 0 0; }
+    .bridge-right { border-radius: 0 0 12px 12px; }
+    .bridge-center {
+      width: 100%; min-width: unset;
+      height: 40px; flex-direction: row;
+      background: linear-gradient(180deg, var(--accent-glow), var(--amber-soft));
+    }
+    .bridge-center-icon { transform: rotate(90deg); }
+    .trace-row { flex-direction: column; gap: 0.5vh; }
+    .trace-label { width: auto; text-align: left; }
+    .flow-annotation { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<div class="sidebar" id="sidebar"></div>
+
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══ 1: Title ═══ -->
+  <div class="slide active">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">From Diagnosis<br>to Treatment</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      The complete analytics lifecycle for hospital material flow
+    </p>
+  </div>
+
+  <!-- ═══ 2: The medical metaphor ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Metaphor</div>
+    <div class="quote fade-in">
+      Every hospital is a patient.<br>Its data is the specimen.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      We built a diagnostic laboratory &mdash; not a consulting practice.<br>
+      The lab processes specimens. It produces findings. It renders verdicts.<br>
+      What happens next is a clinical decision.
+    </p>
+  </div>
+
+  <!-- ═══ 3: The pyramid TODAY ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Analytics Pyramid</div>
+    <h2 class="fade-in">Five layers. Four built. One ahead.</h2>
+    <div class="pyramid fade-in">
+      <div class="pyramid-layer pyr-1 future fade-in">Treatment</div>
+      <div class="pyramid-label fade-in">what do we do about it?</div>
+      <div class="pyramid-layer pyr-2 fade-in">Diagnoses</div>
+      <div class="pyramid-label fade-in">root cause identification</div>
+      <div class="pyramid-layer pyr-3 fade-in">Hypotheses</div>
+      <div class="pyramid-label fade-in">business questions with verdicts</div>
+      <div class="pyramid-layer pyr-4 fade-in">Assessments</div>
+      <div class="pyramid-label fade-in">entity health scores</div>
+      <div class="pyramid-layer pyr-5 fade-in">Probes</div>
+      <div class="pyramid-label fade-in">detect symptoms in data</div>
+    </div>
+  </div>
+
+  <!-- ═══ 4: What each layer answers ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Each Layer, One Question</div>
+    <h2 class="fade-in">From detection to decision</h2>
+    <div class="steps fade-in">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-title">What?</div>
+        <div class="step-desc">Probes detect anomalies. A billing gap. A missing implant. A duplicate charge.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-title">How bad?</div>
+        <div class="step-desc">Assessments score entity health. CHF at risk. Severity. Affected scope.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-title">Is it real?</div>
+        <div class="step-desc">Hypotheses weigh evidence. Confirmed, plausible, or not observed.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-title">Why?</div>
+        <div class="step-desc">Diagnoses trace to root cause. Process, system, or behaviour.</div>
+      </div>
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-title">What now?</div>
+        <div class="step-desc">Treatment recommends action. Investigation. Resolution. Verification.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 5: Breathing ═══ -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══ 6: A confirmed hypothesis is not enough ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Diagnosis Gap</div>
+    <h2 class="fade-in">A confirmed hypothesis<br>is not enough.</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      The CFO doesn't want to know <em>what</em> is happening.<br>
+      They want to know <span class="highlight">why</span>.<br><br>
+      &ldquo;Revenue leakage confirmed&rdquo; is a finding.<br>
+      &ldquo;The SAP-OPALE interface drops 3% of billing events<br>
+      on weekend transfers&rdquo; is a diagnosis.
+    </p>
+  </div>
+
+  <!-- ═══ 7: How diagnosis works ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">How Diagnosis Works</div>
+    <h2 class="fade-in">From signal to root cause</h2>
+    <div class="flow fade-in">
+      <div class="flow-box">Confirmed<br>Hypothesis</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Conditions<br>Check</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Confidence<br>Compute</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box active-step">Root<br>Cause</div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      The system evaluates structural conditions around each confirmed hypothesis &mdash;<br>
+      temporal patterns, entity correlations, severity distributions &mdash;<br>
+      to narrow the search space from &ldquo;something is wrong&rdquo; to &ldquo;here is why.&rdquo;
+    </p>
+  </div>
+
+  <!-- ═══ 8: The 6 root cause categories ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Root Cause Taxonomy</div>
+    <h2 class="fade-in">Six categories. One language.</h2>
+    <div class="root-causes fade-in">
+      <div class="root-card fade-in">
+        <div class="root-icon">&#9881;</div>
+        <div class="root-title">Process Failure</div>
+        <div class="root-desc">A step in the workflow was skipped, delayed, or executed incorrectly.</div>
+      </div>
+      <div class="root-card fade-in">
+        <div class="root-icon">&#9000;</div>
+        <div class="root-title">System Failure</div>
+        <div class="root-desc">An interface dropped data, a mapping was stale, or a sync failed silently.</div>
+      </div>
+      <div class="root-card fade-in">
+        <div class="root-icon">&#9888;</div>
+        <div class="root-title">Data Quality</div>
+        <div class="root-desc">Missing fields, orphan references, type mismatches in the source data.</div>
+      </div>
+      <div class="root-card fade-in">
+        <div class="root-icon">&#9998;</div>
+        <div class="root-title">Behavioural</div>
+        <div class="root-desc">Staff bypass, selective scanning, undocumented workarounds on the floor.</div>
+      </div>
+      <div class="root-card fade-in">
+        <div class="root-icon">&#9670;</div>
+        <div class="root-title">Structural</div>
+        <div class="root-desc">Cost centre misalignment, organisational mapping gaps, taxonomy drift.</div>
+      </div>
+      <div class="root-card fade-in">
+        <div class="root-icon">&#9729;</div>
+        <div class="root-title">External</div>
+        <div class="root-desc">Regulatory changes, supplier catalogue updates, seasonal demand shifts.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 9: Real example ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">A Diagnosis in Action</div>
+    <h2 class="fade-in">From finding to root cause</h2>
+    <div class="trace fade-in">
+      <div class="trace-row fade-in">
+        <div class="trace-label">Finding</div>
+        <div class="trace-value">Revenue leakage: CHF 142K unbilled usage in Q3</div>
+      </div>
+      <div class="trace-down fade-in">&#8595;</div>
+      <div class="trace-row fade-in">
+        <div class="trace-label">Hypothesis</div>
+        <div class="trace-value">Confirmed: systematic unbilled consumption in orthopaedics</div>
+      </div>
+      <div class="trace-down fade-in">&#8595;</div>
+      <div class="trace-row fade-in">
+        <div class="trace-label">Diagnosis</div>
+        <div class="trace-value">Root cause: <span class="highlight">billing workflow gap</span> &mdash; weekend transfers not triggering invoice events. Confidence: 85%.</div>
+      </div>
+      <div class="trace-down fade-in">&#8595;</div>
+      <div class="trace-row fade-in">
+        <div class="trace-label">Recommendation</div>
+        <div class="trace-value">Check ERP interface logs for Saturday/Sunday batch failures. Review billing trigger configuration.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 10: Breathing ═══ -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══ 11: The lab doesn't perform surgery ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Boundary</div>
+    <div class="quote fade-in">
+      The diagnostic lab identifies the disease.<br>
+      It doesn't perform the surgery.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      This is not a limitation. It is a design decision.<br>
+      The lab must stay pure to stay trusted.
+    </p>
+  </div>
+
+  <!-- ═══ 12: What the system CANNOT know ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">Beyond the Data</div>
+    <h2 class="fade-in">What the system cannot know</h2>
+    <div class="limits fade-in">
+      <div class="limit-card fade-in">
+        <div class="limit-icon" style="color: var(--slate);">&#63;</div>
+        <div class="limit-title">Who is responsible?</div>
+        <div class="limit-desc">The data shows where the gap is. It does not show who owns the process or who can fix it.</div>
+      </div>
+      <div class="limit-card fade-in">
+        <div class="limit-icon" style="color: var(--slate);">&#8634;</div>
+        <div class="limit-title">What has been tried?</div>
+        <div class="limit-desc">Past remediation attempts, workarounds, and institutional memory live outside the data.</div>
+      </div>
+      <div class="limit-card fade-in">
+        <div class="limit-icon" style="color: var(--slate);">&#10003;</div>
+        <div class="limit-title">Is it intentional?</div>
+        <div class="limit-desc">Some anomalies are accepted trade-offs. The system flags them. Humans decide if they matter.</div>
+      </div>
+      <div class="limit-card fade-in">
+        <div class="limit-icon" style="color: var(--slate);">&#9878;</div>
+        <div class="limit-title">What does the fix cost?</div>
+        <div class="limit-desc">The cost of a diagnosis is quantified. The cost of treating it requires operational context.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 13: The human bridge ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Human Bridge</div>
+    <h2 class="fade-in">Floor knowledge meets<br>data intelligence</h2>
+    <div class="bridge fade-in">
+      <div class="bridge-side bridge-left fade-in">
+        <div class="bridge-title">The System</div>
+        <div class="bridge-text">Detects patterns. Quantifies risk. Identifies root causes. Suggests where to look.</div>
+      </div>
+      <div class="bridge-center fade-in">
+        <div class="bridge-center-icon">&#8596;</div>
+      </div>
+      <div class="bridge-side bridge-right fade-in">
+        <div class="bridge-title">The Human</div>
+        <div class="bridge-text">Knows the context. Weighs trade-offs. Assigns ownership. Makes the decision.</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2.5vh;">
+      The system <span class="highlight">suggests</span>. Humans <span class="highlight">decide</span>.<br>
+      This is where analytics becomes action.
+    </p>
+  </div>
+
+  <!-- ═══ 14: Breathing ═══ -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══ 15: Three capabilities ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Treatment Layer</div>
+    <h2 class="fade-in">Three capabilities to close the loop</h2>
+    <div class="capabilities fade-in">
+      <div class="cap-card fade-in">
+        <div class="cap-icon">&#9783;</div>
+        <div class="cap-title">Investigation Templates</div>
+        <div class="cap-desc">Structured checklists generated from the diagnosis. What to verify. Where to look. What data to collect from the floor.</div>
+      </div>
+      <div class="cap-card fade-in">
+        <div class="cap-icon">&#9745;</div>
+        <div class="cap-title">Resolution Tracking</div>
+        <div class="cap-desc">Record what was decided, what was changed, and when. Link resolutions back to the original diagnosis for audit trail.</div>
+      </div>
+      <div class="cap-card fade-in">
+        <div class="cap-icon">&#9733;</div>
+        <div class="cap-title">Cross-Tenant Knowledge</div>
+        <div class="cap-desc">When hospital A resolves a diagnosis, the resolution pattern becomes available to hospitals B, C, and D facing the same root cause.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ 16: The feedback loop ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Feedback Loop</div>
+    <h2 class="fade-in">The cycle that makes the system smarter</h2>
+    <div class="flow fade-in">
+      <div class="flow-box">Detect</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Assess</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Hypothesise</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Diagnose</div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-annotated">
+        <div class="flow-box human-step">Treat</div>
+        <div class="flow-annotation">Human Decision</div>
+      </div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box">Verify</div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      After treatment, the next data load re-runs the probes.<br>
+      Did the finding disappear? Did the money at risk decrease?<br>
+      <span class="highlight">The system verifies its own prescriptions.</span>
+    </p>
+  </div>
+
+  <!-- ═══ 17: The network effect ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">The Network Effect</div>
+    <div class="quote fade-in">
+      When hospital A resolves a diagnosis,<br>
+      hospital B learns from it.<br>
+      The fleet gets smarter.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      Same root cause. Same probe. Different hospital.<br>
+      The resolution that worked for one becomes a recommendation for all.<br>
+      Every tenant makes the platform stronger.
+    </p>
+  </div>
+
+  <!-- ═══ 18: Closing ═══ -->
+  <div class="slide">
+    <div class="logo fade-in">nuMetrix</div>
+    <h2 class="fade-in">The diagnostic lab stays pure.<br>The treatment ward is where humans work.</h2>
+    <div class="pyramid fade-in">
+      <div class="pyramid-layer pyr-1 fade-in">Treatment</div>
+      <div class="pyramid-label fade-in">investigation, resolution, knowledge</div>
+      <div class="pyramid-layer pyr-2 fade-in">Diagnoses</div>
+      <div class="pyramid-label fade-in">root cause identification</div>
+      <div class="pyramid-layer pyr-3 fade-in">Hypotheses</div>
+      <div class="pyramid-label fade-in">business questions with verdicts</div>
+      <div class="pyramid-layer pyr-4 fade-in">Assessments</div>
+      <div class="pyramid-label fade-in">entity health scores</div>
+      <div class="pyramid-layer pyr-5 fade-in">Probes</div>
+      <div class="pyramid-label fade-in">detect symptoms in data</div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      <span class="highlight">From specimen to treatment. The complete lifecycle.</span>
+    </p>
+  </div>
+
+</div>
+
+<div class="brand">nuMetrix</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const sidebar = document.getElementById('sidebar');
+  const counter = document.getElementById('counter');
+  let current = 0;
+
+  const contentTotal = slides.filter(s => !s.classList.contains('breathing')).length;
+
+  // ── Build thumbnail sidebar ──
+  let contentNum = 0;
+  slides.forEach(function(slide, i) {
+    const isBreathing = slide.classList.contains('breathing');
+    if (!isBreathing) contentNum++;
+
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    const inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    const label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = 'nuMetrix';
+    } else {
+      var title = slide.querySelector('h1, h2');
+      var logo = slide.querySelector('.logo');
+      if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      const num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  const thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var num = 0;
+    for (var i = 0; i <= index; i++) {
+      if (!slides[i].classList.contains('breathing')) num++;
+    }
+    counter.textContent = num + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+
+    // Scroll thumbnail into view
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  // ── Keyboard navigation (no auto-advance) ──
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  // Click on main area advances (but not sidebar clicks)
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

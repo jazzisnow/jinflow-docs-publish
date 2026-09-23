@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- UNLISTED, deliberately. This page has a stable public address but is absent
+     from docs/presentations/presentations.yaml, so it does not appear on the
+     presentations index, and noindex keeps it out of search. It is a readable
+     URL to hand to someone, not a published page. To list it: add an entry to
+     the manifest, run scripts/presentationsgen.py, and drop the robots line.
+     Source of record: docs/design/what_is_a_fleet_deck.html — edit there, then re-run
+     scripts/deckpublish.py. -->
+<meta name="robots" content="noindex">
+<title>What Is a Fleet — working deck</title>
+<!-- visibility: public — this file is served at a reachable address
+     (docs.jinflow.io/presentations/, unlisted). Read before you add an
+     example: it is publishable because it argues about SHAPES rather than
+     examples, which is the same reason sense_62_the_fleet.md is internal —
+     that paper's argument leans on a real org chart and this one does not.
+     scripts/deckpublish.py refuses to publish without this line, and refuses
+     again if the text names a private tenant. -->
+<style>
+  :root {
+    --paper:    #f5f6f7;
+    --slab:     #ffffff;
+    --ink:      #171a1e;
+    --ink-soft: #4a545f;
+    --ink-faint:#78838f;
+    --rule:     #d9dee3;
+    --accent:   #9d2f26;   /* reserved: a word doing work it should not */
+    --keep:     #2f5d63;   /* reserved: vocabulary we are keeping */
+    --slab-sh:  0 1px 2px rgba(23,26,30,.05), 0 8px 24px rgba(23,26,30,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:#101317; --slab:#171b20; --ink:#e6e9ec; --ink-soft:#a3adb7;
+      --ink-faint:#7b8691; --rule:#2a3138; --accent:#e0776b; --keep:#7fb3b8;
+      --slab-sh: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#101317; --slab:#171b20; --ink:#e6e9ec; --ink-soft:#a3adb7;
+    --ink-faint:#7b8691; --rule:#2a3138; --accent:#e0776b; --keep:#7fb3b8;
+    --slab-sh: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  }
+  :root[data-theme="light"] {
+    --paper:#f5f6f7; --slab:#ffffff; --ink:#171a1e; --ink-soft:#4a545f;
+    --ink-faint:#78838f; --rule:#d9dee3; --accent:#9d2f26; --keep:#2f5d63;
+    --slab-sh: 0 1px 2px rgba(23,26,30,.05), 0 8px 24px rgba(23,26,30,.05);
+  }
+
+  body {
+    background: var(--paper); color: var(--ink);
+    font: 400 17px/1.62 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    margin: 0; scroll-snap-type: y proximity; scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) { body { scroll-behavior: auto; } }
+
+  .slide {
+    scroll-snap-align: start; min-height: 100vh; box-sizing: border-box;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 6vh clamp(20px, 6vw, 84px); gap: 26px;
+    border-bottom: 1px solid var(--rule); max-width: 1080px; margin: 0 auto;
+  }
+  .eyebrow {
+    font: 600 11.5px/1 ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+    letter-spacing: .17em; text-transform: uppercase; color: var(--ink-faint);
+    display: flex; gap: 14px; align-items: baseline;
+  }
+  .eyebrow b { color: var(--accent); font-weight: 600; }
+  .eyebrow b.keep { color: var(--keep); }
+  h1 { font-size: clamp(38px, 6.4vw, 70px); line-height: 1.04; margin: 0;
+       letter-spacing: -.022em; text-wrap: balance; font-weight: 400; }
+  h2 { font-size: clamp(27px, 3.5vw, 40px); line-height: 1.14; margin: 0;
+       letter-spacing: -.016em; text-wrap: balance; font-weight: 400; }
+  p  { margin: 0; max-width: 64ch; color: var(--ink-soft); }
+  p.lead { font-size: 20px; color: var(--ink); }
+  strong { color: var(--ink); font-weight: 600; }
+  .m { font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+       font-size: .87em; }
+
+  .quote {
+    border-left: 2px solid var(--accent); padding: 4px 0 4px 22px;
+    font-size: 21px; line-height: 1.42; color: var(--ink); max-width: 60ch;
+  }
+  .quote cite { display: block; margin-top: 10px; font: 400 13px/1.4 ui-monospace,
+       Menlo, monospace; color: var(--ink-faint); font-style: normal; }
+
+  .tbl { width: 100%; border-collapse: collapse; font-size: 15px;
+         font-variant-numeric: tabular-nums; }
+  .scroller { overflow-x: auto; }
+  .tbl th {
+    text-align: left; font: 600 11px/1 ui-monospace, Menlo, monospace;
+    letter-spacing: .13em; text-transform: uppercase; color: var(--ink-faint);
+    padding: 0 18px 11px 0; border-bottom: 1px solid var(--rule); white-space: nowrap;
+  }
+  .tbl td { padding: 13px 18px 13px 0; border-bottom: 1px solid var(--rule);
+            vertical-align: top; color: var(--ink-soft); }
+  .tbl td:first-child { color: var(--ink); font-weight: 600; white-space: nowrap; }
+  .tbl tr:last-child td { border-bottom: 0; }
+
+  .cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); }
+  .card { background: var(--slab); border: 1px solid var(--rule); border-radius: 3px;
+          padding: 22px; box-shadow: var(--slab-sh); display: flex;
+          flex-direction: column; gap: 9px; }
+  .card .term { font: 600 15px/1 ui-monospace, Menlo, monospace; color: var(--keep);
+                letter-spacing: .01em; }
+  .card .term.gone { color: var(--accent); text-decoration: line-through;
+                     text-decoration-thickness: 1px; }
+  .card p { font-size: 14.5px; line-height: 1.5; }
+
+  ol.rulings { margin: 0; padding: 0; list-style: none; display: grid; gap: 15px; counter-reset: r; }
+  ol.rulings li { display: grid; grid-template-columns: 30px 1fr; gap: 15px;
+                  padding-bottom: 15px; border-bottom: 1px solid var(--rule); }
+  ol.rulings li:last-child { border-bottom: 0; }
+  ol.rulings li::before {
+    counter-increment: r; content: counter(r);
+    font: 600 12px/1.7 ui-monospace, Menlo, monospace; color: var(--ink-faint);
+  }
+  ol.rulings b { display: block; color: var(--ink); font-weight: 600; font-size: 16.5px; }
+  ol.rulings span { color: var(--ink-soft); font-size: 15px; }
+
+  /* a retired term, inline in prose — the same reading as .term.gone on a card */
+  .retired { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .87em;
+             color: var(--accent); text-decoration: line-through;
+             text-decoration-thickness: 1px; }
+  .flag { display: inline-block; font: 600 10.5px/1 ui-monospace, Menlo, monospace;
+          letter-spacing: .1em; text-transform: uppercase; padding: 4px 8px;
+          border: 1px solid currentColor; border-radius: 2px; color: var(--accent); }
+  .flag.keep { color: var(--keep); }
+  footer { padding: 40px clamp(20px, 6vw, 84px) 64px; max-width: 1080px; margin: 0 auto;
+           color: var(--ink-faint); font: 400 13px/1.6 ui-monospace, Menlo, monospace; }
+</style>
+</head>
+<body>
+<section class="slide">
+  <div class="eyebrow"><span>Working deck &middot; v5</span><b>Decided &amp; open, marked</b><span>2026-09-10</span></div>
+  <h1>What is a fleet?</h1>
+  <p class="lead">Sense&nbsp;62 was written to stop one word doing <strong>two</strong> jobs.
+     It is now doing <strong>four</strong>, and a fifth use arrived last week.</p>
+  <p>This deck is the shared page for Mig, sister&#8209;9 and sister&#8209;1 — the argument so
+     far, the <strong>definition</strong> that arrived, a fixed vocabulary, and what is
+     still open.</p>
+  <p><strong>It is no longer an agenda.</strong> Earlier versions said <em>“nothing here is
+     settled”</em>, which stopped being true the moment the fleet was defined — so the next
+     slide says what is settled and <em>by whose authority</em>, before anything argues.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>01</span><b>Status</b><span>Read this first</span></div>
+  <h2>These were settled by three different authorities</h2>
+  <p>The deck began as an agenda and became a <strong>record</strong> — we have been having
+     the conversation through it and the letters. A record that flags everything equally is
+     doing to its reader exactly what the papers criticised here did to us.</p>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th>Standing</th><th>What</th><th>Where</th></tr></thead>
+    <tbody>
+      <tr><td>Decided by Mig</td>
+          <td>The <strong>register is the boundary</strong> — the definition ·
+              <strong>FLS</strong> as the name · <strong>routing carries
+              <span class="m">{pack, tenant}</span> and nothing else</strong> · <strong>the
+              seam</strong>: the FLS holds what dies with the deployment</td>
+          <td>07 · 10 · 12 · Aug&nbsp;31, Sep&nbsp;8, Sep&nbsp;10</td></tr>
+      <tr><td>Follows from it</td>
+          <td>J3 is an <strong>installation</strong>, not a fleet ·
+              <span class="m">fleet_id</span> retired <em>in its narrow form</em> (slide 11) ·
+              <span class="retired">operator-scoped</span> dropped</td>
+          <td>03 · 06 · 11</td></tr>
+      <tr><td>Decided by us,<br>wants a nod</td>
+          <td><strong>Presences</strong>, not tenants, are what gets registered ·
+              <strong>Cohort · Organisation · Site</strong> ·
+              one FLS per installation, written by <span class="m">jin fleet</span></td>
+          <td>05 · 07 · 08 · the letters</td></tr>
+      <tr><td>Still open</td>
+          <td><strong>Two rulings</strong>, neither blocking. Two of the original four were
+              ruled in September; one of those shipped the same day</td>
+          <td>13</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>The middle row is the one to watch.</strong> Mig defined the fleet; he did not
+     separately rule that J3 is an installation — that <em>follows</em>. A deck that prints a
+     consequence as his ruling is doing the thing we keep catching, so it is printed as a
+     consequence and one nod covers the row. <span class="m">(s9)</span></p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>02</span><span>The method</span></div>
+  <h2>Not “what is a fleet” first — <em>what jobs is the word doing?</em></h2>
+  <p>Define one thing while using it for four and you will define it correctly and keep
+     the confusion. So the jobs come first, and the useful question is which of them
+     actually need the same noun.</p>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th></th><th>The job</th><th>Where</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>J1</td><td>Authority scope — what a fleet&#8209;admin may operate</td>
+          <td class="m">requestCanFleet</td><td>Shipped</td></tr>
+      <tr><td>J2</td><td>Observability object — the population, and where each member lives</td>
+          <td>Sense 62</td><td>Modelled, not built</td></tr>
+      <tr><td>J3</td><td>Credential boundary — key at rest, App key, substrate creds</td>
+          <td>Resolver §9</td><td>Ruled 2026&#8209;08&#8209;11</td></tr>
+      <tr><td>J4</td><td>Address — the thing you broadcast <em>to</em></td>
+          <td>hosts.yml, the footing, the served set, the access policy</td>
+          <td><strong>Shipped four times</strong></td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>J4 was never undefined.</strong> It has existed all along under another word —
+     which is why the address facts sit in four homes today, and any two of them can
+     disagree. <span class="m">(s9)</span></p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>03</span><b>Consequence</b><span>J3</span></div>
+  <h2>A credential boundary is a place. A fleet is not.</h2>
+  <blockquote class="quote">“Anyone running jinflow on their own infrastructure is their
+     <strong>own fleet</strong>.”<cite>Resolver §9 — location-scoped by construction</cite></blockquote>
+  <blockquote class="quote">“Operator-scoped, <strong>not location-scoped</strong>.
+     A <strong>view</strong>, not a place.”<cite>Sense 62 — the definition it contradicts</cite></blockquote>
+  <p class="lead"><strong>A view cannot hold a key.</strong> So this is not a coincidence
+     that will end at the first hybrid customer — it is a category error <em>already</em>,
+     and decidable now.</p>
+  <p><strong>This is no longer a ruling the deck is waiting on.</strong> Once the fleet is
+     the contents of a register, and a register lives somewhere, J3 <em>is</em> the
+     installation — it follows from the definition rather than needing its own decision
+     (slide&nbsp;01). What the slide keeps is the argument, because the argument is what makes
+     the consequence safe to nod at.</p>
+  <p>The consequence was written as: <span class="m">fleet_id</span> goes on every row — as a
+     population it means <em>whose these are</em>, as a deployment <em>where they run</em> — so
+     it should be born an <strong>installation id</strong> rather than renamed once rows exist.
+     <strong>The register definition arrived after that sentence and changes it</strong>, which
+     this deck did not reconcile until Mig caught it: if membership is constituted by being
+     <em>in the book</em>, a column repeating it is constant within a store and becomes a second
+     home for a boundary fact. See slide 11 for the narrow form, and the condition under which
+     the column comes back.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>04</span><span>The three kinds</span></div>
+  <h2>Membership cardinality <em>is</em> the aspect</h2>
+  <p>Three qualifiers on one noun was the signal. The analysis says they were never three
+     flavours of one thing: they differ in what they contain, and in how many of them a
+     tenant can be in at once.</p>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th>Was</th><th>Shape</th><th>A tenant belongs to</th><th>Why it must be so</th></tr></thead>
+    <tbody>
+      <tr><td>ofleet</td><td>a tree</td><td><strong>exactly one</strong> leaf, plus ancestors</td>
+          <td>single parenthood is what makes it an <em>organisation</em> rather than a tagging scheme</td></tr>
+      <tr><td>pfleet</td><td>a tree</td><td><strong>one place per presence</strong> — and a tenant may have several</td>
+          <td>a thing runs <em>somewhere</em>. Two places at once is not one tenant twice; it is two presences</td></tr>
+      <tr><td>lfleet</td><td>a set</td><td><strong>many, overlapping</strong></td>
+          <td>arbitrary by design — the freedom is the point</td></tr>
+    </tbody>
+  </table></div>
+  <p>Two things fall out. Sense 62’s <em>flat vs nested</em> facet split is the wrong axis —
+     two of these are trees and behave nothing alike. And its open question about
+     multi&#8209;presence dissolves: <strong>the tenant is the identity; only presences have
+     a place.</strong></p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>05</span><b>Proposed</b><span>Vocabulary</span></div>
+  <h2>Two of the three already had names. We were shadowing them.</h2>
+  <div class="cards">
+    <div class="card"><span class="term gone">pfleet</span>
+      <p><strong>Site</strong> + <strong>Presence</strong>. Operating Modes already says a
+         Site is where a tenant instance lives. A “pfleet of presences” is just
+         <em>the presences at a site</em>.</p></div>
+    <div class="card"><span class="term gone">ofleet</span>
+      <p><strong>Organisation</strong>. A tree with single parenthood is what that word
+         means. Calling it a fleet added nothing and cost the word its precision.</p></div>
+    <div class="card"><span class="term keep">lfleet → Cohort</span>
+      <p>The only genuinely new thing: a curated, overlapping set. <em>Grouped for a
+         purpose</em> — and “a tenant is in several cohorts” reads naturally.</p></div>
+  </div>
+  <p class="lead">Dropping the kinds <strong>restores</strong> the word: there is one fleet,
+     and the three “kinds” were three <em>classifications over</em> it — which is what
+     Sense 62 called <strong>facets</strong>. What the restored word still lacks is a
+     <em>boundary</em>. The next two slides take the old one away and supply a better one.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>06</span><span>A correction</span></div>
+  <h2>“Operator” was the authority scope in disguise</h2>
+  <p>Sense 62 needed to say a fleet is not defined by <em>where</em>, so it reached for
+     <em>whose</em>. But scoping by an actor <strong>is J1</strong> — the very job the paper
+     opens by insisting we separate from J2.</p>
+  <p class="lead">So the paper says <em>“the word does two jobs — separate them”</em>, then
+     defines the second in terms of the first, under a word chosen so it does not look
+     like it is doing that.</p>
+  <p>Drop it and nothing is lost. What varies by asker is the <strong>view</strong>, and
+     “which tenants may I see?” is already answered, and already shipped.</p>
+  <p><strong>But it takes the boundary with it.</strong> <em>Operator</em> was the only thing
+     bounding “all your tenants, wherever they live.” Without it the fleet means every tenant
+     anywhere that runs jinflow — which is not a set anyone can hold, address, or display.
+     Something has to replace it, or the word does die here.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>07</span><b>Proposed</b><span>The definition</span></div>
+  <h2>The register is the boundary</h2>
+  <blockquote class="quote">“The fleet is defined through all ventures that are
+     <strong>registered</strong> in the fleet store.”<cite>Mig, 2026-08-31</cite></blockquote>
+  <p>Definition by <strong>registration</strong> — the way the word has always worked for
+     ships. A fleet is what is on the register. That answers the slide before it: the fleet is
+     not a view over an unbounded world, it is <strong>the contents of a book</strong>, and the
+     book is a file in a place.</p>
+  <p class="lead">So it does not refine Sense 62’s definition — it <strong>replaces</strong>
+     it. A register lives somewhere, which makes the fleet <strong>installation&#8209;scoped</strong>:
+     the exact opposite of “operator&#8209;scoped, not location&#8209;scoped; a view, not a
+     place.” One of the two has to go, and only one of them can be built.</p>
+  <p><strong>The cost, and it is the dangerous class.</strong> Sense 62 §3.2 requires the roster
+     to stay a <em>projection</em> — a disk scan, never stored, because “a stored projection is
+     a second source of truth.” A register is authoritative. Those two collide head&#8209;on.</p>
+  <p class="lead"><strong>The fix: register presences, not tenants.</strong> A tenant on disk is
+     a fact you <em>discover</em> — store it and you have duplicated the disk. “This
+     installation serves tenant&nbsp;X” is a <em>decision somebody made</em>, and decisions are
+     exactly what a register is for. The book never shadows the scan, and the drift cannot run
+     the dangerous way: an unregistered tenant is not <em>missing from the fleet</em>, it is
+     <strong>not served</strong> — which is both true and safe.</p>
+  <p><span class="flag keep">Proposed name</span> &nbsp; The store becomes the
+     <strong>FLS</strong> — the Fleet Store, sibling to AFS, KLS and OPS. It does not
+     <em>store</em> the fleet; it <strong>constitutes</strong> it.
+     <span class="m">(Mig, 2026-08-31)</span></p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>08</span><b>Proposed</b><span>The installation</span></div>
+  <h2>The book decides who belongs. The reader only decides what it knows.</h2>
+  <p><span class="m">jin serve</span> makes it cheap to run several engines against one book
+     on one machine — which is Mig's question, and the one that turns the definition into
+     something buildable: <strong>how many engines share an FLS?</strong></p>
+  <p class="lead">If the FLS <em>constitutes</em> the fleet, two registers on one machine are
+     two fleets — and an engine cannot be in a fleet it disagrees about. So: <strong>one FLS
+     per installation</strong>. Which finally makes the word pointable rather than
+     hand&#8209;wavy: <strong>an installation is the set of engines that share one FLS.</strong>
+     Defining the abstract term from a file at a path is the right direction — it is what
+     replaces the boundary that <span class="retired">operator</span> took with it.</p>
+  <p><strong>Membership is by the book you <em>write to</em>, not the book you read.</strong>
+     A JinServer on another machine cannot share a file; it reads a replica, and a replica is
+     a <em>copy</em>, not the register. So strictly it is <strong>not a member</strong> — it is
+     a <strong>client</strong> of the installation. And the book loses nothing by it, because
+     the book never recorded <em>engines</em> in the first place: it records
+     <strong>presences</strong> — a tenant, at a site — and a remote JinServer is one of the
+     things that <em>hosts</em> one. No second concept is needed.
+     <span class="m">(s9 — the crack, kept rather than patched; the engine&#8202;/&#8202;presence
+     distinction is s1's)</span></p>
+  <p>And staleness never touches membership: a stale footing makes an engine <em>ignorant</em>,
+     never an ex&#8209;member. That is &sect;11's availability&#8202;/&#8202;exposure split
+     arriving in a third place.</p>
+  <p><span class="flag keep">The writer</span> &nbsp; <strong>Not a daemon.</strong> The fleet
+     tier must degrade to nothing — one grower, one tenant, offline, on a laptop. A component
+     that must be <em>running</em> before an operator can register a tenant makes the tier a
+     prerequisite, which is the one thing it must never be. So <strong>writes go through
+     <span class="m">jin fleet</span> verbs and SQLite/WAL is the lock</strong> — the OPS
+     precedent exactly: human&#8209;paced writes, many readers, one writer. One code rule, not
+     a component: <strong>a write is one transaction</strong>, never a read&#8209;modify&#8209;write
+     spanning process boundaries. It is safe rather than lucky because WAL does not serialise
+     over a network share and <em>does not have to</em> — remote engines never write. The
+     constraint and the mechanism share a boundary, which is worth saying out loud so nobody
+     later &ldquo;improves&rdquo; this by putting the FLS on a share. <span class="m">(s9)</span></p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>09</span><span>J4 — address and delivery</span></div>
+  <h2>The village, and the houses</h2>
+  <blockquote class="quote">“The fleet itself is not tangible for postmen… it’s like a
+     village. But every house in the village gets the message.”<cite>Mig, 2026-08-30</cite></blockquote>
+  <p>An address is a <em>resolvable expression</em>, not an object — so a fleet can be a view
+     and still be addressable. The analogy also splits two things that had been welded
+     together, and the awkward cases then answer themselves:</p>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th></th><th>Is</th><th>Consequence</th></tr></thead>
+    <tbody>
+      <tr><td>The address</td><td>a Cohort, an Organisation, or a Site</td>
+          <td>curated, declared, or computed membership</td></tr>
+      <tr><td>The recipient</td><td>a <strong>presence</strong> — the house</td>
+          <td>a tenant has no inbox. Only a running server receives</td></tr>
+      <tr><td>No presence</td><td>a plot with no house</td>
+          <td>addressed, undeliverable — recorded, never a silent success</td></tr>
+      <tr><td>Two presences</td><td>two houses on one plot</td>
+          <td>both delivered; idempotency is the house’s problem</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>What the analogy does not remove: which village.</strong> An organisation and a
+     cohort can share a name and resolve to different houses — and the operational one
+     (<em>everything running here</em>) looks identical in the grammar to the harmless one.
+     The aspect must be spoken, never inferred. That is not a new rule; it is
+     <strong>P18</strong> applied to blast radius.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>10</span><b class="keep">Ruled &amp; built</b><span>2026-09-08</span></div>
+  <h2>Routing carries <span class="m">{pack, tenant}</span> — and nothing else</h2>
+  <p class="lead">The tenant access policy — <strong>shipped</strong> — moved visibility to the
+     tenant. Its thesis sentence is <em>“the host stops deciding policy,”</em> written because
+     one tenant on two hosts had two personalities. The routing citizen re-created exactly that,
+     and this deck proposed a split: drop <span class="m">public</span>, keep
+     <span class="m">require_auth</span>.</p>
+  <p><strong>The ruling went further, and the second half of our proposal was wrong.</strong>
+     Both fields leave. <span class="m">public</span> because a security bit with three homes
+     eventually fails OPEN — the tenant's access policy and its authored kind already hold it.
+     And <span class="m">require_auth</span> because it gates a host's <em>landing page</em>:
+     what the host does when you arrive with no target. That is not routing at all, so it stays
+     in host config, ships with the image, and never enters the store.</p>
+  <blockquote class="quote">If the same tenant is served by two hosts, must the answer be the
+     same? <strong>Yes → the tenant owns it. No → the host owns it. Routing owns
+     neither.</strong><cite>The test the ruling leaves behind — so the next one is cheap</cite></blockquote>
+  <p><strong>The argument that settled it was one row of the live file, not the doc.</strong>
+     <span class="m">app.jinflow.io</span> and <span class="m">this-is.jinflow.io</span> serve
+     <em>no tenant at all</em> and disagree on <span class="m">require_auth</span>. A flag
+     present where there is no tenant cannot be a tenant property — and is not routing either.
+     <span class="m">(s9 audited the file rather than reasoning from the paper.)</span></p>
+  <p>The consequence lands in §11: with nothing permissive in the footing, <strong>the
+     fail&#8209;CLOSED half is gone</strong> — a stale replica cannot widen access, only make an
+     engine ignorant. Availability, the fail&#8209;OPEN axis, is untouched. Nobody builds a
+     staleness horizon and nobody sets a dial.</p>
+  <p><strong>And the 404 that the type could not express is now a fourth outcome.</strong>
+     <span class="m">Route</span> had two — unknown host, or resolved — so a host pointing at a
+     tenant this installation does not serve printed a <em>healthy row</em> while 404&#8209;ing to
+     everyone, its owner included. It now has four: resolved · unknown&#8209;host (fail&#8209;safe) ·
+     <strong>no&#8209;presence</strong> (loud misconfiguration, counted in the footer) · peer&#8209;link.
+     Against the real host file it flags <strong>seven</strong> hosts. A box that cannot tell
+     reports <em>unknown</em> rather than absence — a guard that cries wolf gets muted.</p>
+  <p><strong>Two stores, specced independently by two papers that did not cite each other.</strong>
+     This deck called it “one build away from the worst available outcome”. Sister&#8209;3's
+     correction is sharper in both directions: <em>overstated</em>, because the seam turned out to
+     be a scope boundary and those do not drift the way taste boundaries do; and
+     <em>understated</em>, because until an organisation carries a declared external reference
+     there is no way to say two installations hold one organisation — and that gap is
+     <strong>invisible rather than loud</strong>. Resolved 2026&#8209;09&#8209;10 (slide 12).</p>
+  <p><strong>Still live: fleet grants in two homes</strong>, shipped in one and proposed again
+     in the other — and the seam gives it a new edge she has flagged rather than ruled: a grant
+     scoped to an <em>org node</em> is durable across a rebuild, a grant scoped to
+     <span class="m">system</span> is authority over <em>one</em> installation. They share a
+     column today and now want different homes.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>11</span><span>Vocabulary</span></div>
+  <h2>The words, once</h2>
+  <p>Every term the deck now relies on, in one place — so the argument can be checked against
+     a fixed vocabulary rather than a drifting one.</p>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th>Term</th><th>Means</th></tr></thead>
+    <tbody>
+      <tr><td>Fleet</td><td>the ventures <strong>registered in the FLS</strong>. Bounded by the
+          register, and therefore enumerable, addressable, and installation&#8209;scoped</td></tr>
+      <tr><td>FLS</td><td>the <strong>Fleet Store</strong> — the register, plus what this
+          installation serves and how it reaches it. Sibling to AFS · KLS · OPS</td></tr>
+      <tr><td>Installation</td><td>one sovereign deployment: its own keys, its own FLS.
+          What Resolver §9 was calling a fleet</td></tr>
+      <tr><td>Tenant</td><td>the isolation atom — a sealed cell. (<em>Venture</em>, parked, is
+          the same atom under a better word)</td></tr>
+      <tr><td>Presence</td><td>a tenant <em>running</em> at a Site. What gets registered, what
+          gets addressed, and the only thing that receives</td></tr>
+      <tr><td>Site</td><td>where presences live — laptop, cloud, bucket</td></tr>
+      <tr><td><strong>Facet</strong></td><td>a <strong>classification over the fleet</strong> —
+          that is, over <strong>the members of one register</strong>. It assigns every member a
+          value; it <em>never connects</em> them. Identified by its <strong>membership
+          cardinality</strong>, not its shape. Its <em>extent</em> is one FLS; whether its
+          <em>content</em> is stored there is the open seam (slide 12)</td></tr>
+      <tr><td>Organisation</td><td>the <strong>exactly&#8209;one</strong> facet — a
+          single&#8209;parent tree. Was <span class="m">ofleet</span></td></tr>
+      <tr><td>Cohort</td><td>the <strong>many, overlapping</strong> facet — a curated set,
+          grouped for a purpose. Was <span class="m">lfleet</span></td></tr>
+      <tr><td>Address</td><td>a <em>resolvable expression</em> naming recipients — not an
+          object. A Cohort, an Organisation, or a Site</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Retired by this deck:</strong> <span class="retired">ofleet</span> ·
+     <span class="retired">pfleet</span> · <span class="retired">lfleet</span> — three
+     cardinalities, not three flavours · <span class="retired">operator-scoped</span> — the
+     authority scope in disguise · <span class="retired">fleet_id</span> — see below.</p>
+  <p><span class="flag keep">Narrowed 2026-09-10</span> &nbsp; <strong>The
+     <span class="m">fleet_id</span> retirement is one sentence, not a slogan:</strong>
+     <em>no row carries the fleet it belongs to — the register constitutes membership.</em> It
+     was never a column; it was a proposal in the resolver (&sect;13, “cheap insurance”), so
+     retiring it means declining to add one. Three things it does <strong>not</strong> mean:
+     facet identifiers stay (an Organisation, a Cohort and a Site each need one — they vary
+     per member, which is the whole point of a facet); a peer link needs none, because the
+     peer-ness lives in the routing <em>target</em>, not in a column on our row; and it is
+     <strong>conditional</strong>. The moment rows from more than one installation share a
+     table — a hosted control plane, or an FLS living in a shared cloud database — the
+     discriminator is needed and its name is <span class="m">installation_id</span>. The
+     decision therefore has a <strong>deadline rather than a verdict</strong>: it must be
+     settled before the FLS writes its first row, not before it is designed. Nothing has
+     written one yet, so deferring still costs nothing today.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>12</span><b class="keep">Ruled</b><span>2026-09-10 · the seam</span></div>
+  <h2>The FLS holds what dies when the deployment dies</h2>
+  <blockquote class="quote">The FLS holds what dies when the deployment dies. The declared map
+     holds what does not.<cite>Mig, 2026-09-10 — the seam between the two stores</cite></blockquote>
+  <p>The question that forced it was <em>are facets limited to one FLS?</em> Their <strong>extent</strong>
+     is — a facet classifies the members of one register — but the things they name outlive any
+     deployment: a group running one installation on&#8209;premises and one in the cloud is
+     <em>one</em> organisation with <em>two</em> registers. So extent and ownership are different
+     questions, and only the first was ever bounded by the store.</p>
+  <p class="lead"><strong>And the reason underneath is better than the test.</strong> Sister&#8209;3
+     re-read her own registry paper rather than answering from memory of it and found the real
+     collision: that paper is scoped <em>per operator</em> — and this deck dropped operator scope.
+     Her store's premise had not been contradicted, it had <strong>dissolved</strong>. Which
+     turns the seam from a judgement into a fact:</p>
+  <blockquote class="quote">The FLS is per&#8209;installation. The declared map spans
+     installations. The seam is a <strong>scope boundary</strong>, and a fact belongs to
+     whichever scope it is <em>true at</em>.<cite>sister-3, 2026-09-10 — and the ruling above is
+     the working heuristic downstream of it</cite></blockquote>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th>Fact</th><th>Dies with the deployment?</th><th>Home</th></tr></thead>
+    <tbody>
+      <tr><td>Routing · the served set</td><td>Yes — rebuild elsewhere and every row is wrong</td>
+          <td class="nw"><strong>FLS</strong></td></tr>
+      <tr><td>Substrate credentials</td><td>Yes — they belong to this deployment's substrate</td>
+          <td class="nw"><strong>FLS</strong></td></tr>
+      <tr><td>Organisations · Cohorts</td><td>No — the same organisation exists on the other
+          side of the rebuild</td><td class="nw">Declared map</td></tr>
+      <tr><td>Grants</td><td>No — but see the caveat</td><td class="nw">Declared map<sup>*</sup></td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Two places this could still bite, named rather than smoothed over.</strong>
+     <sup>*</sup><strong>Grants may already have a third home</strong> — the identity substrate
+     holds who may operate what, so the ruling may make the registry's grant section
+     <em>redundant</em> rather than relocated, which is a better outcome but a different edit.
+     And <strong>Site straddles</strong>: a site outlives a rebuild (the declared map), while
+     the presences at it do not (the FLS). The test still sorts them, but only if you ask it of
+     the presence rather than of the place.</p>
+  <p><strong>Already built on it</strong> <span class="m">(ad8a55f0)</span>. The served set
+     <em>moved</em> — she had proposed it in her own first slice and conceded it: “which ventures
+     does THIS installation serve” is per&#8209;installation by construction. What stayed with the
+     tenant is the <em>rule</em>: <span class="m">showcase</span> resolves through the venture's
+     access policy rather than a <span class="m">how</span> column re&#8209;deciding visibility in a
+     second store. One writer per fact. And if the set must ever survive a rebuild —
+     <strong>re&#8209;derive it, never copy it</strong>; a copy is a second source of truth and the
+     stale one wins whenever the primary is missing.</p>
+  <p><span class="flag keep">Answered by the same letter</span> &nbsp; <em>What identifies a facet
+     value across two installations?</em> Flat facets already do — the vocabulary <em>is</em> the
+     identifier, so <span class="m">commercial=pro</span> means the same in both registers. The
+     org tree did not: its node id is a locally minted surrogate doing a business id's job, so two
+     installations holding the same group had no way to say so. Now <span class="m">org_ref</span>,
+     declared and never inferred, absent meaning distinct.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>13</span><b>Open</b><span>What the deck asks for</span></div>
+  <h2>Two open — and neither is blocking anyone</h2>
+  <p><strong>Ruled 8 September:</strong> routing carries <span class="m">{pack, tenant}</span>
+     and nothing else (slide 10). It was the only one in shipped code, it had held a finished
+     resolver for weeks, and it is now built — the resolver landed with a fourth outcome and
+     §11's fail&#8209;CLOSED half deleted. <strong>The seam was ruled on 10 September</strong>
+     (slide 12). Two remain, and neither is blocking anyone.</p>
+  <ol class="rulings">
+    <li><b>Does a Site hold presences, and routing resolve to one?</b><span>It turns a
+        class of runtime 404 — synced, correct, and served nowhere — into a type error
+        catchable at author time.</span></li>
+    <li><b>Must the aspect be spoken at a broadcast call site?</b><span>Proposed:
+        yes — <span class="m">--cohort</span> / <span class="m">--site</span>, never a bare
+        name.</span></li>
+  </ol>
+  <p><strong>Answered since v2 — a nod, not a ruling.</strong>
+     <strong>J3 is an installation</strong> (a consequence of the definition, not a separate
+     ruling — slide 01) · <strong>the store is the FLS</strong> (Mig's name, now spent
+     throughout) · <strong>the writer</strong> — <span class="m">jin fleet</span> verbs over
+     SQLite/WAL, no daemon · <strong>JinServer's category</strong> — a second element test,
+     amended into <span class="m">the_names.md</span> §1.</p>
+  <p><span class="flag">Deliberately not done</span> &nbsp; <span class="m">fleet_id</span> is
+     <strong>untouched in the code</strong>. Its retirement follows from the definition and this
+     deck says so — but the September ruling was about exposure, and sister&#8209;9 landed what
+     was ruled rather than what she expects to be ruled. In the document that taught us that
+     difference, that is the right call.</p>
+  <p><span class="flag keep">Parked, not dropped</span> &nbsp; <strong>Venture.</strong> When
+     it returns it brings one question: does a venture <em>kind</em> — project, study,
+     tenant — change <strong>isolation</strong>? Lean: no. Kinds are display and policy;
+     isolation is the invariant, or every gate must learn the difference.</p>
+</section>
+
+<footer>
+  Working deck v5 · decided and open, marked separately · Mig × sister-9 × sister-1<br>
+  Source: docs/design/what_is_a_fleet.md · the_fleet_resolver.md · sense_62_the_fleet.md ·
+  the_fleet_registry.md · tenant_access_policy.md · the_served_set.md
+</footer>
+</body>
+</html>
