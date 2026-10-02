@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nuMetrix — The Three Compilers</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --navy: #1a2744;
+    --teal: #2a8f8f;
+    --teal-light: #3bbfbf;
+    --slate: #4a5568;
+    --warm-gray: #6b7280;
+    --light-gray: #f1f5f9;
+    --bg: #fafbfd;
+    --white: #ffffff;
+    --red: #dc2626;
+    --red-soft: #fef2f2;
+    --green: #16a34a;
+    --green-soft: #f0fdf4;
+    --amber: #d97706;
+    --amber-soft: #fffbeb;
+    --purple: #7c3aed;
+    --purple-soft: #f5f3ff;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Layout: sidebar + main ── */
+  .layout {
+    display: flex; width: 100%; height: 100%;
+  }
+
+  .sidebar {
+    width: 180px; min-width: 180px;
+    height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: #1e293b;
+    border-right: 1px solid #334155;
+    padding: 10px 8px;
+    display: flex; flex-direction: column; gap: 6px;
+    z-index: 200;
+    scrollbar-width: thin;
+    scrollbar-color: #475569 #1e293b;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: #1e293b; }
+  .sidebar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+
+  .thumb {
+    position: relative;
+    width: 100%; aspect-ratio: 16/10;
+    border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent;
+    overflow: hidden;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: rgba(42, 143, 143, 0.5); }
+  .thumb.active { border-color: var(--teal); box-shadow: 0 0 8px rgba(42, 143, 143, 0.4); }
+  .thumb.breathing-thumb { background: var(--bg); }
+  .thumb.section-thumb { background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%); }
+
+  .thumb-inner {
+    position: absolute; inset: 0;
+    transform-origin: top left;
+    pointer-events: none;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 4px;
+  }
+
+  .thumb-label {
+    font-size: 6.5px; font-weight: 600;
+    color: var(--navy); text-align: center;
+    line-height: 1.2; overflow: hidden;
+    max-height: 100%;
+    display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  }
+  .thumb.section-thumb .thumb-label { color: var(--white); }
+  .thumb.breathing-thumb .thumb-label { color: var(--teal); opacity: 0.4; font-size: 7px; }
+
+  .thumb-num {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 6px; color: var(--warm-gray); opacity: 0.6;
+  }
+
+  .main-area {
+    flex: 1; position: relative; height: 100%; overflow: hidden;
+  }
+
+  .deck { position: relative; width: 100%; height: 100%; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 7vh 10vw;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+
+  .logo {
+    font-size: clamp(1rem, 1.6vw, 1.3rem);
+    font-weight: 600; letter-spacing: 0.08em;
+    color: var(--teal); text-transform: uppercase;
+    margin-bottom: 2vh;
+  }
+
+  h1 {
+    font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+    font-weight: 700; line-height: 1.15;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2.5vh; max-width: 900px;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 2.8vw, 2.3rem);
+    font-weight: 600; line-height: 1.25;
+    text-align: center; color: var(--navy);
+    margin-bottom: 2vh; max-width: 850px;
+  }
+
+  .subtitle {
+    font-size: clamp(0.95rem, 1.6vw, 1.3rem);
+    font-weight: 300; line-height: 1.6;
+    text-align: center; color: var(--slate);
+    max-width: 720px;
+  }
+
+  .highlight { color: var(--teal); font-weight: 500; }
+  .red { color: var(--red); }
+  .green { color: var(--green); }
+  .amber { color: var(--amber); }
+  .purple { color: var(--purple); }
+
+  .slide .fade-in {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .slide.active .fade-in { opacity: 1; transform: translateY(0); }
+  .slide.active .fade-in:nth-child(1) { transition-delay: 0.3s; }
+  .slide.active .fade-in:nth-child(2) { transition-delay: 0.7s; }
+  .slide.active .fade-in:nth-child(3) { transition-delay: 1.1s; }
+  .slide.active .fade-in:nth-child(4) { transition-delay: 1.5s; }
+  .slide.active .fade-in:nth-child(5) { transition-delay: 1.9s; }
+  .slide.active .fade-in:nth-child(6) { transition-delay: 2.3s; }
+
+  .divider {
+    width: 60px; height: 3px;
+    background: var(--teal);
+    border-radius: 2px; margin: 2vh 0;
+  }
+
+  /* ── Section slide ── */
+  .section-slide {
+    background: linear-gradient(135deg, var(--navy) 0%, #2d3f5e 100%);
+  }
+  .section-slide h2 { color: var(--white); }
+  .section-slide .subtitle { color: rgba(255,255,255,0.6); }
+  .section-slide .logo { color: var(--teal-light); }
+  .section-slide .divider { background: var(--teal-light); }
+
+  /* ── Quote ── */
+  .quote {
+    font-size: clamp(1.3rem, 2.8vw, 2.2rem);
+    font-weight: 300; font-style: italic; line-height: 1.5;
+    text-align: center; color: var(--navy); max-width: 750px;
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    display: flex; align-items: center; justify-content: center;
+    flex-wrap: wrap; gap: 1.5vw; margin-top: 2vh;
+  }
+
+  .flow-box {
+    background: var(--white); border: 2px solid var(--teal);
+    border-radius: 10px; padding: 1.5vh 2vw;
+    font-weight: 600; font-size: clamp(0.82rem, 1.1vw, 1rem);
+    color: var(--navy); text-align: center; min-width: 100px;
+  }
+
+  .flow-box.filled {
+    background: var(--navy); border-color: var(--navy); color: var(--white);
+  }
+
+  .flow-box.teal-filled {
+    background: var(--teal); border-color: var(--teal); color: var(--white);
+  }
+
+  .flow-arrow {
+    font-size: clamp(1.2rem, 2vw, 1.8rem);
+    color: var(--teal); font-weight: 300;
+  }
+
+  /* ── Stat cards ── */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 2vw; max-width: 1000px; width: 100%; margin-top: 2vh;
+  }
+
+  .stat {
+    background: var(--white);
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    border-radius: 12px; padding: 2.5vh 1.5vw;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .stat-num {
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 700; color: var(--teal);
+    line-height: 1; margin-bottom: 0.6vh;
+  }
+
+  .stat-label {
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Code block ── */
+  .code-block {
+    background: var(--navy); color: #e2e8f0;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: clamp(0.68rem, 0.95vw, 0.85rem);
+    line-height: 1.7; padding: 2.5vh 2.5vw;
+    border-radius: 10px; max-width: 800px;
+    width: 100%; margin-top: 2vh; white-space: pre;
+    overflow-x: auto;
+  }
+
+  .code-block .comment { color: #94a3b8; }
+  .code-block .key { color: var(--teal-light); }
+  .code-block .val { color: #fbbf24; }
+  .code-block .str { color: #86efac; }
+
+  /* ── Data table ── */
+  .data-table {
+    width: 100%; max-width: 950px; margin-top: 2vh;
+    border-collapse: collapse;
+    font-size: clamp(0.72rem, 1vw, 0.9rem);
+  }
+
+  .data-table th {
+    background: var(--light-gray);
+    font-weight: 600; text-align: left;
+    padding: 1vh 1.2vw;
+    border-bottom: 2px solid #cbd5e1;
+    color: var(--navy); white-space: nowrap;
+  }
+
+  .data-table th.num { text-align: right; }
+
+  .data-table td {
+    padding: 0.8vh 1.2vw;
+    border-bottom: 1px solid var(--light-gray);
+    vertical-align: top;
+  }
+
+  .data-table td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .data-table td.mono {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.85em;
+  }
+
+  .data-table tr:nth-child(even) { background: #f8fafc; }
+
+  /* ── Card grid ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2vw; max-width: 960px; width: 100%; margin-top: 2vh;
+  }
+
+  .card {
+    background: var(--white); border-radius: 12px;
+    padding: 2.5vh 2vw; text-align: center;
+    border: 1px solid rgba(42, 143, 143, 0.15);
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .card-icon {
+    font-size: clamp(1.8rem, 2.8vw, 2.4rem);
+    margin-bottom: 0.8vh;
+  }
+
+  .card-title {
+    font-size: clamp(0.85rem, 1.15vw, 1rem);
+    font-weight: 600; color: var(--navy); margin-bottom: 0.4vh;
+  }
+
+  .card-desc {
+    font-size: clamp(0.72rem, 0.95vw, 0.85rem);
+    color: var(--warm-gray); line-height: 1.5;
+  }
+
+  /* ── Impact list ── */
+  .impacts {
+    list-style: none; max-width: 750px; width: 100%; margin-top: 1.5vh;
+  }
+
+  .impacts li {
+    font-size: clamp(0.9rem, 1.4vw, 1.15rem);
+    line-height: 1.7; color: var(--navy);
+    padding: 0.7vh 0;
+    border-bottom: 1px solid rgba(42, 143, 143, 0.1);
+    display: flex; align-items: baseline; gap: 0.8rem;
+  }
+  .impacts li:last-child { border-bottom: none; }
+
+  .bullet {
+    display: inline-block; width: 8px; height: 8px; min-width: 8px;
+    border-radius: 50%; margin-top: 0.5em;
+  }
+  .bullet.teal { background: var(--teal); }
+  .bullet.amber { background: var(--amber); }
+  .bullet.purple { background: var(--purple); }
+  .bullet.red { background: var(--red); }
+  .bullet.green { background: var(--green); }
+
+  /* ── Comparison cards ── */
+  .compare {
+    display: flex; gap: 2.5vw; max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .compare-card {
+    flex: 1; border-radius: 12px; padding: 2.5vh 2vw;
+    box-shadow: 0 2px 12px rgba(26, 39, 68, 0.04);
+  }
+
+  .compare-card.good { background: var(--green-soft); border: 1px solid #bbf7d0; }
+  .compare-card.neutral { background: var(--amber-soft); border: 1px solid #fde68a; }
+  .compare-card.info { background: var(--purple-soft); border: 1px solid #c4b5fd; }
+
+  .compare-title {
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
+    font-weight: 600; margin-bottom: 0.8vh;
+  }
+  .compare-card.good .compare-title { color: #166534; }
+  .compare-card.neutral .compare-title { color: #92400e; }
+  .compare-card.info .compare-title { color: #5b21b6; }
+
+  .compare-text {
+    font-size: clamp(0.78rem, 1vw, 0.9rem);
+    color: var(--slate); line-height: 1.5;
+  }
+
+  .compare-text code {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.9em; background: rgba(0,0,0,0.06);
+    padding: 0.1em 0.4em; border-radius: 3px;
+  }
+
+  /* ── Pyramid (dependency stack) ── */
+  .dep-stack {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 0.6vh; margin-top: 2vh; width: 100%; max-width: 700px;
+  }
+
+  .dep-layer {
+    display: flex; align-items: center; justify-content: center;
+    height: clamp(48px, 6.5vh, 62px); border-radius: 8px;
+    font-weight: 600; font-size: clamp(0.82rem, 1.2vw, 1rem);
+    color: var(--white); text-align: center; letter-spacing: 0.03em;
+  }
+
+  .dep-arrow {
+    font-size: clamp(0.9rem, 1.3vw, 1.2rem);
+    color: var(--warm-gray); margin: 0.2vh 0;
+  }
+
+  /* ── Timeline ── */
+  .timeline {
+    display: flex; align-items: flex-start; gap: 0;
+    max-width: 900px; width: 100%; margin-top: 2vh;
+  }
+
+  .tl-phase {
+    flex: 1; text-align: center; position: relative;
+    padding: 0 1vw;
+  }
+
+  .tl-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    margin: 0 auto 1vh; position: relative; z-index: 2;
+  }
+
+  .tl-dot.done { background: var(--teal); }
+  .tl-dot.future { background: var(--warm-gray); border: 2px dashed var(--teal); }
+
+  .tl-phase::before {
+    content: '';
+    position: absolute; top: 6px;
+    left: 0; right: 0;
+    height: 2px; background: rgba(42, 143, 143, 0.2);
+    z-index: 1;
+  }
+
+  .tl-phase:first-child::before { left: 50%; }
+  .tl-phase:last-child::before { right: 50%; }
+
+  .tl-label {
+    font-size: clamp(0.8rem, 1.1vw, 0.95rem);
+    font-weight: 600; color: var(--navy);
+    margin-bottom: 0.4vh;
+  }
+
+  .tl-desc {
+    font-size: clamp(0.65rem, 0.85vw, 0.78rem);
+    color: var(--warm-gray); line-height: 1.4;
+  }
+
+  /* ── Branding + counter ── */
+  .brand {
+    position: absolute; bottom: 2vh; right: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.06em; opacity: 0.5; z-index: 100;
+  }
+
+  .slide-counter {
+    position: absolute; bottom: 2vh; left: 3vw;
+    font-size: clamp(0.65rem, 0.9vw, 0.8rem);
+    font-weight: 500; color: var(--warm-gray);
+    letter-spacing: 0.04em; opacity: 0.5; z-index: 100;
+    transition: opacity 0.6s ease;
+  }
+  .slide-counter.hidden { opacity: 0; }
+
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .slide { padding: 5vh 5vw; }
+    .stats { grid-template-columns: 1fr 1fr; }
+    .compare { flex-direction: column; }
+    .flow { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+    .card-grid { grid-template-columns: 1fr; }
+    .timeline { flex-direction: column; gap: 1.5vh; }
+    .tl-phase::before { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<div class="sidebar" id="sidebar"></div>
+
+<div class="main-area">
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 1: TITLE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide active">
+    <div class="logo fade-in">nuMetrix &middot; Architecture</div>
+    <h1 class="fade-in">The Three Compilers</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      How nuMetrix turns declarative YAML<br>
+      into a complete diagnostic pipeline,<br>
+      explains itself in three languages &mdash;<br>
+      and what the forward compiler makes possible.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 2: THE CORE IDEA -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Core Idea</div>
+    <div class="quote fade-in">
+      Nobody writes SQL.<br>
+      Everybody writes intent.
+    </div>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      A probe is a business question: &ldquo;show me where usage exceeds billing.&rdquo;<br>
+      A hypothesis is a concern: &ldquo;I suspect we have revenue leakage.&rdquo;<br>
+      A diagnosis is an explanation: &ldquo;the billing interface drops weekend transfers.&rdquo;<br><br>
+      Each is expressed as <span class="highlight">YAML</span>. Each is compiled to <span class="highlight">SQL</span>.<br>
+      The compiler handles the plumbing. The author handles the meaning.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 3: THE SHARED PATTERN -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">One Pattern, Three Layers</div>
+    <h2 class="fade-in">Every compiler follows the same architecture</h2>
+    <div class="flow fade-in">
+      <div class="flow-box"><strong>*.yaml</strong><br><small>declarative rules</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>check.py</strong><br><small>validate + cross-ref</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>compile.py</strong><br><small>generate SQL</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>dbt build</strong><br><small>execute per tenant</small></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      <code>--check</code> dry-run on every compiler. Tri-lingual text (DE/EN/FR) throughout.<br>
+      Cross-reference validation: every ID must resolve to an existing file.<br>
+      Deterministic MD5 keys. No hand-written SQL touches the pipeline.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 4: THE NUMBERS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">At a Glance</div>
+    <h2 class="fade-in">44 YAML definitions. 62 generated files. Zero hand-wired SQL.</h2>
+    <div class="stats fade-in">
+      <div class="stat">
+        <div class="stat-num">27</div>
+        <div class="stat-label">Probe YAMLs<br>13 probe types</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">9</div>
+        <div class="stat-label">Hypothesis YAMLs<br>4-status verdicts</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">8</div>
+        <div class="stat-label">Diagnosis YAMLs<br>6 root cause categories</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">62</div>
+        <div class="stat-label">Generated SQL + YML<br>files in dbt</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      Adding a new probe is 30 lines of YAML and a single command.<br>
+      No SQL. No schema file. No platform wiring. The compiler does it all.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 5: SECTION — PROBE COMPILER -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Compiler I</div>
+    <h2 class="fade-in">The Probe Compiler</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">27 YAML definitions &rarr; 56 generated files &rarr; 22 probes + 5 assessments</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 6: WHAT YAML LOOKS LIKE -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Probe YAML</div>
+    <h2 class="fade-in">This is what a probe looks like</h2>
+    <div class="code-block fade-in"><span class="key">probe_id</span>: <span class="val">probe_revenue_leakage</span>
+<span class="key">type</span>: <span class="val">balance</span>
+<span class="key">contract</span>: <span class="str">"gold.v1"</span>
+
+<span class="key">left</span>:
+  <span class="key">entity</span>: <span class="val">CaseMaterialUsage</span>
+  <span class="key">aggregate</span>: <span class="str">"sum(quantity * standard_price)"</span>
+<span class="key">right</span>:
+  <span class="key">entity</span>: <span class="val">BillingEvent</span>
+  <span class="key">aggregate</span>: <span class="str">"sum(billed_amount)"</span>
+
+<span class="key">severity</span>:
+  <span class="key">high</span>: <span class="str">"pct_deviation > 0.30"</span>
+  <span class="key">medium</span>: <span class="str">"pct_deviation > 0.10"</span></div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      No SQL. No table names. Just: <span class="highlight">compare usage value against billing, flag deviations.</span><br>
+      The compiler resolves <code>CaseMaterialUsage</code> to <code>gold_case_material_usage</code> via the contract.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 7: 13 PROBE TYPES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">13 Probe Types</div>
+    <h2 class="fade-in">One DSL, thirteen compilation strategies</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Pattern</th>
+          <th class="num">Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">balance</td><td>Left aggregate vs right aggregate</td><td class="num">2</td></tr>
+        <tr><td class="mono">mandatory_item</td><td>Entity must have required children</td><td class="num">2</td></tr>
+        <tr><td class="mono">distribution_outlier</td><td>Z-score flagging</td><td class="num">1</td></tr>
+        <tr><td class="mono">duplicate</td><td>GROUP BY + HAVING count &gt; 1</td><td class="num">2</td></tr>
+        <tr><td class="mono">ratio</td><td>Numerator / denominator vs expected</td><td class="num">1</td></tr>
+        <tr><td class="mono">trend</td><td>Rolling average drift detection</td><td class="num">1</td></tr>
+        <tr><td class="mono">temporal_sequence</td><td>Event ordering violations</td><td class="num">1</td></tr>
+        <tr><td class="mono">silver_audit</td><td>Validity &amp; activity audits on Silver</td><td class="num">4</td></tr>
+        <tr><td class="mono">entity_filter</td><td>WHERE clause on Gold dimension</td><td class="num">3</td></tr>
+        <tr><td class="mono">enrichment</td><td>Fact aggregate joined to dimension</td><td class="num">2</td></tr>
+        <tr><td class="mono">reconciliation</td><td>Two fact tables, full-outer-join</td><td class="num">1</td></tr>
+        <tr><td class="mono">hand_written</td><td>Companion SQL, YAML for metadata</td><td class="num">3</td></tr>
+        <tr><td class="mono">assessment</td><td>Aggregate probes &rarr; health score</td><td class="num">5</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 8: CONTRACT INDIRECTION -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Contract Indirection</div>
+    <h2 class="fade-in">Probes don't know table names.<br>They know entity names.</h2>
+    <div class="flow fade-in">
+      <div class="flow-box">YAML<br><code>entity: BillingEvent</code></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><code>gold_contract.v1.json</code><br><small>BillingEvent &rarr;<br>gold_billing_events</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled">SQL<br><code>{{ ref('gold_billing_events') }}</code></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      Rename a dbt model? Update the contract. All probes follow automatically.<br>
+      Add a new source system? The contract stays the same &mdash; only Bronze changes.<br>
+      <span class="highlight">The contract is the seam between detection and data.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 9: FINDINGS CONTRACT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Findings Output</div>
+    <h2 class="fade-in">Every probe emits the same 10 columns</h2>
+    <div class="code-block fade-in"><span class="key">finding_id</span>       <span class="comment">-- MD5(probe_id | tenant_id | entity_id | time_bucket)</span>
+<span class="key">tenant_id</span>        <span class="comment">-- which hospital</span>
+<span class="key">probe_id</span>         <span class="comment">-- which detector</span>
+<span class="key">probe_version</span>    <span class="comment">-- reproducibility</span>
+<span class="key">severity</span>         <span class="comment">-- high | medium | low</span>
+<span class="key">entity_type</span>      <span class="comment">-- Case | Material | CostCenter</span>
+<span class="key">entity_id</span>        <span class="comment">-- the affected entity</span>
+<span class="key">time_bucket</span>      <span class="comment">-- month or quarter</span>
+<span class="key">money_at_risk</span>    <span class="comment">-- CHF impact</span>
+<span class="key">evidence</span>         <span class="comment">-- JSON: the proof</span></div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      This is the interface contract. Assessments, hypotheses, and diagnoses<br>
+      all consume this shape. <span class="highlight">Add a new probe and the entire pyramid sees it.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 10: SECTION — HYPOTHESIS COMPILER -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Compiler II</div>
+    <h2 class="fade-in">The Hypothesis Compiler</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">9 business questions &rarr; weighted evidence &rarr; 4-status verdicts</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 11: HYPOTHESIS YAML -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Hypothesis YAML</div>
+    <h2 class="fade-in">A business concern, formalised</h2>
+    <div class="code-block fade-in"><span class="key">hypothesis_id</span>: <span class="val">hyp_revenue_leakage_unbilled</span>
+
+<span class="key">statement</span>:
+  <span class="key">en</span>: <span class="str">"The hospital is losing revenue because materials are used but never billed."</span>
+
+<span class="key">evidence</span>:
+  - <span class="key">probe_id</span>: <span class="val">probe_revenue_leakage</span>
+    <span class="key">role</span>: <span class="val">primary</span>         <span class="comment"># weight 3 — must fire for "confirmed"</span>
+    <span class="key">weight</span>: <span class="val">3</span>
+  - <span class="key">probe_id</span>: <span class="val">probe_missing_mandatory_implants</span>
+    <span class="key">role</span>: <span class="val">supporting</span>      <span class="comment"># weight 2 — strengthens the case</span>
+    <span class="key">weight</span>: <span class="val">2</span>
+
+<span class="key">verdict</span>:
+  <span class="key">thresholds</span>: { <span class="key">confirmed</span>: <span class="val">0.6</span>, <span class="key">plausible</span>: <span class="val">0.3</span> }</div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      The YAML says: <em>these probes are the evidence for this concern.</em><br>
+      The compiler builds the SQL that weighs the evidence and renders a verdict.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 12: EVIDENCE MODEL -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Evidence Roles</div>
+    <h2 class="fade-in">Four roles. Weighted scoring. One verdict.</h2>
+    <div class="card-grid fade-in">
+      <div class="card fade-in">
+        <div class="card-icon" style="color: #6366f1;">P</div>
+        <div class="card-title">Primary</div>
+        <div class="card-desc">Must fire for &ldquo;confirmed&rdquo;. The core evidence. Without it, the hypothesis cannot be proven.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--teal);">S</div>
+        <div class="card-title">Supporting</div>
+        <div class="card-desc">Strengthens the case. More supporting probes firing = higher evidence score.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--warm-gray);">C</div>
+        <div class="card-title">Context</div>
+        <div class="card-desc">Background signal. Not decisive, but adds depth. Low weight.</div>
+      </div>
+      <div class="card fade-in">
+        <div class="card-icon" style="color: var(--red);">&minus;</div>
+        <div class="card-title">Counter</div>
+        <div class="card-desc">Evidence against the hypothesis. If counter probes fire, the score drops. Negative weight.</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Score = <span class="highlight">sum(weight &times; signal &times; direction) / sum(weight)</span><br>
+      Then: confirmed &ge; 0.6, plausible &ge; 0.3, else not observed.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 13: MONOLITHIC OUTPUT -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Compilation Output</div>
+    <h2 class="fade-in">9 hypotheses fold into 2 SQL models</h2>
+    <div class="compare fade-in">
+      <div class="compare-card good">
+        <div class="compare-title">hypothesis_verdicts.sql</div>
+        <div class="compare-text">
+          One monolithic SQL file.<br>
+          3 CTEs per hypothesis: <code>__evidence</code>, <code>__scored</code>, <code>__verdict</code>.<br>
+          Final SELECT: UNION ALL of all verdict CTEs.<br><br>
+          <strong>One row per hypothesis per tenant.</strong><br>
+          Status, evidence score, finding count, CHF at risk.
+        </div>
+      </div>
+      <div class="compare-card info">
+        <div class="compare-title">hypothesis_registry.sql</div>
+        <div class="compare-text">
+          Metadata table.<br>
+          Tri-lingual statements, interpretation templates.<br>
+          Category, audience, probe linkage.<br><br>
+          <strong>Identical across tenants.</strong><br>
+          The human-readable side of each hypothesis.
+        </div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Unlike probes (one SQL per probe), hypotheses compile to a single model.<br>
+      This keeps the dbt DAG simple and the evidence query atomic.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 14: SECTION — DIAGNOSIS COMPILER -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">Compiler III</div>
+    <h2 class="fade-in">The Diagnosis Compiler</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">8 root causes &rarr; conditions + confidence &rarr; structured explanations</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 15: DIAGNOSIS YAML -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Diagnosis YAML</div>
+    <h2 class="fade-in">Why it happened &mdash; in YAML</h2>
+    <div class="code-block fade-in"><span class="key">diagnosis_id</span>: <span class="val">diag_billing_workflow_gap</span>
+<span class="key">hypothesis_id</span>: <span class="val">hyp_revenue_leakage_unbilled</span>
+<span class="key">root_cause_category</span>: <span class="val">process_failure</span>
+
+<span class="key">conditions</span>:                   <span class="comment"># ALL must pass</span>
+  - <span class="key">probe_id</span>: <span class="val">probe_revenue_leakage</span>
+    <span class="key">field</span>: <span class="val">finding_count</span>
+    <span class="key">above</span>: <span class="val">10</span>               <span class="comment"># not isolated</span>
+
+<span class="key">confidence</span>:
+  <span class="key">base</span>: <span class="val">0.70</span>
+  <span class="key">boost_if</span>:                  <span class="comment"># dynamic refinement</span>
+    - <span class="key">probe_id</span>: <span class="val">assessment_case_financial_integrity</span>
+      <span class="key">above</span>: <span class="val">20</span>
+      <span class="key">boost</span>: <span class="val">0.15</span>            <span class="comment"># systematic = higher confidence</span></div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Gate: only fires if the linked hypothesis is <span class="highlight">confirmed</span>.<br>
+      Conditions: pattern-match against evidence probes. All must pass.<br>
+      Confidence: base + dynamic boosts, capped at 1.0.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 16: 4 CTEs PER DIAGNOSIS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Compilation Strategy</div>
+    <h2 class="fade-in">Four CTEs per diagnosis</h2>
+    <div class="flow fade-in">
+      <div class="flow-box"><strong>__hypothesis</strong><br><small>gate: confirmed?</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>__conditions</strong><br><small>all thresholds met?</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>__confidence</strong><br><small>base + boosts</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>__verdict</strong><br><small>emit or skip</small></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      If the hypothesis isn't confirmed: no output. Zero rows.<br>
+      If any condition fails: no output. Zero rows.<br>
+      Only when <em>both</em> gates pass does the diagnosis emit a root cause<br>
+      with a computed confidence score and tri-lingual explanation.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 17: ROOT CAUSE TAXONOMY -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Root Cause Taxonomy</div>
+    <h2 class="fade-in">Six categories. One shared vocabulary.</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Category</th>
+          <th>Meaning</th>
+          <th class="num">Current</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">process_failure</td><td>A workflow step was skipped, delayed, or incorrect</td><td class="num">4</td></tr>
+        <tr><td class="mono">system_failure</td><td>Interface dropped data, mapping stale, sync failed</td><td class="num">1</td></tr>
+        <tr><td class="mono">data_quality</td><td>Missing fields, orphan references, type mismatches</td><td class="num">2</td></tr>
+        <tr><td class="mono">behavioral</td><td>Staff bypass, selective scanning, undocumented workarounds</td><td class="num">0</td></tr>
+        <tr><td class="mono">structural</td><td>Organisational misalignment, taxonomy drift</td><td class="num">1</td></tr>
+        <tr><td class="mono">external</td><td>Regulatory changes, supplier updates, seasonal shifts</td><td class="num">0</td></tr>
+      </tbody>
+    </table>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      8 diagnoses across 4 categories today. <em>Behavioral</em> and <em>external</em> are waiting<br>
+      for real-world deployment where floor knowledge informs the rules.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 18: SECTION — THE DEPENDENCY CHAIN -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Chain</div>
+    <h2 class="fade-in">How the Compilers Stack</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">Each layer trusts the layer below. Each layer adds meaning.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 19: DEPENDENCY STACK -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Dependency Stack</div>
+    <h2 class="fade-in">The pipeline builds bottom-up</h2>
+    <div class="dep-stack fade-in">
+      <div class="dep-layer fade-in" style="width: 35%; background: var(--navy);">Diagnosis Verdicts</div>
+      <div class="dep-arrow fade-in">&uarr; queries</div>
+      <div class="dep-layer fade-in" style="width: 50%; background: #234060;">Hypothesis Verdicts</div>
+      <div class="dep-arrow fade-in">&uarr; queries</div>
+      <div class="dep-layer fade-in" style="width: 65%; background: var(--teal);">Probe Findings (27 models)</div>
+      <div class="dep-arrow fade-in">&uarr; queries</div>
+      <div class="dep-layer fade-in" style="width: 80%; background: #1a7070;">Gold Entities (7 models)</div>
+      <div class="dep-arrow fade-in">&uarr; validated from</div>
+      <div class="dep-layer fade-in" style="width: 90%; background: #155858;">Bronze &rarr; Silver (18 models)</div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      <code>dbt build</code> resolves the DAG automatically.<br>
+      Add a new probe? It flows through hypotheses and diagnoses on the next build.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 20: VALIDATION GUARANTEES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Validation Guarantees</div>
+    <h2 class="fade-in">Compile-time safety at every layer</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet teal"></span><span><strong>Entity references checked.</strong> If a probe YAML says <code>entity: BillingEvent</code> and the contract doesn't have it &mdash; compile fails.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Probe IDs cross-referenced.</strong> If a hypothesis references <code>probe_id: probe_foo</code> and no <code>probes/probe_foo.yaml</code> exists &mdash; compile fails.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Hypothesis IDs cross-referenced.</strong> If a diagnosis references <code>hypothesis_id: hyp_foo</code> and no <code>hypotheses/hyp_foo.yaml</code> exists &mdash; compile fails.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Confidence ranges checked.</strong> Base 0&ndash;1, boosts 0&ndash;0.3, total &le; 1.0. Thresholds: plausible &lt; confirmed &le; 1.</span></li>
+      <li><span class="bullet teal"></span><span><strong>Tri-lingual text required.</strong> Every explanation, interpretation, and recommendation must have EN, DE, and FR.</span></li>
+    </ul>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION — THE REVERSE COMPILER -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Other Direction</div>
+    <h2 class="fade-in">The Reverse Compiler</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">YAML &rarr; human language. The machine explains itself in three languages.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THE GLOSSARY -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Vocabulary</div>
+    <h2 class="fade-in">A curated glossary powers<br>tri-lingual text generation</h2>
+    <div class="code-block fade-in"><span class="comment"># registry_glossary.yaml</span>
+
+<span class="key">entities</span>:
+  <span class="key">Case</span>:         { <span class="key">en</span>: <span class="str">"case"</span>, <span class="key">de</span>: <span class="str">"Fall"</span>, <span class="key">fr</span>: <span class="str">"cas"</span> }
+  <span class="key">BillingEvent</span>: { <span class="key">en</span>: <span class="str">"billing event"</span>, <span class="key">de</span>: <span class="str">"Abrechnungsereignis"</span>, <span class="key">fr</span>: <span class="str">"événement de facturation"</span> }
+  <span class="key">Material</span>:     { <span class="key">en</span>: <span class="str">"material"</span>, <span class="key">de</span>: <span class="str">"Material"</span>, <span class="key">fr</span>: <span class="str">"matériau"</span> }
+
+<span class="key">fields</span>:
+  <span class="key">billed_amount</span>:  { <span class="key">en</span>: <span class="str">"billed amount"</span>, <span class="key">de</span>: <span class="str">"Rechnungsbetrag"</span>, <span class="key">fr</span>: <span class="str">"montant facturé"</span> }
+  <span class="key">standard_price</span>: { <span class="key">en</span>: <span class="str">"standard price"</span>, <span class="key">de</span>: <span class="str">"Standardpreis"</span>, <span class="key">fr</span>: <span class="str">"prix standard"</span> }
+
+<span class="key">derived_fields</span>:
+  <span class="key">money_at_risk</span>:  { <span class="key">en</span>: <span class="str">"money at risk"</span>, <span class="key">de</span>: <span class="str">"Risikobetrag"</span>, <span class="key">fr</span>: <span class="str">"montant à risque"</span> }
+  <span class="key">io_coefficient</span>: { <span class="key">en</span>: <span class="str">"I/O coefficient"</span>, <span class="key">de</span>: <span class="str">"I/O-Koeffizient"</span>, <span class="key">fr</span>: <span class="str">"coefficient I/O"</span> }</div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      Entities, fields, and computed measures &mdash; all named in three languages.<br>
+      <span class="highlight">proberegistry.py</span> reads this glossary and generates text from YAML structure.<br>
+      No LLM. No translation service. Pure code generation.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- THREE REGISTRIES -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Three Registries</div>
+    <h2 class="fade-in">Every compiler outputs a registry table</h2>
+    <table class="data-table fade-in">
+      <thead>
+        <tr>
+          <th>Registry</th>
+          <th>Generator</th>
+          <th>Text Source</th>
+          <th>Content</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="mono">probe_registry</td>
+          <td>proberegistry.py</td>
+          <td><span class="highlight">Auto-generated</span> from YAML structure + glossary, overridable per probe</td>
+          <td>display_name, description, interpretation &times;3 langs</td>
+        </tr>
+        <tr>
+          <td class="mono">hypothesis_registry</td>
+          <td>hypothesiscompile.py</td>
+          <td>Hand-authored in YAML, serialised</td>
+          <td>statement + 4 interpretation templates &times;3 langs</td>
+        </tr>
+        <tr>
+          <td class="mono">diagnosis_registry</td>
+          <td>diagnosiscompile.py</td>
+          <td>Hand-authored in YAML, serialised</td>
+          <td>explanation + recommendation &times;3 langs</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      The probe registry is the most sophisticated &mdash; <span class="highlight">12 type-specific generators</span><br>
+      that synthesise text from the DSL structure. One per probe type.<br>
+      Hypothesis and diagnosis registries serialise hand-authored text &mdash;<br>
+      the compiler packages it, doesn't create it.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- TEMPLATE RESOLUTION -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Runtime Resolution</div>
+    <h2 class="fade-in">Templates become sentences<br>when findings arrive</h2>
+    <div class="code-block fade-in"><span class="comment">── Template (from probe_registry) ──</span>
+<span class="str">"Case {entity_id} shows a gap of {money_at_risk} between
+ material usage and billing ({pct_diff}% of usage unbilled)."</span>
+
+<span class="comment">── Finding row ──</span>
+<span class="key">entity_id</span>:    <span class="val">CASE-2847</span>
+<span class="key">money_at_risk</span>: <span class="val">1'250.00</span>
+<span class="key">evidence</span>:     { <span class="str">"pct_diff"</span>: <span class="str">"14.2"</span> }
+
+<span class="comment">── Rendered in Explorer ──</span>
+<span class="str">"Case CASE-2847 shows a gap of CHF 1'250.00 between
+ material usage and billing (14.2% of usage unbilled)."</span></div>
+    <p class="subtitle fade-in" style="margin-top: 1.5vh;">
+      <code>interpretation.ts</code> resolves <code>{placeholders}</code> from the finding's evidence JSON.<br>
+      Works identically for probe, hypothesis, and diagnosis text.<br>
+      <span class="highlight">One rendering engine. Three registries. Three languages.</span>
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SECTION — THE AMBITION -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide section-slide">
+    <div class="logo fade-in">The Ambition</div>
+    <h2 class="fade-in">The Forward Compiler</h2>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">From natural language to validated YAML. Closing the loop.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 22: REVERSE VS FORWARD -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Two Directions</div>
+    <h2 class="fade-in">We already compile in both directions.<br>Almost.</h2>
+    <div class="compare fade-in">
+      <div class="compare-card good">
+        <div class="compare-title">Reverse compiler (built)</div>
+        <div class="compare-text">
+          3 registries &middot; 42 entries &middot; 3 languages<br><br>
+          YAML &rarr; human-readable text.<br>
+          Glossary-driven auto-generation +<br>
+          hand-authored overrides + runtime resolution.<br><br>
+          <strong>The machine explains itself to humans.</strong>
+        </div>
+      </div>
+      <div class="compare-card neutral">
+        <div class="compare-title">Forward compiler (ambition)</div>
+        <div class="compare-text">
+          Natural language &rarr; YAML.<br><br>
+          &ldquo;Flag materials where usage exceeds billing<br>
+          by more than 30% in any month.&rdquo;<br><br>
+          &rarr; generates <code>probe_*.yaml</code><br><br>
+          <strong>The human tells the machine what to look for.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 23: THE FULL LOOP -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Full Loop</div>
+    <h2 class="fade-in">Natural language in. Findings out.<br>No SQL in between.</h2>
+    <div class="flow fade-in">
+      <div class="flow-box filled"><strong>&ldquo;Flag usage<br>without billing&rdquo;</strong></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>Forward<br>Compiler</strong><br><small>LLM + contracts</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>YAML</strong><br><small>validated probe</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box"><strong>Probe<br>Compiler</strong><br><small>existing pipeline</small></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-box teal-filled"><strong>Findings</strong></div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 3vh;">
+      The forward compiler doesn't replace the probe compiler.<br>
+      It feeds it. The existing validation pipeline catches every error.<br>
+      <span class="highlight">The LLM proposes. The validator disposes.</span>
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 24: WHY IT WORKS -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">Why This Works</div>
+    <h2 class="fade-in">Three reasons the forward compiler<br>is feasible &mdash; not a fantasy.</h2>
+    <ul class="impacts fade-in">
+      <li><span class="bullet green"></span><span><strong>The contract is the guardrail.</strong> The LLM doesn't need to know SQL. It needs to pick entities, fields, and comparisons from a finite, documented vocabulary: <code>gold_contract.v1.json</code>.</span></li>
+      <li><span class="bullet green"></span><span><strong>The DSL is the target.</strong> 13 probe types. Each has a well-defined structure. The LLM generates structured YAML, not freeform code. The search space is bounded.</span></li>
+      <li><span class="bullet green"></span><span><strong>Validation is already built.</strong> <code>probecheck.py</code> catches every invalid entity, missing field, broken reference. The human reviews only probes that pass validation.</span></li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 25: THE WORKFLOW -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">The Workflow</div>
+    <h2 class="fade-in">Human in the loop. Always.</h2>
+    <div class="timeline fade-in">
+      <div class="tl-phase fade-in">
+        <div class="tl-dot done"></div>
+        <div class="tl-label">Describe</div>
+        <div class="tl-desc">Admin describes the concern in natural language. Any language.</div>
+      </div>
+      <div class="tl-phase fade-in">
+        <div class="tl-dot done"></div>
+        <div class="tl-label">Generate</div>
+        <div class="tl-desc">LLM generates candidate YAML using the contract vocabulary.</div>
+      </div>
+      <div class="tl-phase fade-in">
+        <div class="tl-dot done"></div>
+        <div class="tl-label">Validate</div>
+        <div class="tl-desc">probecheck.py validates structure, contracts, and cross-references.</div>
+      </div>
+      <div class="tl-phase fade-in">
+        <div class="tl-dot future"></div>
+        <div class="tl-label">Review</div>
+        <div class="tl-desc">Human reads the YAML, adjusts thresholds, approves or rejects.</div>
+      </div>
+      <div class="tl-phase fade-in">
+        <div class="tl-dot future"></div>
+        <div class="tl-label">Compile</div>
+        <div class="tl-desc">Approved YAML enters the standard pipeline. dbt builds. Findings appear.</div>
+      </div>
+    </div>
+    <p class="subtitle fade-in" style="margin-top: 2vh;">
+      The system <span class="highlight">proposes</span>. The admin <span class="highlight">disposes</span>.<br>
+      No probe reaches production without human approval.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- 26: CLOSING -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <div class="slide">
+    <div class="logo fade-in">nuMetrix</div>
+    <h1 class="fade-in">Three compilers.<br>One pipeline.<br>Zero SQL.</h1>
+    <div class="divider fade-in"></div>
+    <p class="subtitle fade-in">
+      The probe compiler detects.<br>
+      The hypothesis compiler judges.<br>
+      The diagnosis compiler explains.<br>
+      The reverse compiler makes it all human-readable.<br><br>
+      The forward compiler will let anyone ask the question.
+    </p>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="slide breathing">
+    <div class="logo fade-in" style="opacity: 0.3;">nuMetrix</div>
+  </div>
+
+</div>
+
+<div class="brand">nuMetrix</div>
+<div class="slide-counter" id="counter"></div>
+
+</div><!-- /main-area -->
+</div><!-- /layout -->
+
+<script>
+(function() {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const sidebar = document.getElementById('sidebar');
+  const counter = document.getElementById('counter');
+  let current = 0;
+
+  const contentTotal = slides.filter(s => !s.classList.contains('breathing')).length;
+
+  // ── Build thumbnail sidebar ──
+  let contentNum = 0;
+  slides.forEach(function(slide, i) {
+    const isBreathing = slide.classList.contains('breathing');
+    const isSection = slide.classList.contains('section-slide');
+    if (!isBreathing) contentNum++;
+
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+    if (isBreathing) thumb.classList.add('breathing-thumb');
+    if (isSection) thumb.classList.add('section-thumb');
+    if (i === 0) thumb.classList.add('active');
+
+    const inner = document.createElement('div');
+    inner.className = 'thumb-inner';
+
+    const label = document.createElement('div');
+    label.className = 'thumb-label';
+
+    if (isBreathing) {
+      label.textContent = 'nuMetrix';
+    } else {
+      var title = slide.querySelector('h1, h2');
+      var logo = slide.querySelector('.logo');
+      if (title) {
+        label.textContent = title.textContent.trim();
+      } else if (logo) {
+        label.textContent = logo.textContent.trim();
+      }
+    }
+
+    inner.appendChild(label);
+    thumb.appendChild(inner);
+
+    if (!isBreathing) {
+      const num = document.createElement('div');
+      num.className = 'thumb-num';
+      num.textContent = contentNum;
+      thumb.appendChild(num);
+    }
+
+    thumb.addEventListener('click', function(e) {
+      e.stopPropagation();
+      current = i;
+      show(i);
+    });
+
+    sidebar.appendChild(thumb);
+  });
+
+  const thumbs = Array.from(sidebar.querySelectorAll('.thumb'));
+
+  function updateCounter(index) {
+    if (slides[index].classList.contains('breathing')) {
+      counter.classList.add('hidden'); return;
+    }
+    counter.classList.remove('hidden');
+    var num = 0;
+    for (var i = 0; i <= index; i++) {
+      if (!slides[i].classList.contains('breathing')) num++;
+    }
+    counter.textContent = num + ' / ' + contentTotal;
+  }
+
+  function show(index) {
+    slides.forEach(function(s) { s.classList.remove('active'); });
+    slides[index].classList.add('active');
+
+    thumbs.forEach(function(t) { t.classList.remove('active'); });
+    thumbs[index].classList.add('active');
+
+    thumbs[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+    updateCounter(index);
+  }
+
+  function advance() {
+    current = (current + 1) % slides.length;
+    show(current);
+  }
+
+  function back() {
+    current = (current - 1 + slides.length) % slides.length;
+    show(current);
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+      e.preventDefault(); advance();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault(); back();
+    } else if (e.key === 'Home') {
+      e.preventDefault(); current = 0; show(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); current = slides.length - 1; show(current);
+    }
+  });
+
+  document.querySelector('.main-area').addEventListener('click', function(e) {
+    if (e.target.closest('.sidebar')) return;
+    advance();
+  });
+
+  show(0);
+})();
+</script>
+
+</body>
+</html>

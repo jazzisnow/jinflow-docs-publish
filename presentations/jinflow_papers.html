@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- UNLISTED, deliberately. This page has a stable public address but is absent
+     from docs/presentations/presentations.yaml, so it does not appear on the
+     presentations index, and noindex keeps it out of search. It is a readable
+     URL to hand to someone, not a published page. To list it: add an entry to
+     the manifest, run scripts/presentationsgen.py, and drop the robots line.
+     Source of record: docs/design/papers_index.html — edit there, then re-run
+     scripts/deckpublish.py. -->
+<meta name="robots" content="noindex">
+<title>jinflow Papers</title>
+<!-- visibility: public — this file is served at a reachable address
+     (docs.jinflow.io/presentations/, unlisted). Read before you add an
+     example: it is publishable because it argues about SHAPES rather than
+     examples, which is the same reason sense_62_the_fleet.md is internal —
+     that paper's argument leans on a real org chart and this one does not.
+     scripts/deckpublish.py refuses to publish without this line, and refuses
+     again if the text names a private tenant. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap">
+<style>
+  /* The front door. Same palette and faces as the two partner-facing decks, laid
+     out as an index rather than a deck: this page is read standing up. */
+  :root {
+    --paper:#f7f8f8; --slab:#ffffff; --ink:#16202b; --ink-soft:#4a5a68;
+    --ink-faint:#7d8b98; --rule:#dde3e6;
+    --brand:#2a8f8f; --deep:#1a2744; --warn:#a9631f;
+    --slab-sh: 0 1px 2px rgba(22,32,43,.05), 0 8px 22px rgba(22,32,43,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#0d1317; --slab:#141d23; --ink:#e9eff1; --ink-soft:#a2b0ba;
+      --ink-faint:#75858f; --rule:#25313a; --brand:#3bbfbf; --deep:#8fa6c8; --warn:#e0954f;
+      --slab-sh: 0 1px 2px rgba(0,0,0,.45), 0 8px 22px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0d1317; --slab:#141d23; --ink:#e9eff1; --ink-soft:#a2b0ba;
+    --ink-faint:#75858f; --rule:#25313a; --brand:#3bbfbf; --deep:#8fa6c8; --warn:#e0954f;
+    --slab-sh: 0 1px 2px rgba(0,0,0,.45), 0 8px 22px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"] {
+    --paper:#f7f8f8; --slab:#ffffff; --ink:#16202b; --ink-soft:#4a5a68;
+    --ink-faint:#7d8b98; --rule:#dde3e6; --brand:#2a8f8f; --deep:#1a2744; --warn:#a9631f;
+    --slab-sh: 0 1px 2px rgba(22,32,43,.05), 0 8px 22px rgba(22,32,43,.06);
+  }
+
+  body {
+    background: var(--paper); color: var(--ink); margin: 0;
+    font: 400 16.5px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: clamp(40px, 8vh, 84px) clamp(20px, 6vw, 84px) 90px; }
+  .eyebrow {
+    font: 600 11px/1 ui-monospace, "SF Mono", Menlo, monospace;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--ink-faint);
+    display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap; margin-bottom: 22px;
+  }
+  .eyebrow b { color: var(--brand); font-weight: 600; }
+  h1 { font-family: Newsreader, Georgia, serif; font-optical-sizing: auto;
+       font-size: clamp(38px, 5.6vw, 62px); line-height: 1.04; font-weight: 300;
+       letter-spacing: -.02em; margin: 0 0 20px; text-wrap: balance; }
+  h2 { font-family: Newsreader, Georgia, serif; font-optical-sizing: auto;
+       font-size: 25px; font-weight: 400; margin: 0; letter-spacing: -.01em; }
+  p { margin: 0; max-width: 66ch; color: var(--ink-soft); }
+  p.lead { font-size: 19px; color: var(--ink); }
+  strong { color: var(--ink); font-weight: 600; }
+
+  section { margin-top: 54px; }
+  .sechead { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+             padding-bottom: 14px; border-bottom: 1px solid var(--rule); margin-bottom: 22px; }
+  .sechead span { font: 600 10.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .14em;
+                  text-transform: uppercase; color: var(--ink-faint); }
+
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(268px, 1fr)); }
+  .grid.two { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  @media (max-width: 640px) { .grid, .grid.two { grid-template-columns: 1fr; } }
+
+  a.card {
+    display: flex; flex-direction: column; gap: 9px; text-decoration: none;
+    background: var(--slab); border: 1px solid var(--rule); border-radius: 3px;
+    padding: 20px 20px 18px; box-shadow: var(--slab-sh); color: inherit;
+    transition: border-color .14s ease, transform .14s ease, box-shadow .14s ease;
+  }
+  a.card:hover { border-color: var(--brand); transform: translateY(-2px);
+                 box-shadow: 0 2px 4px rgba(22,32,43,.06), 0 14px 30px rgba(22,32,43,.09); }
+  a.card:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { a.card, a.card:hover { transition: none; transform: none; } }
+  a.card .t { font: 400 21px/1.2 Newsreader, Georgia, serif; color: var(--ink); }
+  a.card.big .t { font-size: 26px; }
+  a.card p { font-size: 14.5px; line-height: 1.5; }
+  /* the date/status line sits on the baseline of every card, whatever the blurb
+     length — a recurring element belongs in the same place on each */
+  a.card .meta { margin-top: auto; padding-top: 8px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+                 font: 600 10px/1 ui-monospace, Menlo, monospace; letter-spacing: .11em;
+                 text-transform: uppercase; color: var(--ink-faint); }
+  .chip { display: inline-block; padding: 4px 7px; border: 1px solid currentColor;
+          border-radius: 2px; color: var(--brand); }
+  .chip.internal { color: var(--deep); }
+  .chip.older { color: var(--warn); }
+  .chip.private { color: var(--ink-faint); }
+
+  .note { margin-top: 46px; padding: 20px 22px; border: 1px solid var(--rule);
+          border-left: 3px solid var(--brand); border-radius: 2px; background: var(--slab); }
+  .note p + p { margin-top: 10px; }
+  footer { margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--rule);
+           color: var(--ink-faint); font: 400 13px/1.7 ui-monospace, Menlo, monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow"><span>jinflow · a jazzisnow product</span><b>Papers</b><span>9 September 2026</span></div>
+  <h1>Everything written down, in one place</h1>
+  <p class="lead">jinflow is a declarative analytical engine: you declare what should be
+     detected, and it compiles, runs and packages the answer with its provenance attached.
+     These are the documents that explain it — what it is and why, where it is going, and the
+     arguments still being had.</p>
+  <p style="margin-top:14px">Each entry says how current it is. Anything marked
+     <strong>older</strong> was written before parts of the system changed and may describe a
+     version that no longer exists — a real risk we would rather flag than have you discover.</p>
+
+  <section>
+    <div class="sechead"><h2>Start here</h2><span>Written for a reader outside the project</span></div>
+    <div class="grid two">
+      <a class="card big" href="https://docs.jinflow.io/presentations/jinflow_today.html">
+        <span class="t">jinflow Today</span>
+        <p>Why the engine is shaped the way it is — five design decisions, each answering a
+           specific way analytical software fails — followed by an honest inventory: what is
+           built, what is only specified, and what is wrong this week.</p>
+        <span class="meta"><span class="chip">Current</span> 8 Sept 2026</span>
+      </a>
+      <a class="card big" href="https://docs.jinflow.io/presentations/jinflow_rationale.html">
+        <span class="t">jinflow Rationale</span>
+        <p>Why it should exist at all: who buys it, what they carry instead if they don't,
+           why the timing is now, and what we are asking for — which is partners and early
+           adopters, not capital.</p>
+        <span class="meta"><span class="chip">Current</span> 9 Sept 2026</span>
+      </a>
+      <a class="card big" href="https://docs.jinflow.io/presentations/jinflow_roadmap.html">
+        <span class="t">jinflow Roadmap</span>
+        <p>The capability plan to 31 December: four phases, confidence markers, and a
+           checkable done-when for each. Generated from the team's working plan, and states
+           the security position openly.</p>
+        <span class="meta"><span class="chip">Current</span> 8 Sept 2026</span>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><h2>Working decks</h2><span>Internal arguments, published as they are</span></div>
+    <p style="margin-bottom:20px">These are not pitches. They are the actual decision documents
+       the team argues through — kept because how a decision was reached is often more useful
+       than the decision, and because a reader who wants to know whether the thinking is any
+       good should be able to check.</p>
+    <div class="grid">
+      <a class="card" href="https://docs.jinflow.io/presentations/what_is_a_fleet.html">
+        <span class="t">What Is a Fleet</span>
+        <p>One word doing four jobs, and the argument that ended in a definition: the register
+           is the boundary. Twelve slides, four rulings still open.</p>
+        <span class="meta"><span class="chip internal">Internal</span> v3 · 7 Sept 2026</span>
+      </a>
+      <a class="card" href="https://docs.jinflow.io/presentations/after_the_fleet.html">
+        <span class="t">After the Fleet</span>
+        <p>The four topics next in line — the register, post-data processing, the outward API,
+           and the documentation gap — and the single shift underneath all four.</p>
+        <span class="meta"><span class="chip internal">Internal</span> 8 Sept 2026</span>
+      </a>
+      <a class="card" href="https://claude.ai/code/artifact/26c1a983-a3dc-4033-87d6-5ce1f6aa81e8">
+        <span class="t">The Untyped Third</span>
+        <p>On declaring what a column <em>is</em> — measurement, identifier, category — and what
+           a third of them being untyped actually costs.</p>
+        <span class="meta"><span class="chip private">Private link</span> <span class="chip internal">Internal</span> 30 Aug 2026</span>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><h2>The product, explained</h2><span>Written for particular audiences</span></div>
+    <div class="grid">
+      <a class="card" href="https://docs.jinflow.io/presentations/reproducible_and_measured.html">
+        <span class="t">Reproducible by construction</span>
+        <p>The provenance argument: why a result carries the framework that produced it, and
+           what that makes possible years later.</p>
+        <span class="meta"><span class="chip older">Older</span> 11 Aug 2026</span>
+      </a>
+      <a class="card" href="https://docs.jinflow.io/presentations/intro_for_scientists.html">
+        <span class="t">An introduction for scientists</span>
+        <p>The same engine described for research use — declared analyses, typed measurements,
+           and a store you can cite.</p>
+        <span class="meta"><span class="chip older">Older</span> 11 Aug 2026</span>
+      </a>
+      <a class="card" href="https://docs.jinflow.io/presentations/aeros_capabilities_and_outlook.html">
+        <span class="t">Capabilities &amp; outlook — aeros</span>
+        <p>What the engine does on open environmental data, and where the air-quality work is
+           heading.</p>
+        <span class="meta"><span class="chip older">Older</span> 11 Aug 2026</span>
+      </a>
+      <a class="card" href="https://docs.jinflow.io/presentations/hope_for_datadesk_expats.html">
+        <span class="t">Hope for DataDesk expats</span>
+        <p>For people arriving from a dashboard tool: what transfers, what does not, and why the
+           difference is the point.</p>
+        <span class="meta"><span class="chip older">Older</span> 11 Aug 2026</span>
+      </a>
+    </div>
+  </section>
+
+  <section>
+    <div class="sechead"><h2>Worked examples</h2><span>The engine on real, open data</span></div>
+    <div class="grid">
+      <a class="card" href="https://claude.ai/code/artifact/cfb30d7e-61fa-4a43-80d1-a973d8cab282">
+        <span class="t">aura — field manual</span>
+        <p>The alpine air-quality showcase end to end: the data, the analyses, and how to read
+           what comes out.</p>
+        <span class="meta"><span class="chip private">Private link</span> <span class="chip older">Older</span> 13 Aug 2026</span>
+      </a>
+      <a class="card" href="https://claude.ai/code/artifact/04674ebd-b6f5-4096-8757-3468b9a2d6b7">
+        <span class="t">Aerosol sources at Jungfraujoch</span>
+        <p>An illustrative source apportionment — the shape of analysis the engine cannot yet run
+           itself, and the reason processors beyond SQL are on the plan.</p>
+        <span class="meta"><span class="chip private">Private link</span> <span class="chip older">Older</span> 8 Aug 2026</span>
+      </a>
+      <a class="card" href="https://claude.ai/code/artifact/a5c546cc-2935-47af-9ce6-a3c86a4b1757">
+        <span class="t">The Courses — gridland</span>
+        <p>An early sketch of post-data processing on electricity-grid data. Superseded in
+           vocabulary, kept for the thinking.</p>
+        <span class="meta"><span class="chip private">Private link</span> <span class="chip older">Older</span> 26 Jul 2026</span>
+      </a>
+    </div>
+  </section>
+
+  <div class="note">
+    <p><strong>A note on access.</strong> Most of these have a stable public address on
+       <span style="white-space:nowrap">docs.jinflow.io</span> and open for anyone holding the
+       link. Four are marked <em>private link</em>: those live only as working documents and
+       will ask for permission. That is the system working, not a broken link.</p>
+    <p><strong>A note on candour.</strong> Two of these documents state what is currently broken,
+       including findings from a security review we ran against ourselves and have not yet
+       finished repairing. That is intentional. A product with nothing to report has not been
+       looked at.</p>
+  </div>
+
+  <footer>
+    jinflow · a jazzisnow product · index compiled 9 September 2026<br>
+    The two current documents are generated from the team's working plan; when they disagree,
+    the plan wins and the documents are rewritten.
+  </footer>
+</div>
+</body>
+</html>

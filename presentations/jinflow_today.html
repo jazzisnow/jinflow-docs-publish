@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- UNLISTED, deliberately. This page has a stable public address but is absent
+     from docs/presentations/presentations.yaml, so it does not appear on the
+     presentations index, and noindex keeps it out of search. It is a readable
+     URL to hand to someone, not a published page. To list it: add an entry to
+     the manifest, run scripts/presentationsgen.py, and drop the robots line.
+     Source of record: docs/design/today_deck.html — edit there, then re-run
+     scripts/deckpublish.py. -->
+<meta name="robots" content="noindex">
+<title>jinflow Today</title>
+<!-- visibility: public — this file is served at a reachable address
+     (docs.jinflow.io/presentations/, unlisted). Read before you add an
+     example: it is publishable because it argues about SHAPES rather than
+     examples, which is the same reason sense_62_the_fleet.md is internal —
+     that paper's argument leans on a real org chart and this one does not.
+     scripts/deckpublish.py refuses to publish without this line, and refuses
+     again if the text names a private tenant. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap">
+<style>
+  /* Outward pair with roadmap_deck.html — same palette, same faces, so the two
+     read as one set. Three states again: built · specced · wrong-right-now. */
+  :root {
+    --paper:#f7f8f8; --slab:#ffffff; --ink:#16202b; --ink-soft:#4a5a68;
+    --ink-faint:#7d8b98; --rule:#dde3e6;
+    --brand:#2a8f8f; --deep:#1a2744; --bet:#a9631f;
+    --slab-sh: 0 1px 2px rgba(22,32,43,.05), 0 10px 28px rgba(22,32,43,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#0d1317; --slab:#141d23; --ink:#e9eff1; --ink-soft:#a2b0ba;
+      --ink-faint:#75858f; --rule:#25313a; --brand:#3bbfbf; --deep:#8fa6c8; --bet:#e0954f;
+      --slab-sh: 0 1px 2px rgba(0,0,0,.45), 0 10px 28px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0d1317; --slab:#141d23; --ink:#e9eff1; --ink-soft:#a2b0ba;
+    --ink-faint:#75858f; --rule:#25313a; --brand:#3bbfbf; --deep:#8fa6c8; --bet:#e0954f;
+    --slab-sh: 0 1px 2px rgba(0,0,0,.45), 0 10px 28px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"] {
+    --paper:#f7f8f8; --slab:#ffffff; --ink:#16202b; --ink-soft:#4a5a68;
+    --ink-faint:#7d8b98; --rule:#dde3e6; --brand:#2a8f8f; --deep:#1a2744; --bet:#a9631f;
+    --slab-sh: 0 1px 2px rgba(22,32,43,.05), 0 10px 28px rgba(22,32,43,.06);
+  }
+
+  body {
+    background: var(--paper); color: var(--ink); margin: 0;
+    font: 400 16.5px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+    scroll-snap-type: y proximity; scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) { body { scroll-behavior: auto; } }
+  .slide {
+    scroll-snap-align: start; min-height: 100vh; box-sizing: border-box;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 7vh clamp(20px, 6vw, 88px); gap: 28px;
+    border-bottom: 1px solid var(--rule); max-width: 1100px; margin: 0 auto;
+  }
+  .eyebrow {
+    font: 600 11px/1 ui-monospace, "SF Mono", Menlo, monospace;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--ink-faint);
+    display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+  }
+  .eyebrow b { color: var(--brand); font-weight: 600; }
+  .eyebrow b.warn { color: var(--bet); }
+  h1, h2 { font-family: Newsreader, Georgia, "Times New Roman", serif;
+           font-optical-sizing: auto; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(40px, 6.4vw, 72px); line-height: 1.03; font-weight: 300;
+       letter-spacing: -.02em; }
+  h2 { font-size: clamp(26px, 3.4vw, 39px); line-height: 1.14; font-weight: 400;
+       letter-spacing: -.012em; }
+  p { margin: 0; max-width: 66ch; color: var(--ink-soft); }
+  p.lead { font-size: 19px; color: var(--ink); }
+  strong { color: var(--ink); font-weight: 600; }
+  .m { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .87em; }
+
+  .spine {
+    border-left: 3px solid var(--brand); padding: 6px 0 6px 24px;
+    font: 300 clamp(21px, 2.5vw, 28px)/1.35 Newsreader, Georgia, serif;
+    color: var(--ink); max-width: 46ch;
+  }
+
+  .tbl { width: 100%; border-collapse: collapse; font-size: 15px;
+         font-variant-numeric: tabular-nums; }
+  .scroller { overflow-x: auto; }
+  .tbl th { text-align: left; font: 600 10.5px/1 ui-monospace, Menlo, monospace;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint);
+    padding: 0 18px 11px 0; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  .tbl td { padding: 13px 18px 13px 0; border-bottom: 1px solid var(--rule);
+            vertical-align: top; color: var(--ink-soft); }
+  .tbl td:first-child { color: var(--ink); font-weight: 600; }
+  .tbl tr:last-child td { border-bottom: 0; }
+  .tbl td.nw { white-space: nowrap; }
+
+  .why { display: grid; gap: 17px; grid-template-columns: repeat(auto-fit, minmax(232px, 1fr)); }
+  @media (max-width: 760px) { .why { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 470px) { .why { grid-template-columns: 1fr; } }
+  .w { background: var(--slab); border: 1px solid var(--rule); border-radius: 2px;
+       padding: 20px; box-shadow: var(--slab-sh); display: flex;
+       flex-direction: column; gap: 9px; }
+  .w .h { font: 400 19px/1.22 Newsreader, Georgia, serif; color: var(--ink); }
+  .w .k { font: 600 10px/1 ui-monospace, Menlo, monospace; letter-spacing: .14em;
+          text-transform: uppercase; color: var(--brand); }
+  .w p { font-size: 14px; line-height: 1.5; }
+
+  .chip { display: inline-block; font: 600 10px/1 ui-monospace, Menlo, monospace;
+          letter-spacing: .1em; text-transform: uppercase; padding: 4px 7px;
+          border: 1px solid currentColor; border-radius: 2px; color: var(--brand); }
+  .chip.bet { color: var(--bet); }
+
+  ul.plain { margin: 0; padding: 0; list-style: none; display: grid; gap: 11px; max-width: 68ch; }
+  ul.plain li { padding-left: 20px; position: relative; color: var(--ink-soft); font-size: 15.5px; }
+  ul.plain li::before { content: ""; position: absolute; left: 0; top: .62em;
+    width: 7px; height: 7px; background: var(--brand); border-radius: 50%; }
+  ul.plain li.warn::before { background: var(--bet); }
+
+  footer { padding: 44px clamp(20px, 6vw, 88px) 70px; max-width: 1100px; margin: 0 auto;
+           color: var(--ink-faint); font: 400 13px/1.7 ui-monospace, Menlo, monospace; }
+</style>
+</head>
+<body>
+<section class="slide">
+  <div class="eyebrow"><span>jinflow · a jazzisnow product</span><b>The reasoning &amp; the state</b><span>2026-09-08</span></div>
+  <h1>Why it is shaped this way</h1>
+  <p class="lead">The companion to the roadmap. That one says where this is going; this one says
+     <strong>why it is built the way it is</strong>, and then gives an honest inventory of what
+     exists — including the parts that are only specified, and the parts that are wrong today.</p>
+  <p>Five design decisions do most of the work. They were not taken for elegance: each is a
+     response to a way that analytical software usually fails.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>01</span><span>The problem</span></div>
+  <h2>The gap is never “what happened”. It is “why, and what do I do”.</h2>
+  <p class="lead">Organisations sit on data they do not understand. A hospital's supply chain
+     leaks revenue. A freight forwarder loses sight of a shipment between checkpoints. A law
+     firm bills hours it cannot trace. The data exists. The questions exist.</p>
+  <div class="spine">What is missing is a systematic way to get from <em>“something looks
+     wrong”</em> to <em>“here is why, and here is what to do about it.”</em></div>
+  <p><strong>Dashboards do not close that gap; they widen it.</strong> A dashboard answers one
+     question and raises three, and the three are asked of a person who then writes a query by
+     hand. The knowledge earned that way lives in that person, and leaves with them. Every
+     decision below follows from refusing that outcome.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>02</span><span>The reasoning</span></div>
+  <h2>Five decisions, each answering a specific failure</h2>
+  <div class="why">
+    <div class="w"><span class="k">Declare</span><span class="h">A question is a declaration, not code</span>
+      <p>You write what should be detected — in a short, reviewable file. The engine compiles it
+         to SQL and runs it. <strong>Fails otherwise:</strong> hand-written queries nobody can
+         audit, re-derived per customer.</p></div>
+    <div class="w"><span class="k">Escalate</span><span class="h">Signal → thesis → verdict</span>
+      <p>An observation, then <em>is this systematic?</em>, then <em>why</em> — ending in a
+         recommendation with its evidence attached. <strong>Fails otherwise:</strong> alerts that
+         say a number is red and nothing else.</p></div>
+    <div class="w"><span class="k">Attribute</span><span class="h">Expert knowledge is a first-class citizen</span>
+      <p>What the veteran knows — the workaround, the system quirk, the event that explains the
+         data — is captured with its author, its scope and its <em>why</em>.
+         <strong>Fails otherwise:</strong> institutional memory leaves with the person.</p></div>
+    <div class="w"><span class="k">Contain</span><span class="h">One portable store, carrying its own framework</span>
+      <p>Every build produces a single file holding the data, the findings and the framework that
+         produced them. Freeze it, send it, open it years later.
+         <strong>Fails otherwise:</strong> a result nobody can reproduce.</p></div>
+    <div class="w"><span class="k">Stay put</span><span class="h">The data does not have to move</span>
+      <p>Each customer is a sealed cell, and the same product runs on a laptop, behind a private
+         tunnel, or in the cloud — <em>your data, your machine, their browser</em>.
+         <strong>Fails otherwise:</strong> sensitive data uploaded because the tool demanded it.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>03</span><span>The commercial shape</span></div>
+  <h2>Packs make expertise reusable — and we say the awkward part out loud</h2>
+  <p>A <strong>domain pack</strong> is a whole analytical framework for a field: the data
+     contract, the extractors, twenty-odd signals, theses, and a catalogue of expert knowledge.
+     Ten exist — hospital material flow, workforce, agriculture, air quality, the electricity
+     grid, freshwater, wine, legal, logistics, alpine operations. Installing one gives a new
+     customer a working framework on day one.</p>
+  <p class="lead"><strong>And then the honest part, which is on our public site in these
+     words:</strong> <em>the pack is a head start; the analysis is the work.</em> Fitting the
+     framework to this customer's data, calibrating the signals, capturing what their people
+     know — that is the first month, and it is analytical work, not configuration.</p>
+  <p>We lead with that because it is true, and because the flexibility that makes it necessary is
+     exactly what a dashboard product cannot offer. It also sets an honest expectation about
+     where the effort goes, before anyone signs anything.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>04</span><b>Built</b><span>The inventory</span></div>
+  <h2>What exists and runs today</h2>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th>Layer</th><th>What is built</th></tr></thead>
+    <tbody>
+      <tr><td>Ingestion</td><td>a declared extraction contract — every source file listed,
+          hash-pinned, verified on each run, appended to an audit log. Four source systems
+          including two hospital ERPs</td></tr>
+      <tr><td>The pipeline</td><td>structure → domain truth → the product contract, with invalid
+          rows flagged rather than dropped, and quality itself queryable</td></tr>
+      <tr><td>The diamond</td><td>signals, perspectives, theses and verdicts — all declared,
+          compiled and running, in three languages</td></tr>
+      <tr><td>Knowledge</td><td>attributed expert knowledge and curated dossiers, with optional
+          executable checks that confirm or contradict what an expert asserted</td></tr>
+      <tr><td>Typing</td><td>every published column declares what it <em>is</em> — quantity,
+          identifier, category, instant — against hosted external standards</td></tr>
+      <tr><td>Surfaces</td><td>a browser workbench, a command line, and a sovereign proxy mode;
+          guided tours that verify their own claims against the data they narrate</td></tr>
+      <tr><td>Operations</td><td>identity and passes, per-tenant access policy, a per-tenant
+          operational store that outlives every rebuild, live run streaming, notes and alerts</td></tr>
+      <tr><td>Distribution</td><td>a cloud deployment serving eleven tenants, and a signed macOS
+          application a customer can double-click</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Real data has been through all of it</strong> — including a Swiss hospital group's
+     anonymised ERP export and a cantonal agriculture dataset — not only the synthetic showcases.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>05</span><b>Specified</b><span>Designed, not built</span></div>
+  <h2>What is written down but not yet running</h2>
+  <p>Each of these has a specification, an author and an argument behind it. None of them has
+     code. They are listed because a roadmap you cannot audit is a wish list:</p>
+  <ul class="plain">
+    <li><strong>The register.</strong> A machine-readable statement of which customers an
+        installation serves. Today that is a disk scan plus knowledge in one person's head.</li>
+    <li><strong>Extending a store in place.</strong> Answer a new question against an existing
+        knowledge store without re-running the customer's pipeline — which is also the only way
+        it can work in the cloud, where the raw data never goes.</li>
+    <li><strong>The outward contract, served.</strong> One contract, many transports — including
+        <strong>MCP</strong>, so an AI agent is a first-class caller rather than a bolt-on. The
+        protocol decision is made; nothing is served yet.</li>
+    <li><strong>Processors beyond SQL.</strong> Heavier analysis — source apportionment on air
+        quality is the first candidate — placed on top of the settled data like inserts on a
+        recording, each emitting its own dataset and never mutating what came before.</li>
+  </ul>
+  <p>The line between this slide and the last one is the whole reason both exist. Ambiguity about
+     which side something sits on is how technical roadmaps mislead people.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>06</span><b class="warn">Wrong right now</b><span>Stated deliberately</span></div>
+  <h2>What we know is broken, this week</h2>
+  <ul class="plain">
+    <li class="warn"><strong>29 findings from our own adversarial review</strong> — 7 critical, 15
+        of them security — with a scheduled lockout at the end of September and the highest-value
+        mitigation already going in. It was postponed on the reasoning that there are no customers
+        and therefore no customer data at stake.</li>
+    <li class="warn"><strong>Parts of the public documentation are older than the system.</strong>
+        One page still describes a cloud design as forthcoming. It shipped. A stranger reading us
+        today meets a version of jinflow that no longer exists.</li>
+    <li class="warn"><strong>Some shipped paths have never been run end to end</strong> against
+        the real thing — they typecheck, they are plausible, and that is not the same as
+        verified. Fixing that is a discipline change, not a feature.</li>
+    <li class="warn"><strong>The probe that exists to detect a bad deployment was itself blind
+        for weeks</strong> — it reported a placeholder instead of the running version. Found and
+        fixed this week; it goes live on the next deploy.</li>
+  </ul>
+  <p class="lead">This slide is here on purpose. Every product has one; most do not publish it,
+     and the ones that cannot write it are the ones to worry about.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>07</span><span>Where that leaves us</span></div>
+  <h2>A working system, an honest gap, and a plan with dates</h2>
+  <p class="lead">jinflow is seven months old, in production, serving eleven tenants, released
+     twenty-one times in the last thirty days — and has <strong>no customers</strong>. Everything
+     above is either how that gets closed or why it was worth building first.</p>
+  <p>What the reasoning buys, if it holds: a new question is a declaration rather than a project;
+     the answer arrives with its provenance attached; the knowledge stays with the organisation
+     rather than the analyst; and the data never has to leave the building for any of it.</p>
+  <p><strong>The plan for the next sixteen weeks is a separate document</strong>, with phases,
+     dates, confidence markers and a done-when for each — and it names the one thing that
+     depends on somebody who is not us: a first design partner with a real dataset and a real
+     question.</p>
+</section>
+
+<footer>
+  jinflow · a jazzisnow product · the reasoning and the state, 8 September 2026<br>
+  Companion to the roadmap (8 Sept — 31 Dec). Source: docs/ROADMAP.md and the design record.<br>
+  No commercial claims are made or implied.
+</footer>
+</body>
+</html>
