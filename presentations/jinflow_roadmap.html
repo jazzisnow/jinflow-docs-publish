@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- UNLISTED, deliberately. This page has a stable public address but is absent
+     from docs/presentations/presentations.yaml, so it does not appear on the
+     presentations index, and noindex keeps it out of search. It is a readable
+     URL to hand to someone, not a published page. To list it: add an entry to
+     the manifest, run scripts/presentationsgen.py, and drop the robots line.
+     Source of record: docs/design/roadmap_deck.html — edit there, then re-run
+     scripts/deckpublish.py. -->
+<meta name="robots" content="noindex">
+<title>jinflow Roadmap</title>
+<!-- visibility: public — this file is served at a reachable address
+     (docs.jinflow.io/presentations/, unlisted). Read before you add an
+     example: it is publishable because it argues about SHAPES rather than
+     examples, which is the same reason sense_62_the_fleet.md is internal —
+     that paper's argument leans on a real org chart and this one does not.
+     scripts/deckpublish.py refuses to publish without this line, and refuses
+     again if the text names a private tenant. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap">
+<style>
+  /* Outward-facing, so it wears the product's own colours rather than the
+     working decks': teal #2a8f8f and navy #1a2744 are the site's accents.
+     Three semantic states, and they mean exactly what the roadmap file means:
+     live (running now) · building (scheduled, owner named) · bet (needs a
+     decision or a person we do not have). */
+  :root {
+    --paper:#f7f8f8; --slab:#ffffff; --ink:#16202b; --ink-soft:#4a5a68;
+    --ink-faint:#7d8b98; --rule:#dde3e6;
+    --brand:#2a8f8f; --deep:#1a2744; --bet:#a9631f;
+    --slab-sh: 0 1px 2px rgba(22,32,43,.05), 0 10px 28px rgba(22,32,43,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#0d1317; --slab:#141d23; --ink:#e9eff1; --ink-soft:#a2b0ba;
+      --ink-faint:#75858f; --rule:#25313a;
+      --brand:#3bbfbf; --deep:#8fa6c8; --bet:#e0954f;
+      --slab-sh: 0 1px 2px rgba(0,0,0,.45), 0 10px 28px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0d1317; --slab:#141d23; --ink:#e9eff1; --ink-soft:#a2b0ba;
+    --ink-faint:#75858f; --rule:#25313a;
+    --brand:#3bbfbf; --deep:#8fa6c8; --bet:#e0954f;
+    --slab-sh: 0 1px 2px rgba(0,0,0,.45), 0 10px 28px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"] {
+    --paper:#f7f8f8; --slab:#ffffff; --ink:#16202b; --ink-soft:#4a5a68;
+    --ink-faint:#7d8b98; --rule:#dde3e6;
+    --brand:#2a8f8f; --deep:#1a2744; --bet:#a9631f;
+    --slab-sh: 0 1px 2px rgba(22,32,43,.05), 0 10px 28px rgba(22,32,43,.06);
+  }
+
+  body {
+    background: var(--paper); color: var(--ink); margin: 0;
+    font: 400 16.5px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+    scroll-snap-type: y proximity; scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) { body { scroll-behavior: auto; } }
+
+  .slide {
+    scroll-snap-align: start; min-height: 100vh; box-sizing: border-box;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 7vh clamp(20px, 6vw, 88px); gap: 28px;
+    border-bottom: 1px solid var(--rule); max-width: 1100px; margin: 0 auto;
+  }
+  .eyebrow {
+    font: 600 11px/1 ui-monospace, "SF Mono", Menlo, monospace;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--ink-faint);
+    display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+  }
+  .eyebrow b { color: var(--brand); font-weight: 600; }
+  h1, h2 { font-family: Newsreader, Georgia, "Times New Roman", serif;
+           font-optical-sizing: auto; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(40px, 6.4vw, 72px); line-height: 1.03; font-weight: 300;
+       letter-spacing: -.02em; }
+  h2 { font-size: clamp(26px, 3.4vw, 39px); line-height: 1.14; font-weight: 400;
+       letter-spacing: -.012em; }
+  p { margin: 0; max-width: 66ch; color: var(--ink-soft); }
+  p.lead { font-size: 19px; color: var(--ink); }
+  strong { color: var(--ink); font-weight: 600; }
+  .m { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .87em; }
+
+  .spine {
+    border-left: 3px solid var(--brand); padding: 6px 0 6px 24px;
+    font: 300 clamp(21px, 2.5vw, 28px)/1.35 Newsreader, Georgia, serif;
+    color: var(--ink); max-width: 30ch;
+  }
+  .spine.wide { max-width: 46ch; }
+
+  .tbl { width: 100%; border-collapse: collapse; font-size: 15px;
+         font-variant-numeric: tabular-nums; }
+  .scroller { overflow-x: auto; }
+  .tbl th { text-align: left; font: 600 10.5px/1 ui-monospace, Menlo, monospace;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint);
+    padding: 0 18px 11px 0; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  .tbl td { padding: 14px 18px 14px 0; border-bottom: 1px solid var(--rule);
+            vertical-align: top; color: var(--ink-soft); }
+  .tbl td:first-child { color: var(--ink); font-weight: 600; }
+  .tbl tr:last-child td { border-bottom: 0; }
+  .tbl td.nw { white-space: nowrap; }
+
+  /* the arc — four phases, and this one IS a sequence, so it is drawn as one */
+  /* four phases, four columns wherever they fit — a timeline must not leave its
+     last phase alone on a second row. Degrades to 2x2, never 3+1. */
+  .arc { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(196px, 1fr)); }
+  @media (max-width: 780px) { .arc { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 460px) { .arc { grid-template-columns: 1fr; } }
+  .ph { background: var(--slab); border: 1px solid var(--rule); border-top: 3px solid var(--brand);
+        border-radius: 2px; padding: 20px; box-shadow: var(--slab-sh);
+        display: flex; flex-direction: column; gap: 10px; }
+  .ph .when { font: 600 10.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .13em;
+              text-transform: uppercase; color: var(--brand); }
+  .ph .what { font: 400 20px/1.2 Newsreader, Georgia, serif; color: var(--ink); }
+  .ph p { font-size: 14px; line-height: 1.5; }
+  .ph.bet { border-top-color: var(--bet); }
+  .ph.bet .when { color: var(--bet); }
+
+  .chip { display: inline-block; font: 600 10px/1 ui-monospace, Menlo, monospace;
+          letter-spacing: .1em; text-transform: uppercase; padding: 4px 7px;
+          border: 1px solid currentColor; border-radius: 2px; color: var(--brand); }
+  .chip.bet { color: var(--bet); }
+  .chip.deep { color: var(--deep); }
+
+  .facts { display: grid; gap: 2px 34px; grid-template-columns: repeat(auto-fit, minmax(186px, 1fr)); }
+  .fact { padding: 14px 0; border-top: 1px solid var(--rule); }
+  .fact b { display: block; font: 300 30px/1.1 Newsreader, Georgia, serif; color: var(--ink);
+            font-variant-numeric: tabular-nums; }
+  .fact span { font-size: 13.5px; color: var(--ink-soft); }
+
+  ul.plain { margin: 0; padding: 0; list-style: none; display: grid; gap: 11px; max-width: 66ch; }
+  ul.plain li { padding-left: 20px; position: relative; color: var(--ink-soft); font-size: 15.5px; }
+  ul.plain li::before { content: ""; position: absolute; left: 0; top: .62em;
+    width: 7px; height: 7px; background: var(--brand); border-radius: 50%; }
+  ul.plain li.bet::before { background: var(--bet); }
+
+  footer { padding: 44px clamp(20px, 6vw, 88px) 70px; max-width: 1100px; margin: 0 auto;
+           color: var(--ink-faint); font: 400 13px/1.7 ui-monospace, Menlo, monospace; }
+</style>
+</head>
+<body>
+<section class="slide">
+  <div class="eyebrow"><span>jinflow · a jazzisnow product</span><b>Roadmap</b><span>2026-09-08</span></div>
+  <h1>The next sixteen weeks</h1>
+  <p class="lead">jinflow is a declarative analytical engine: you <em>declare</em> what should
+     be detected — a signal, a thesis, a verdict — and the engine compiles it, runs it against
+     the data, and hands back a single portable knowledge store you can browse, ship or freeze.</p>
+  <p><strong>What this document is.</strong> A capability plan to 31 December, written from the
+     working plan the team actually uses, with the same dates and the same confidence markers.
+     It states what is running today, what is scheduled, and what is a bet.</p>
+  <p><strong>What it is not.</strong> It makes no commercial claims — no pipeline, no revenue,
+     no pricing. There are no customers yet, and the plan says so wherever that matters.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>01</span><span>Where this is today</span></div>
+  <h2>Seven months old, in production, and honest about the part that is missing</h2>
+  <div class="facts">
+    <div class="fact"><b>11</b><span>tenants served live in the cloud — hospital logistics,
+      air quality, agriculture, the electricity grid, wine</span></div>
+    <div class="fact"><b>10</b><span>domain packs, each a reusable analytical framework
+      rather than a one-off report</span></div>
+    <div class="fact"><b>0.64.0</b><span>released 7 September. 21 releases in the last
+      30 days</span></div>
+    <div class="fact"><b>0</b><span>customers. The gap this roadmap exists to close</span></div>
+  </div>
+  <p><strong>What already runs.</strong> The engine, the browser surface, the command line and
+     a sovereign proxy mode; five deployment topologies from a single laptop to a cloud build;
+     identity and per-tenant access control; a packaged macOS application; and real data —
+     including a Swiss hospital group's anonymised ERP export and a cantonal agriculture
+     dataset — carried through the whole pipeline into a shipped store.</p>
+  <p class="lead"><strong>What is missing is not a feature.</strong> It is that everything above
+     currently depends on one person being reachable: which tenants a machine serves, what may
+     be asked of it, and what to type when somebody joins are all knowledge rather than system.
+     The four phases that follow are, in order, how that stops being true.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>02</span><span>The questions we get asked</span></div>
+  <h2>Four questions, and where each one honestly stands</h2>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th>The question</th><th>Where it stands</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>How does this scale past one customer?</td>
+          <td>Every tenant is an isolated cell with its own store, and eleven run side by side
+              today. What is missing is the <em>register</em> — a machine-readable statement of
+              which customers an installation serves. Designed; being built in October</td>
+          <td class="nw"><span class="chip deep">October</span></td></tr>
+      <tr><td>How fast can you answer a new question?</td>
+          <td>A new signal is a declaration, not a project. What is missing is extending an
+              existing store <em>in place</em> — answering a new question without re-running the
+              customer's pipeline, which also makes it possible in the cloud where the raw data
+              never goes</td>
+          <td class="nw"><span class="chip deep">November</span></td></tr>
+      <tr><td>Does it integrate, or is it an island?</td>
+          <td>The outward contract is specified, and the protocol decision is made: one contract,
+              many transports — HTTP, a private tunnel, and <strong>MCP</strong>, so an AI agent
+              is a first-class caller rather than an afterthought</td>
+          <td class="nw"><span class="chip deep">November</span></td></tr>
+      <tr><td>What happens when the founder is away?</td>
+          <td>The verbs all exist and work; the documentation that turns them into procedures
+              does not. That is October's other half, and it is also the cheapest possible
+              rehearsal for a first customer</td>
+          <td class="nw"><span class="chip deep">October</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>03</span><b>The plan</b><span>Sept — Dec</span></div>
+  <h2>One outcome, four phases</h2>
+  <div class="spine wide">By year&#8209;end, someone who is not the founder runs a jinflow tenant
+     on their own data — and nothing about that is dangerous.</div>
+  <p>Every item below serves that sentence. The showcase, the documentation and the security
+     work are not side quests; they are its preconditions. Anything that does not move it
+     forward is not in the plan.</p>
+  <div class="arc">
+    <div class="ph"><span class="when">Sept 8–30</span><span class="what">Harden</span>
+      <p>Close the criticals from our own adversarial review before anyone outside is invited
+         in. A scheduled lockout, not a scramble.</p></div>
+    <div class="ph"><span class="when">October</span><span class="what">Operable by someone else</span>
+      <p>The register that says which customers this installation serves, and the administration
+         documentation that lets a stranger run it.</p></div>
+    <div class="ph"><span class="when">November</span><span class="what">Extensible &amp; connectable</span>
+      <p>Extend a customer's store without re-running their pipeline; serve the outward contract,
+         with MCP as one of its transports.</p></div>
+    <div class="ph bet"><span class="when">Dec 1–19</span><span class="what">In someone else's hands</span>
+      <p>A first design partner operating their own tenant. The one item that depends on a person
+         we have not yet named — marked as the bet it is.</p></div>
+  </div>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>04</span><span>Evidence</span></div>
+  <h2>What closes each phase — checkable, not asserted</h2>
+  <p>Each phase carries a <em>done-when</em> that names evidence rather than a feeling. These
+     are the four, in the words the working plan uses:</p>
+  <ul class="plain">
+    <li><strong>Harden.</strong> Every critical finding is either closed <em>with a test that
+        fails without the fix</em>, or accepted in writing, with a reason and a name against it.</li>
+    <li><strong>Operable.</strong> A person who is not the founder can — from the documents
+        alone — install, register a tenant, invite a colleague, publish a tenant, take it dark
+        again, and say which version is running. Without asking anyone.</li>
+    <li><strong>Extensible &amp; connectable.</strong> An outside agent holding only a pass can
+        discover and read one tenant over MCP; and that same tenant gains a new finding while
+        its source data is nowhere near it.</li>
+    <li class="bet"><strong>In someone else's hands.</strong> Somebody outside this project
+        completes a real task on their own data without asking us a question.</li>
+  </ul>
+  <p><strong>And what we are deliberately not doing:</strong> no eleventh domain pack, no Windows
+     or Linux packaging this year, no multi-master federation, no billing system, and no engine
+     migration. Each was considered and each is out.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>05</span><b>Stated openly</b><span>Security</span></div>
+  <h2>We ran an adversarial review against ourselves, and it found things</h2>
+  <p class="lead">On 7 September an adversarially-verified review covered the whole codebase —
+     11 subsystem slices, four lenses, every candidate finding independently re-tested before it
+     counted. <strong>29 findings were confirmed: 7 critical, 11 high, 9 medium, 2 low; 15 of
+     them security.</strong></p>
+  <p><strong>Why it is on this page.</strong> Because the alternative reads worse. A pre-customer
+     product with no findings has not been looked at; a product with findings and a scheduled
+     repayment has been. The fixes cluster into three shared causes rather than 29 separate
+     ones, which is the difference between a rewrite and a fortnight.</p>
+  <p><strong>What has been decided.</strong> The work was postponed deliberately — no customers,
+     therefore no customer data at stake — and scheduled as a <em>lockout</em>: a dedicated pass
+     at the end of September, fixing the class rather than the instance. The single
+     highest-value mitigation needs no code and is being applied now.</p>
+  <p>The report itself stays internal until the lockout closes: it contains working detail
+     against live surfaces, and publishing that before the fix would be the one genuinely
+     irresponsible option.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>06</span><span>How this gets built</span></div>
+  <h2>One founder, and a way of working that is itself the product thesis</h2>
+  <div class="facts">
+    <div class="fact"><b>2,812</b><span>commits in the last 90 days</span></div>
+    <div class="fact"><b>21</b><span>releases in the last 30 days</span></div>
+    <div class="fact"><b>1</b><span>human author</span></div>
+    <div class="fact"><b>7 mo</b><span>from first commit to production</span></div>
+  </div>
+  <p>The engine is built by one person working with several AI agent sessions in parallel git
+     worktrees, each holding a lane — identity, the analytical surface, the cloud substrate,
+     typology and cartography, ingestion — merging through a scripted round trip. Every number
+     above is in the repository history and can be checked line by line.</p>
+  <p class="lead"><strong>The bottleneck is not throughput, and we can prove it.</strong> One
+     unruled design question has held a finished piece of work for weeks while four hundred
+     commits landed around it. That is a useful thing to know about a plan: it is paced by
+     decisions, not by hands — which is exactly why this roadmap names four decisions and their
+     dates rather than a longer list of features.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>07</span><span>Verify us</span></div>
+  <h2>Every claim on these slides is checkable, and here is how</h2>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th>The claim</th><th>How to check it yourself</th></tr></thead>
+    <tbody>
+      <tr><td>It runs</td><td>the public showcase, live, in a browser — eleven tenants, real
+          analyses, no sign&#8209;in for the public ones</td></tr>
+      <tr><td>The version, and that it is current</td><td>a public health endpoint reports the
+          served version; releases are published with notes</td></tr>
+      <tr><td>The pace</td><td>the repository history — commits, releases, and a written journal
+          the team keeps weekly</td></tr>
+      <tr><td>The plan</td><td>this deck is generated from the team's own working plan; when the
+          two disagree, the working plan wins and this one is rewritten</td></tr>
+      <tr><td>The honesty</td><td>the design documents record what was <em>wrong</em> as well as
+          what shipped — including a fix, this week, to the very probe that was supposed to
+          detect a bad deployment</td></tr>
+    </tbody>
+  </table></div>
+  <p class="lead">What we want from a partner conversation is not capital. It is one of three
+     things: somebody to <strong>build alongside</strong>, a <strong>domain partner</strong>
+     whose expertise becomes a pack, or an <strong>early adopter</strong> with a real dataset, a
+     real question, and the willingness to be the first person who is not us. The rationale for
+     all three is its own document.</p>
+</section>
+
+<footer>
+  jinflow · a jazzisnow product · roadmap 8 Sept — 31 Dec 2026<br>
+  Generated from docs/ROADMAP.md — the working plan. When they disagree, the plan wins.<br>
+  Capability plan. No commercial claims are made or implied.
+</footer>
+</body>
+</html>

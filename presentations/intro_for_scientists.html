@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- jinflow — an introduction for scientists. Source of record: docs/presentations/.
+     Served at docs.jinflow.io/presentations/ when listed in presentations.yaml. -->
+<title>jinflow — an introduction for scientists</title>
+<style>
+  :root {
+    --ink: #0e1622;
+    --paper: #f6f8fa;
+    --panel: #ffffff;
+    --slate: #55637a;
+    --faint: #8b97a8;
+    --hair: #e0e5ec;
+    --cyan: #0e7490;
+    --cyan-br: #0891b2;
+    --amber: #b45309;
+    --g: #16a34a; --y: #ca8a04; --o: #ea580c; --r: #dc2626;
+    --grid: rgba(14,116,144,.06);
+    --shadow: 0 1px 2px rgba(15,23,42,.04), 0 12px 32px -12px rgba(15,23,42,.12);
+
+    --bg: var(--paper);
+    --fg: var(--ink);
+    --card: var(--panel);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #eaeff5; --paper: #0b1119; --panel: #111a25;
+      --slate: #9aa7ba; --faint: #6b7789; --hair: #1e2a3a;
+      --cyan: #22d3ee; --cyan-br: #67e8f9; --amber: #f59e0b;
+      --g:#22c55e; --y:#eab308; --o:#f97316; --r:#f87171;
+      --grid: rgba(34,211,238,.06);
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 20px 40px -16px rgba(0,0,0,.6);
+      --bg: var(--paper); --fg: var(--ink); --card: var(--panel);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #eaeff5; --paper: #0b1119; --panel: #111a25;
+    --slate: #9aa7ba; --faint: #6b7789; --hair: #1e2a3a;
+    --cyan: #22d3ee; --cyan-br: #67e8f9; --amber: #f59e0b;
+    --g:#22c55e; --y:#eab308; --o:#f97316; --r:#f87171;
+    --grid: rgba(34,211,238,.06);
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 20px 40px -16px rgba(0,0,0,.6);
+    --bg: var(--paper); --fg: var(--ink); --card: var(--panel);
+  }
+  :root[data-theme="light"] {
+    --ink:#0e1622; --paper:#f6f8fa; --panel:#fff; --slate:#55637a; --faint:#8b97a8;
+    --hair:#e0e5ec; --cyan:#0e7490; --cyan-br:#0891b2; --amber:#b45309;
+    --g:#16a34a; --y:#ca8a04; --o:#ea580c; --r:#dc2626; --grid:rgba(14,116,144,.06);
+    --shadow:0 1px 2px rgba(15,23,42,.04),0 12px 32px -12px rgba(15,23,42,.12);
+    --bg:var(--paper); --fg:var(--ink); --card:var(--panel);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv05","ss01";
+    overflow: hidden;
+  }
+  .mono { font-family: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, monospace; }
+
+  /* ── Deck frame ─────────────────────────────────────────── */
+  #deck {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 42px 42px;
+  }
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: clamp(1.5rem, 5vw, 6rem);
+    padding-bottom: clamp(4rem, 8vh, 6rem);
+    opacity: 0; transform: translateY(14px) scale(.995);
+    transition: opacity .5s ease, transform .5s cubic-bezier(.2,.7,.2,1);
+    pointer-events: none;
+    overflow-y: auto;
+  }
+  .slide.active { opacity: 1; transform: none; pointer-events: auto; }
+  .wrap { width: 100%; max-width: 1080px; margin: 0 auto; }
+
+  /* ── Type ───────────────────────────────────────────────── */
+  .eyebrow {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: .72rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--cyan); font-weight: 600; margin: 0 0 1.1rem;
+    display: flex; align-items: center; gap: .7rem;
+  }
+  .eyebrow::before { content:""; width: 26px; height: 1px; background: var(--cyan); opacity:.6; }
+  h1.title {
+    font-size: clamp(3rem, 9vw, 7rem); font-weight: 800; letter-spacing: -.04em;
+    line-height: .95; margin: 0; text-wrap: balance;
+    background: linear-gradient(180deg, var(--fg), color-mix(in oklab, var(--fg) 62%, var(--cyan)));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  h2 {
+    font-size: clamp(1.8rem, 4.4vw, 3.4rem); font-weight: 750; letter-spacing: -.025em;
+    line-height: 1.04; margin: 0 0 1.4rem; text-wrap: balance; max-width: 20ch;
+  }
+  .lede { font-size: clamp(1.05rem, 1.7vw, 1.4rem); line-height: 1.5; color: var(--slate); max-width: 60ch; margin: 0; }
+  .lede.tight { max-width: 46ch; }
+  p { margin: 0; }
+  strong { color: var(--fg); font-weight: 650; }
+
+  .term {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: .92em; font-weight: 600; color: var(--cyan);
+    background: color-mix(in oklab, var(--cyan) 12%, transparent);
+    border: 1px solid color-mix(in oklab, var(--cyan) 30%, transparent);
+    border-radius: 5px; padding: .08em .4em; white-space: nowrap;
+  }
+  .term.amber { color: var(--amber); background: color-mix(in oklab, var(--amber) 12%, transparent);
+    border-color: color-mix(in oklab, var(--amber) 30%, transparent); }
+
+  /* ── Cards / grids ──────────────────────────────────────── */
+  .grid { display: grid; gap: 1rem; }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g2 { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 760px){ .g3,.g2 { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card); border: 1px solid var(--hair); border-radius: 14px;
+    padding: 1.4rem 1.5rem; box-shadow: var(--shadow);
+  }
+  .card .n { font-family: ui-monospace, Menlo, monospace; font-size: .72rem; letter-spacing:.15em;
+    color: var(--faint); text-transform: uppercase; }
+  .card h3 { font-size: 1.15rem; font-weight: 700; margin: .5rem 0 .55rem; letter-spacing: -.01em; }
+  .card p { font-size: .98rem; line-height: 1.5; color: var(--slate); }
+
+  /* ── Dimensions ─────────────────────────────────────────── */
+  .dims { display: flex; flex-direction: column; gap: 1.15rem; margin-top: .5rem; }
+  .dim { display: grid; grid-template-columns: 9.5rem 1fr; gap: 1.1rem; align-items: center; }
+  @media (max-width: 680px){ .dim { grid-template-columns: 1fr; gap: .3rem; } }
+  .dim .name { font-family: ui-monospace, Menlo, monospace; font-size: .74rem; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--fg); font-weight: 600; }
+  .dim .track { position: relative; height: 40px; border-bottom: 1px solid var(--hair); }
+  .dim .bar {
+    position: absolute; left: 0; bottom: -1px; height: 3px; width: 0;
+    background: linear-gradient(90deg, color-mix(in oklab,var(--cyan) 35%, transparent), var(--cyan));
+    transition: width 1.1s cubic-bezier(.2,.7,.2,1); border-radius: 2px;
+  }
+  .active .dim .bar { width: 100%; }
+  .dim .ends { position: absolute; inset: 0; display: flex; justify-content: space-between; align-items: flex-end;
+    padding-bottom: .3rem; font-size: .84rem; }
+  .dim .ends .lo { color: var(--faint); }
+  .dim .ends .hi { color: var(--fg); font-weight: 600; text-align: right; }
+  .dim .ends .hi .mono, .dim .ends .lo .mono { font-size: .92em; }
+
+  /* ── Diamond ────────────────────────────────────────────── */
+  .diamond { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: stretch; gap: .3rem; margin-top: .4rem; }
+  @media (max-width: 760px){ .diamond { grid-template-columns: 1fr; } .diamond .arrow { display:none; } }
+  .node { background: var(--card); border: 1px solid var(--hair); border-radius: 12px; padding: 1.1rem 1.2rem; box-shadow: var(--shadow); }
+  .node .k { font-family: ui-monospace, Menlo, monospace; font-size: .7rem; letter-spacing: .16em; text-transform: uppercase; color: var(--cyan); }
+  .node.v .k { color: var(--amber); }
+  .node h4 { margin: .35rem 0 .4rem; font-size: 1.1rem; font-weight: 700; }
+  .node p { font-size: .9rem; color: var(--slate); line-height: 1.45; }
+  .arrow { align-self: center; color: var(--faint); font-size: 1.3rem; }
+
+  /* ── aeros ──────────────────────────────────────────────── */
+  .stats { display: flex; gap: 2.4rem; flex-wrap: wrap; margin: .2rem 0 1.6rem; }
+  .stat .v { font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .stat .l { font-family: ui-monospace, Menlo, monospace; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  .spark { background: var(--card); border: 1px solid var(--hair); border-radius: 14px; padding: 1.1rem 1.3rem; box-shadow: var(--shadow); }
+  .spark .cap { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .3rem; }
+  .spark .cap .who { font-family: ui-monospace, Menlo, monospace; font-size: .8rem; }
+  .ramp { display: flex; gap: 0; height: 8px; border-radius: 5px; overflow: hidden; margin-top: 1.1rem; max-width: 320px; }
+  .ramp span { flex: 1; }
+  .ramp-l { display:flex; justify-content:space-between; max-width:320px; font-family: ui-monospace,Menlo,monospace; font-size:.66rem; letter-spacing:.08em; text-transform:uppercase; color: var(--faint); margin-top:.3rem; }
+
+  .close-list { display: flex; flex-direction: column; gap: .85rem; margin-top: 1.4rem; max-width: 52ch; }
+  .close-list .row { display: flex; gap: .9rem; align-items: baseline; font-size: 1.08rem; line-height: 1.4; }
+  .close-list .dot { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); transform: translateY(-2px); }
+
+  /* ── Chrome ─────────────────────────────────────────────── */
+  #bar { position: fixed; left: 0; top: 0; height: 3px; background: linear-gradient(90deg, var(--cyan), var(--cyan-br)); width: 0; transition: width .45s ease; z-index: 40; }
+  #brand { position: fixed; left: clamp(1.2rem,3vw,2.4rem); top: clamp(1rem,2.6vh,1.8rem); z-index: 30; display: flex; align-items: center; gap: .55rem; font-weight: 700; letter-spacing: -.02em; }
+  #brand .d { width: 9px; height: 9px; background: var(--cyan); border-radius: 2px; transform: rotate(45deg); }
+  #brand small { font-family: ui-monospace, Menlo, monospace; font-weight: 500; font-size: .64rem; letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+  #foot { position: fixed; right: clamp(1.2rem,3vw,2.4rem); bottom: clamp(1rem,2.6vh,1.6rem); left: clamp(1.2rem,3vw,2.4rem);
+    z-index: 30; display: flex; justify-content: space-between; align-items: center; font-family: ui-monospace, Menlo, monospace;
+    font-size: .7rem; letter-spacing: .1em; color: var(--faint); }
+  #dots { display: flex; gap: .5rem; }
+  #dots button { width: 7px; height: 7px; border-radius: 50%; border: none; background: var(--hair); padding: 0; cursor: pointer; transition: all .3s; }
+  #dots button.on { background: var(--cyan); transform: scale(1.35); }
+  #hint { opacity: .8; }
+  #hint b { color: var(--slate); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="brand"><span class="d"></span> jinflow <small>a jazzisnow engine</small></div>
+
+<div id="deck">
+
+  <!-- 1 · Title -->
+  <section class="slide active">
+    <div class="wrap">
+      <p class="eyebrow">An introduction · for scientists</p>
+      <h1 class="title">jinflow</h1>
+      <p class="lede" style="margin-top:1.6rem;max-width:52ch;">
+        A declarative engine for diagnostic data pipelines — where a result carries the
+        <strong>method that made it</strong>, and a number remembers it is a
+        <strong>measurement</strong>.
+      </p>
+    </div>
+  </section>
+
+  <!-- 2 · The ache -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">The ache</p>
+      <h2>Three quiet failures we've made our peace with.</h2>
+      <div class="grid g3" style="margin-top:1.6rem;">
+        <div class="card"><div class="n">01</div><h3>Results you can't reproduce</h3>
+          <p>The figure is in the paper. The spreadsheet that made it left with the postdoc.</p></div>
+        <div class="card"><div class="n">02</div><h3>Tools you can't leave</h3>
+          <p>Your method lives inside an application's clicks — not written down, not portable, not yours.</p></div>
+        <div class="card"><div class="n">03</div><h3>Numbers that forgot</h3>
+          <p>Units on a label if you're lucky, uncertainty nowhere, and a mean of things that should never be averaged.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · The turn -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">The turn</p>
+      <h2>jinflow is an engine for <span class="term" style="font-size:.78em;">Study</span>s.</h2>
+      <p class="lede">
+        A <strong>Study</strong> is your data and your <em>declared</em> method, kept together and kept
+        honest. You don't rent a seat — you keep a Study: as long-lived as your programme,
+        as private as your laptop, as reproducible as a commit.
+      </p>
+      <p class="lede tight" style="margin-top:1.3rem;font-size:1.02rem;">
+        Its framework is the <span class="term">AFS</span>; its built store is the
+        <span class="term">KLS</span>; you read it in the <span class="term">Explorer</span>.
+        We'll meet each where it earns its keep.
+      </p>
+    </div>
+  </section>
+
+  <!-- 4 · A Study scales -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">One word, many sizes</p>
+      <h2 style="max-width:26ch;">A Study is not one size — it stretches across five axes.</h2>
+      <div class="dims">
+        <div class="dim"><div class="name">Longevity</div>
+          <div class="track"><div class="ends"><span class="lo">an afternoon's exploration</span><span class="hi">a decade of monitoring</span></div><div class="bar"></div></div></div>
+        <div class="dim"><div class="name">Deployment</div>
+          <div class="track"><div class="ends"><span class="lo">your laptop — data never leaves</span><span class="hi">an always-on public showcase</span></div><div class="bar"></div></div></div>
+        <div class="dim"><div class="name">Complexity</div>
+          <div class="track"><div class="ends"><span class="lo">one CSV</span><span class="hi">a pipeline — <span class="mono">bronze→silver→gold</span></span></div><div class="bar"></div></div></div>
+        <div class="dim"><div class="name">Volume</div>
+          <div class="track"><div class="ends"><span class="lo">a handful of rows</span><span class="hi"><span class="mono">30.6 M</span> measurements</span></div><div class="bar"></div></div></div>
+        <div class="dim"><div class="name">Sovereignty</div>
+          <div class="track"><div class="ends"><span class="lo">fully open data</span><span class="hi">confidential — <span class="mono">your data · your machine · their browser</span></span></div><div class="bar"></div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 · The method: the diamond -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">The method · the diamond</p>
+      <h2 style="max-width:24ch;">Ask a question. Let the data answer — and show its work.</h2>
+      <div class="diamond">
+        <div class="node"><div class="k">Signal</div><h4>A declared query</h4><p>A diagnostic pattern over your gold data — a balance, an outlier, a stale reference — emitting standardized findings.</p></div>
+        <div class="arrow">→</div>
+        <div class="node"><div class="k">Thesis</div><h4>A claim, weighed</h4><p>A plain-language hypothesis, scored against the evidence of its signals: confirmed, plausible, or not observed.</p></div>
+        <div class="arrow">→</div>
+        <div class="node v"><div class="k">Verdict</div><h4>The reason why</h4><p>When a thesis is confirmed, a rule-based root cause — with a recommendation, and a trail back to every row.</p></div>
+      </div>
+      <p class="lede tight" style="margin-top:1.5rem;font-size:1.02rem;">
+        You write <span class="term">YAML</span>; jinflow compiles the SQL, builds the store, and serves
+        the finding. Prior expertise enters too — as attributed <span class="term amber">Subject&nbsp;Matter</span>.
+      </p>
+    </div>
+  </section>
+
+  <!-- 6 · Honest by construction -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">Honest by construction</p>
+      <h2>Reproducible. And measured.</h2>
+      <div class="grid g2" style="margin-top:1.4rem;">
+        <div class="card">
+          <div class="n">Reproducible</div>
+          <h3>The store carries its own method</h3>
+          <p>Every built store travels with the exact framework that produced it — the
+            <span class="term">Imprint</span> — stamped to a commit. Hand it over, and a colleague can
+            <em>see</em>, and <em>re-run</em>, how every number was made. No black box, no lost macro.</p>
+        </div>
+        <div class="card">
+          <div class="n">Measured</div>
+          <h3>A number that knows what it is</h3>
+          <p>Every column declares its kind, its unit (<span class="mono">UCUM</span>), how it may roll up,
+            and its uncertainty (<span class="mono">GUM</span>). So a value isn't <span class="mono">35.1</span> —</p>
+          <p style="margin-top:.7rem;color:var(--fg);font-family:ui-monospace,Menlo,monospace;font-size:.9rem;background:color-mix(in oklab,var(--cyan) 8%,transparent);border-radius:8px;padding:.6rem .7rem;">
+            35.1 µg/m³ ± 2.3 <span style="color:var(--faint)">(1σ)</span> · mass concentration · averageable</p>
+          <p style="margin-top:.7rem;">The engine won't average what mustn't be averaged.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 · See it breathe -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">See it breathe · aeros</p>
+      <h2 style="max-width:22ch;">Air quality, honestly measured.</h2>
+      <div class="stats">
+        <div class="stat"><div class="v mono">30.6 M</div><div class="l">measurements</div></div>
+        <div class="stat"><div class="v mono">6</div><div class="l">pollutants</div></div>
+        <div class="stat"><div class="v mono">hundreds</div><div class="l">of stations</div></div>
+      </div>
+      <div class="grid g2" style="align-items:start;">
+        <div>
+          <p class="lede" style="font-size:1.05rem;">
+            Click a station on the map → its co-located pollutant <strong>streams</strong> →
+            the measured series, with its uncertainty and reference line. Magnitude, not a
+            yes/no threshold, does the colouring.
+          </p>
+          <div class="ramp"><span style="background:var(--g)"></span><span style="background:var(--y)"></span><span style="background:var(--o)"></span><span style="background:var(--r)"></span></div>
+          <div class="ramp-l"><span>within</span><span>&gt; 4× the guideline</span></div>
+        </div>
+        <div class="spark">
+          <div class="cap"><span class="who mono">NO₂ · monthly mean</span><span class="mono" style="color:var(--o);font-size:.8rem;">1.52× WHO</span></div>
+          <svg viewBox="0 0 320 90" width="100%" height="90" preserveAspectRatio="none" aria-label="NO2 monthly mean, seasonal, declining">
+            <line x1="0" y1="34" x2="320" y2="34" stroke="var(--o)" stroke-width="1" stroke-dasharray="3 4" opacity=".7"></line>
+            <polyline id="sk" fill="none" stroke="var(--cyan)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points=""></polyline>
+          </svg>
+          <div class="cap" style="margin-top:.3rem;"><span class="mono" style="font-size:.68rem;color:var(--faint)">2022</span><span class="mono" style="font-size:.68rem;color:var(--faint)">— dashed: WHO annual guideline —</span><span class="mono" style="font-size:.68rem;color:var(--faint)">2024</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · Close -->
+  <section class="slide">
+    <div class="wrap">
+      <p class="eyebrow">What a Study gives you</p>
+      <h2 style="max-width:20ch;">Your data. Your method. Reproducible, measured, and yours.</h2>
+      <div class="close-list">
+        <div class="row"><span class="dot"></span><span>Keep it as long as your science — a Study outlives any single question.</span></div>
+        <div class="row"><span class="dot"></span><span>Run it where your data must stay — from your laptop to the open web, unchanged.</span></div>
+        <div class="row"><span class="dot"></span><span>Hand it over, and it still tells the truth — units, uncertainty, and the whole recipe travel with it.</span></div>
+      </div>
+      <p class="lede" style="margin-top:2rem;font-size:1rem;color:var(--faint);">jinflow — a jazzisnow engine.</p>
+    </div>
+  </section>
+
+</div>
+
+<div id="foot">
+  <div id="dots"></div>
+  <div id="hint"><b>←</b> / <b>→</b> to move · <b>·</b> current</div>
+</div>
+
+<script>
+  (function () {
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const bar = document.getElementById('bar');
+    const dotsWrap = document.getElementById('dots');
+    let i = 0;
+
+    slides.forEach((_, n) => {
+      const b = document.createElement('button');
+      b.addEventListener('click', () => go(n));
+      dotsWrap.appendChild(b);
+    });
+    const dots = Array.from(dotsWrap.children);
+
+    // Seasonal, gently declining NO2 sparkline (winter peaks, summer troughs).
+    const sk = document.getElementById('sk');
+    if (sk) {
+      const N = 36, W = 320, H = 90, pad = 8;
+      const pts = [];
+      for (let k = 0; k < N; k++) {
+        const season = Math.cos((k / 12) * 2 * Math.PI);   // winter high
+        const trend = 1 - 0.006 * k;                        // slow decline
+        const base = (32 + 9 * season) * trend + (k % 2 ? 0.8 : -0.8);
+        const x = pad + (k / (N - 1)) * (W - 2 * pad);
+        const y = H - pad - ((base - 14) / (46 - 14)) * (H - 2 * pad);
+        pts.push(x.toFixed(1) + ',' + y.toFixed(1));
+      }
+      sk.setAttribute('points', pts.join(' '));
+    }
+
+    function go(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach((s, k) => s.classList.toggle('active', k === i));
+      dots.forEach((d, k) => d.classList.toggle('on', k === i));
+      bar.style.width = ((i) / (slides.length - 1) * 100) + '%';
+    }
+    function next() { go(i + 1); }
+    function prev() { go(i - 1); }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+      else if (e.key === 'Home') go(0);
+      else if (e.key === 'End') go(slides.length - 1);
+    });
+    // Tap/click forward on the deck (not on dots/links).
+    document.getElementById('deck').addEventListener('click', (e) => {
+      if (e.target.closest('a,button')) return;
+      const x = e.clientX / window.innerWidth;
+      x < 0.28 ? prev() : next();
+    });
+    go(0);
+  })();
+</script>
+</body>
+</html>

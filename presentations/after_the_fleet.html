@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- UNLISTED, deliberately. This page has a stable public address but is absent
+     from docs/presentations/presentations.yaml, so it does not appear on the
+     presentations index, and noindex keeps it out of search. It is a readable
+     URL to hand to someone, not a published page. To list it: add an entry to
+     the manifest, run scripts/presentationsgen.py, and drop the robots line.
+     Source of record: docs/design/after_the_fleet_deck.html — edit there, then re-run
+     scripts/deckpublish.py. -->
+<meta name="robots" content="noindex">
+<title>After the Fleet</title>
+<!-- visibility: public — this file is served at a reachable address
+     (docs.jinflow.io/presentations/, unlisted). Read before you add an
+     example: it is publishable because it argues about SHAPES rather than
+     examples, which is the same reason sense_62_the_fleet.md is internal —
+     that paper's argument leans on a real org chart and this one does not.
+     scripts/deckpublish.py refuses to publish without this line, and refuses
+     again if the text names a private tenant. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600&display=swap">
+<style>
+  /* Companion to what_is_a_fleet_deck.html — same slide mechanics and body
+     face, its own palette and display type. Two reserved colours, and they
+     carry the deck's whole argument: --stated for what the system already
+     says out loud, --open for what is still only in somebody's head. */
+  :root {
+    --paper:    #f6f5f2;
+    --slab:     #fffefb;
+    --ink:      #1a1815;
+    --ink-soft: #4d4741;
+    --ink-faint:#847b70;
+    --rule:     #ddd8d0;
+    --open:     #a0561a;   /* reserved: not yet stated */
+    --stated:   #33604c;   /* reserved: the system says it */
+    --slab-sh:  0 1px 2px rgba(26,24,21,.05), 0 10px 26px rgba(26,24,21,.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#131210; --slab:#1b1917; --ink:#eae6e0; --ink-soft:#a9a198;
+      --ink-faint:#82796f; --rule:#2f2b27; --open:#e08a4c; --stated:#7cb79b;
+      --slab-sh: 0 1px 2px rgba(0,0,0,.45), 0 10px 26px rgba(0,0,0,.32);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#131210; --slab:#1b1917; --ink:#eae6e0; --ink-soft:#a9a198;
+    --ink-faint:#82796f; --rule:#2f2b27; --open:#e08a4c; --stated:#7cb79b;
+    --slab-sh: 0 1px 2px rgba(0,0,0,.45), 0 10px 26px rgba(0,0,0,.32);
+  }
+  :root[data-theme="light"] {
+    --paper:#f6f5f2; --slab:#fffefb; --ink:#1a1815; --ink-soft:#4d4741;
+    --ink-faint:#847b70; --rule:#ddd8d0; --open:#a0561a; --stated:#33604c;
+    --slab-sh: 0 1px 2px rgba(26,24,21,.05), 0 10px 26px rgba(26,24,21,.05);
+  }
+
+  body {
+    background: var(--paper); color: var(--ink);
+    font: 400 17px/1.62 "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+    margin: 0; scroll-snap-type: y proximity; scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) { body { scroll-behavior: auto; } }
+
+  .slide {
+    scroll-snap-align: start; min-height: 100vh; box-sizing: border-box;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 6vh clamp(20px, 6vw, 84px); gap: 26px;
+    border-bottom: 1px solid var(--rule); max-width: 1080px; margin: 0 auto;
+  }
+  .eyebrow {
+    font: 600 11.5px/1 ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+    letter-spacing: .17em; text-transform: uppercase; color: var(--ink-faint);
+    display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+  }
+  .eyebrow b { color: var(--open); font-weight: 600; }
+  .eyebrow b.ok { color: var(--stated); }
+  h1, h2 { font-family: Fraunces, "Iowan Old Style", Georgia, serif;
+           font-optical-sizing: auto; text-wrap: balance; margin: 0; }
+  h1 { font-size: clamp(40px, 6.6vw, 74px); line-height: 1.02; font-weight: 300;
+       letter-spacing: -.024em; }
+  h2 { font-size: clamp(27px, 3.6vw, 41px); line-height: 1.12; font-weight: 400;
+       letter-spacing: -.014em; }
+  p  { margin: 0; max-width: 64ch; color: var(--ink-soft); }
+  p.lead { font-size: 20px; color: var(--ink); }
+  strong { color: var(--ink); font-weight: 600; }
+  .m { font-family: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+       font-size: .87em; }
+
+  .quote {
+    border-left: 2px solid var(--stated); padding: 4px 0 4px 22px;
+    font-size: 21px; line-height: 1.42; color: var(--ink); max-width: 60ch;
+  }
+  .quote cite { display: block; margin-top: 10px; font: 400 13px/1.4 ui-monospace,
+       Menlo, monospace; color: var(--ink-faint); font-style: normal; }
+
+  .tbl { width: 100%; border-collapse: collapse; font-size: 15px;
+         font-variant-numeric: tabular-nums; }
+  .scroller { overflow-x: auto; }
+  .tbl th {
+    text-align: left; font: 600 11px/1 ui-monospace, Menlo, monospace;
+    letter-spacing: .13em; text-transform: uppercase; color: var(--ink-faint);
+    padding: 0 18px 11px 0; border-bottom: 1px solid var(--rule); white-space: nowrap;
+  }
+  .tbl td { padding: 13px 18px 13px 0; border-bottom: 1px solid var(--rule);
+            vertical-align: top; color: var(--ink-soft); }
+  .tbl td:first-child { color: var(--ink); font-weight: 600; }
+  .tbl tr:last-child td { border-bottom: 0; }
+  .tbl td.nw { white-space: nowrap; }
+
+  .cards { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+  .card { background: var(--slab); border: 1px solid var(--rule); border-radius: 3px;
+          padding: 22px; box-shadow: var(--slab-sh); display: flex;
+          flex-direction: column; gap: 9px; }
+  .card .term { font: 600 12px/1 ui-monospace, Menlo, monospace; color: var(--open);
+                letter-spacing: .11em; text-transform: uppercase; }
+  .card .term.ok { color: var(--stated); }
+  .card p { font-size: 14.5px; line-height: 1.5; }
+
+  ol.asks { margin: 0; padding: 0; list-style: none; display: grid; gap: 15px; counter-reset: r; }
+  ol.asks li { display: grid; grid-template-columns: 30px 1fr; gap: 15px;
+               padding-bottom: 15px; border-bottom: 1px solid var(--rule); }
+  ol.asks li:last-child { border-bottom: 0; }
+  ol.asks li::before { counter-increment: r; content: counter(r);
+    font: 600 12px/1.7 ui-monospace, Menlo, monospace; color: var(--ink-faint); }
+  ol.asks b { display: block; color: var(--ink); font-weight: 600; font-size: 16.5px; }
+  ol.asks span { color: var(--ink-soft); font-size: 15px; }
+
+  /* a retired term, inline in prose */
+  .retired { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .87em;
+             color: var(--open); text-decoration: line-through;
+             text-decoration-thickness: 1px; }
+  .flag { display: inline-block; font: 600 10.5px/1 ui-monospace, Menlo, monospace;
+          letter-spacing: .1em; text-transform: uppercase; padding: 4px 8px;
+          border: 1px solid currentColor; border-radius: 2px; color: var(--open); }
+  .flag.ok { color: var(--stated); }
+  footer { padding: 40px clamp(20px, 6vw, 84px) 64px; max-width: 1080px; margin: 0 auto;
+           color: var(--ink-faint); font: 400 13px/1.6 ui-monospace, Menlo, monospace; }
+</style>
+</head>
+<body>
+<section class="slide">
+  <div class="eyebrow"><span>Agenda</span><b>Three asks open</b><span>2026-09-10</span></div>
+  <h1>After the fleet</h1>
+  <p class="lead">Four topics, chosen by Mig: the <strong>fleet</strong>, the <strong>DAW</strong>,
+     <strong>JinAPI</strong>, and <strong>use&#8209;case documentation — especially
+     administration</strong>.</p>
+  <p>They look unrelated. They are the same move made in four places, which is the argument
+     this deck makes on the next slide — and the reason the order they get done in matters
+     less than doing all four.</p>
+  <p><strong>Standing.</strong> The fleet has its own deck and its own decisions; this one
+     does not re-argue it. The other three are unruled — but not unwritten: the DAW and
+     JinAPI each have a spec and an author already, and what is missing in both cases is a
+     decision and a first line of code, not a design.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>01</span><span>The frame</span></div>
+  <h2>Each one moves something out of your head and into the system</h2>
+  <p>jinflow currently works because a particular person knows things: which tenants this
+     machine serves, what may be asked of it over HTTP, what happens to a number after Gold,
+     and what to type when somebody joins. None of that is written where the system can be
+     asked. All four topics are the same conversion.</p>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th>Topic</th><th>Makes stated</th><th>For whom</th><th>Today</th></tr></thead>
+    <tbody>
+      <tr><td>Fleet</td><td>which ventures this installation serves, and where they run</td>
+          <td>the operator</td><td class="nw">a disk scan + four homes</td></tr>
+      <tr><td>The DAW</td><td>what happens to data after Gold — and how a KLS is
+          <em>extended</em> without re-cutting the take</td>
+          <td>the analyst</td><td class="nw">SQL, written per case</td></tr>
+      <tr><td>JinAPI</td><td>how another system — or an AI agent — connects to a JinServer</td>
+          <td>another system</td><td class="nw">specced as the Wire; nothing served</td></tr>
+      <tr><td>Administration</td><td>how a person runs any of it without asking you</td>
+          <td>the administrator</td><td class="nw">a list of verbs</td></tr>
+    </tbody>
+  </table></div>
+  <p class="lead">Which is also the precondition for the thing none of them mention:
+     <strong>a first reader who is not us.</strong> Every one of these is currently supplied
+     by you being reachable.</p>
+  <p><strong>The slides are in the order you listed them, not in priority order.</strong>
+     A proposed working order is the last slide, and it is different.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>02</span><b class="ok">Has a deck</b><span>Fleet</span></div>
+  <h2>The register is the boundary — and four rulings are still open</h2>
+  <blockquote class="quote">“The fleet is defined through all ventures that are
+     <strong>registered</strong> in the fleet store.”<cite>Mig, 2026-08-31 — the definition v3 is built on</cite></blockquote>
+  <p><strong>Settled:</strong> the definition and the <span class="m">FLS</span> as its name
+     (yours); that J3 is an <em>installation</em>, that <span class="m">fleet_id</span> retires
+     and <span class="retired">operator-scoped</span> is dropped (consequences of it); and,
+     ours pending a nod — presences rather than tenants are what gets registered, the
+     Cohort&#8202;/&#8202;Organisation&#8202;/&#8202;Site vocabulary, one FLS per installation
+     written by <span class="m">jin fleet</span> over SQLite/WAL.</p>
+  <p><strong>The one that was charging interest is paid.</strong> Ruled 8 September: routing
+     carries <span class="m">{pack, tenant}</span> and nothing else — both exposure fields
+     leave, §11's fail&#8209;CLOSED half is deleted, and the resolver that had been held for
+     weeks is built, with a fourth outcome that finally names the misconfiguration it could not
+     express. <strong>The seam was ruled on 10 September</strong> — the FLS holds what dies
+     when the deployment dies, the declared map holds what does not. <strong>Two remain, neither
+     blocking:</strong> does a Site hold presences, and must the aspect be spoken at a broadcast
+     call site.</p>
+  <p>Nothing here needs this deck. It needs a reader with authority, for about an hour.
+     <span class="m">(docs/design/what_is_a_fleet_deck.html — v3)</span></p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>03</span><b>Spec, not built</b><span>The DAW</span></div>
+  <h2>Gold is the sacred raw take. Everything after it is an insert.</h2>
+  <p>sister&#8209;7's spec, doc&#8209;first, vocabulary settled with the sisters: a
+     <strong>plugin</strong> is a processor type plus an I/O contract; an
+     <strong>instance</strong> is that plugin <em>placed</em>, with a preset and an input
+     binding; the dataset it emits is a <strong>stem</strong>; a <strong>render</strong> is
+     the routing graph executed as N make&#8209;calls; a <strong>scenario</strong> is a whole
+     AFS state, implied by a git branch; a <strong>generation</strong> is a data delivery.</p>
+  <p class="lead">Two rules carry it: <strong>a KLS is a container
+     <span class="m">(scenario, generation)</span>, not a coordinate</strong>, and
+     <strong>only a scenario is a git branch</strong> — instances are peers, there is no base.
+     The build is a DAW that <em>bounces</em> rather than plays live, which is exactly what
+     keeps every render reproducible.</p>
+  <p><strong>Why it is the biggest bet of the four.</strong> Everything jinflow computes
+     today is SQL a person wrote. The DAW's first non&#8209;SQL plugin — PMF on the aeros
+     flagship is the candidate — is the moment the engine stops being <em>dbt with a very
+     good surface</em> and becomes a processor host. That is a product ceiling question, and
+     it is the only one of the four that does not get more urgent by waiting.</p>
+  <p class="lead"><strong>And the build side is already written: <span class="m">make --from
+     &lt;kls&gt;</span>.</strong> The seam is at gold — <span class="m">make</span> cuts the
+     take, everything after gold is a <em>render</em> — so the flag names an existing KLS to
+     build <em>on</em> rather than re-cutting from source. <span class="m">--from gold</span>
+     is the ergonomic default (this tenant's working KLS); <span class="m">--from
+     &lt;snapshot&gt;</span> forks a new KLS off a frozen take; <span class="m">--from &lt;base&gt;
+     --scenario scn_x</span> forks a cheap what&#8209;if. <span class="m">(the_build_graph.md,
+     s7 with Mig.)</span></p>
+  <p><strong>That flag is the cloud requirement, and it is why this is not only an analyst's
+     feature.</strong> A KLS in the cloud has no <span class="m">source/</span> beside it — the
+     take cannot be re-cut there. Rendering from the gold already inside the container is the
+     one build operation that <em>is</em> possible, which makes
+     <span class="m">--from</span> the mechanism by which a cloud KLS can be extended at all.
+     sister&#8209;9's Processor doc names the same primitive in your words: <em>a processor
+     extends the surface of a given KLS by an additional contract.</em></p>
+  <p><span class="flag">Status</span> &nbsp; Spec only. <span class="m">--from</span> exists in
+     the CLI today on <span class="m">ops restore</span> and <span class="m">ops rewrap</span>,
+     nowhere near <span class="m">make</span>.</p>
+  <p><span class="flag">Open</span> &nbsp; Does a forked scenario <strong>copy</strong> the
+     base's gold into its own file or <strong>reference</strong> stems by content&#8209;address
+     from a shared store — a KLS is one DuckDB file, so this is a real decision and the deeper
+     of the two. Then: does a plugin run in&#8209;process or out, and what does a stem cost in a
+     store we ship whole.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>04</span><b>Word is new, thing is not</b><span>JinAPI</span></div>
+  <h2>How a JinServer becomes connectable — and the first caller is an agent</h2>
+  <p><span class="m">grep -ri jinapi</span> over the repository returns <strong>nothing</strong>.
+     But the <em>thing</em> has a spec, an author and a ruling already, so the only genuinely
+     new part is the word — and that is a naming decision, not a design one.</p>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th>Piece</th><th>Is</th><th>Standing</th></tr></thead>
+    <tbody>
+      <tr><td>The Wire</td><td>the outward <em>contract</em> — Read, Write, and a
+          <strong>Catalog</strong> facet for discovery. <em>“There is no jinflow ↔ jinflow
+          surface. There is only a jinflow ↔ everything surface.”</em></td>
+          <td class="nw">Sense 30, proposed</td></tr>
+      <tr><td>JinServer</td><td>the host: JinDesk with the browser taken off, one tenant, many
+          per machine — serves <strong>nothing but</strong> the Wire</td>
+          <td class="nw">specced, not built</td></tr>
+      <tr><td><strong>MCP</strong></td><td><strong>one transport of the Wire, not a parallel
+          protocol.</strong> <span class="m">tools/list</span> ← Catalog + write verbs;
+          <span class="m">resources/list</span> ← Catalog + Read</td>
+          <td class="nw">ruled 2026&#8209;08&#8209;27 (Mig × s9)</td></tr>
+      <tr><td>Identity</td><td>a <strong>Pass</strong>, like any other consumer — an agent gets
+          no special door</td><td class="nw">the existing model</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>Why MCP changes who arrives first.</strong> A human integrator needs a customer,
+     a contract and a reason. An agent needs a URL and a Pass. So the Wire's first outside
+     consumer is likely to be a model rather than a company — which is cheap and early, and
+     also means <em>the first thing that ever calls this is something that will try every verb
+     it is shown</em>. jinflow already speaks the tool shape internally, via Vera
+     (<span class="m">evolve/tools.ts</span>); the MCP binding externalises exactly those
+     tools to a caller that is not trusted in&#8209;process.</p>
+  <p class="lead"><strong>So what does the word do?</strong> We have just spent a whole deck
+     removing three qualifiers that named one noun. JinAPI has to name something Wire,
+     JinServer and MCP do not — and it does: <strong>the faces are what runs, the Wire is what
+     is spoken, and JinAPI is the Wire made reachable by someone who is not us.</strong> That
+     is a third slot the naming doc does not have: not <em>how a person meets it</em>, not
+     <em>how a system meets it</em>, but <em>what is spoken</em> — a contract, not a face.</p>
+  <p><span class="flag">Open</span> &nbsp; Which rung: a <strong>word</strong> we use in prose
+     (free), a <strong>supported surface</strong> (versioned, documented, deprecation policy),
+     or a <strong>product</strong> (keys, quotas, someone answering when it breaks). The trap
+     is climbing that ladder without deciding — a name a caller has integrated against is a
+     foreign key you can never rename.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>05</span><b>Missing reader</b><span>Administration</span></div>
+  <h2>Three people use this system. One of them has documentation.</h2>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th>Reader</th><th>Asks</th><th>Has</th></tr></thead>
+    <tbody>
+      <tr><td>The analyst</td><td>what does this number mean, and where did it come from</td>
+          <td><strong>12 guides</strong> in <span class="m">docs/guide/</span>, in three languages</td></tr>
+      <tr><td>The administrator</td><td>somebody joined. Somebody left. This tenant must go
+          public — no, dark. Who can see what?</td>
+          <td><strong>a verb list.</strong> <span class="m">invite · appoint · appointments ·
+          revoke · sync-principals · ops policy</span> are all in the CLI reference, and
+          nowhere in a document that describes a <em>situation</em></td></tr>
+      <tr><td>The operator</td><td>it is deployed. Is it healthy? What did it just do?</td>
+          <td><strong>25 files</strong> in <span class="m">docs/operations/</span> — runbooks,
+          a diagnosis from May, a to&#8209;do list, and two called
+          <span class="m">Untitled-1.md</span> and <span class="m">Untitled-2.md</span></td></tr>
+    </tbody>
+  </table></div>
+  <p class="lead"><strong>A list of verbs is not documentation — it is an index to
+     documentation that was never written.</strong> The administrator's document is
+     situation&#8209;shaped, not command&#8209;shaped: <em>you have been handed an
+     installation</em> · <em>somebody joined</em> · <em>somebody left, today, angrily</em> ·
+     <em>this tenant must become public</em> · <em>this tenant must go dark</em> · <em>the
+     numbers were wrong and are now right</em>.</p>
+  <p>And it is the only one of the four that can be written <strong>today</strong>: every verb
+     it would document already exists and already works. What it needs is a decision about
+     <em>who it is for</em> — you, a customer's IT department, or us — because that choice
+     sets its whole voice.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>06</span><span>Sequence</span></div>
+  <h2>A working order, which is not the order they were listed in</h2>
+  <ol class="asks">
+    <li><b>Fleet — no longer holding a branch, and now worth finishing.</b><span>The blocking
+        ruling landed on 8 September and the resolver shipped with it. What is left is
+        consolidation rather than decision: three unhurried rulings, and folding what was
+        settled out of this deck and into the papers that outlive it — which is the step that
+        actually ends a topic.</span></li>
+    <li><b>JinAPI — because the design is done and only the promise is unnamed.</b><span>The
+        Wire is specced, MCP is ruled as its transport, the JinServer is designed to serve
+        nothing else. What is unsettled is which rung the word claims — a term of prose, a
+        supported surface, or a product — and that is a conversation, not a project. It also
+        completes the names doc, which currently has slots for what <em>runs</em> and none for
+        what is <em>spoken</em>.</span></li>
+    <li><b>Administration documentation — because it can start before anything settles.</b><span>The
+        verbs exist. The situations exist. The only prerequisite is naming the reader. It is
+        also the cheapest possible rehearsal for a first outside user: writing down what
+        somebody else would have to do is how you find out they cannot.</span></li>
+    <li><b>The DAW — and its first slice may be a flag, not a plugin.</b><span>The bet is
+        the first non&#8209;SQL processor, and that needs a date rather than a queue position.
+        But <span class="m">make --from &lt;kls&gt;</span> is specced, small, and load&#8209;bearing
+        for the cloud: without it a cloud KLS cannot be extended at all, because there is no
+        <span class="m">source/</span> up there to re-cut from. Building the flag first buys
+        the cloud capability and lands the DAW's build side, before anyone writes a
+        processor.</span></li>
+  </ol>
+  <p><span class="flag">What this deck asks for</span> &nbsp; Three sentences, one each:
+     <strong>which rung JinAPI claims</strong> (a word · a supported surface · a product) ·
+     <strong>who the administration document is for</strong> · <strong>whether
+     <span class="m">make --from</span> is built before the first processor</strong>. The
+     fleet's rulings live in their own deck and are not re-asked here.</p>
+</section>
+
+<footer>
+  Agenda deck · nothing ruled · Mig × sister-1 · 2026-09-08<br>
+  Companion to: docs/design/what_is_a_fleet_deck.html (v3)<br>
+  Source: the_daw.md · the_build_graph.md · the_processor.md · sense_30_the_wire.md ·
+  the_jinserver.md · the_names.md §1 · docs/guide/ · docs/operations/ · docs/reference/cli.md
+</footer>
+</body>
+</html>
