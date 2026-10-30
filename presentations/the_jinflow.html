@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The jinflow — the sentence, five names, one shape, one centre</title>
+<style>
+  :root {
+    --accent: #7c3aed;
+    --ink: #0f172a;
+    --paper: #fafafa;
+    --muted: #64748b;
+    --rule: #e2e8f0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink); background: var(--paper); line-height: 1.45;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  }
+  .deck { position: relative; width: 100vw; height: 100vh; }
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 6vh 8vw 11vh;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.35s ease;
+    overflow: auto;
+  }
+  .slide.active { opacity: 1; pointer-events: auto; }
+  .eyebrow {
+    font-size: 0.78rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--accent); font-weight: 600; margin-bottom: 1.3rem;
+  }
+  .headline {
+    font-size: clamp(2rem, 4.5vw, 3.8rem);
+    font-weight: 700; line-height: 1.1; letter-spacing: -0.02em;
+    max-width: 26ch;
+  }
+  .headline em { font-style: normal; color: var(--accent); }
+  .subhead {
+    font-size: clamp(1rem, 1.35vw, 1.35rem);
+    color: var(--muted); margin-top: 1.4rem;
+    max-width: 60ch; line-height: 1.55;
+  }
+  .sentence {
+    font-size: clamp(1.4rem, 2.2vw, 2rem);
+    color: var(--ink); line-height: 1.45;
+    max-width: 32ch; margin-top: 1.6rem;
+    font-weight: 500;
+  }
+  .sentence em { font-style: normal; color: var(--accent); font-weight: 700; }
+  .body { margin-top: 2.5rem; max-width: 1200px; }
+  .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; }
+  .cols.two { grid-template-columns: repeat(2, 1fr); gap: 3rem; }
+  .col strong {
+    display: block; font-size: 0.72rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--accent);
+    font-weight: 600; margin-bottom: 0.5rem;
+  }
+  .col p { font-size: 1rem; line-height: 1.55; color: var(--ink); }
+  .col p + p { margin-top: 0.6rem; }
+  .col code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.85em; background: rgba(124, 58, 237, 0.08); padding: 0.05em 0.35em; border-radius: 3px; }
+
+  /* Five-names table on slide 2 */
+  .names-grid {
+    display: grid; grid-template-columns: 10rem 1fr 1.4fr;
+    gap: 0.8rem 1.5rem; max-width: 980px;
+    font-size: 1.05rem; line-height: 1.5;
+  }
+  .names-grid .nm { font-weight: 700; color: var(--accent); letter-spacing: -0.01em; }
+  .names-grid .role { color: var(--ink); }
+  .names-grid .life { color: var(--muted); font-style: italic; }
+  .names-grid .row { display: contents; }
+  .names-grid hr { grid-column: 1 / -1; border: 0; border-top: 1px solid var(--rule); margin: 0.2rem 0; }
+
+  /* Diamond visual on slide 3. CSS classes (.strategy/.expertise/
+     .analysis) are V1-legacy and frozen here for grid stability; the
+     displayed text inside each cell is V2 (Observations/Knowledge/
+     Data) per docs/design/the_jinflow.md. */
+  .diamond {
+    display: grid;
+    grid-template-columns: 12rem 14rem 12rem;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      ".         strategy   .       "
+      "expertise insight    analysis"
+      ".         evolution  .       ";
+    gap: 1.4rem 2.5rem; align-items: center; justify-items: center;
+    margin: 2.5rem auto 0; max-width: 720px;
+    position: relative;
+  }
+  .diamond-arrows {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .cell {
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem 1.2rem; border: 1px solid var(--rule);
+    background: white; border-radius: 4px;
+    font-weight: 600; font-size: 1.05rem; min-width: 11rem;
+    text-align: center;
+    box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
+    position: relative;
+    z-index: 1;
+  }
+  .cell.strategy   { grid-area: strategy; }
+  .cell.expertise  { grid-area: expertise; }
+  .cell.insight    { grid-area: insight; border: 2px solid var(--accent); color: var(--accent); padding: 1.4rem 1.6rem; font-size: 1.15rem; }
+  .cell.analysis   { grid-area: analysis; }
+  .cell.evolution  { grid-area: evolution; }
+
+  /* Inline tier table for Data / Observations / Knowledge / Progress slides */
+  .tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; max-width: 1200px; }
+  .tier .tier-name { font-size: 1.4rem; font-weight: 700; color: var(--accent); margin-bottom: 0.4rem; }
+  .tier .tier-asks { font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+  .tier .tier-body { font-size: 0.95rem; line-height: 1.55; }
+
+  .nav {
+    position: fixed; bottom: 1.8rem; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 2rem; font-size: 0.72rem;
+    color: var(--muted); letter-spacing: 0.12em;
+    pointer-events: none;
+  }
+  .brand { font-weight: 700; color: var(--ink); letter-spacing: 0.02em; font-size: 0.85rem; }
+  .brand .powered { font-weight: 400; color: var(--muted); margin-left: 0.5rem; letter-spacing: 0.05em; }
+  .dots { display: flex; gap: 0.5rem; pointer-events: auto; }
+  .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted); opacity: 0.3; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .dot.active { background: var(--accent); opacity: 1; width: 24px; border-radius: 3px; }
+  .progress { font-variant-numeric: tabular-nums; min-width: 4ch; text-align: right; }
+  .signature {
+    margin-top: 1.5rem; font-size: 0.95rem; color: var(--muted);
+    border-top: 1px solid var(--rule); padding-top: 1rem; max-width: 50ch;
+  }
+  .signature a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--accent); }
+
+  @media print {
+    html, body { overflow: visible; height: auto; }
+    .slide { opacity: 1 !important; pointer-events: auto !important;
+      position: relative; height: 100vh; page-break-after: always;
+      transition: none !important;
+    }
+    .nav { display: none; }
+  }
+  @media (max-width: 720px) {
+    .cols, .cols.two, .tiers { grid-template-columns: 1fr; gap: 1.5rem; }
+    .body { margin-top: 2rem; }
+    .slide { padding: 5vh 5vw 12vh; }
+    .diamond { grid-template-columns: 1fr; grid-template-areas: "strategy" "expertise" "insight" "analysis" "evolution"; }
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- 1. Hero -->
+  <section class="slide active">
+    <div class="eyebrow">The jinflow</div>
+    <h1 class="headline">The product, said <em>in one sentence.</em></h1>
+    <p class="sentence">Jinflow fosters <em>Progress</em> by gaining <em>Understanding</em> through <em>Observations</em>, <em>Knowledge</em>, and <em>Data</em>.</p>
+    <p class="subhead">Five names. One shape. One centre. Drop any one of the five and the shape collapses — the model is held by all five.</p>
+  </section>
+
+  <!-- 2. The five names -->
+  <section class="slide">
+    <div class="eyebrow">Vocabulary</div>
+    <h1 class="headline">Every analytical move has <em>the same shape.</em></h1>
+    <p class="subhead">Five names — not layers, not pillars, not aspects. The product's shape is the relationship between them.</p>
+    <div class="body">
+      <div class="names-grid">
+        <div class="row"><div class="nm">Observations</div><div class="role">What we notice</div><div class="life">top-down — signed notices by named people, with state</div></div>
+        <hr>
+        <div class="row"><div class="nm">Knowledge</div><div class="role">What we know</div><div class="life">pack-shipped wisdom + activatable patterns; tenant adds 50cents</div></div>
+        <hr>
+        <div class="row"><div class="nm">Data</div><div class="role">What the data says</div><div class="life">bottom-up — produced by signals + their dbt rules</div></div>
+        <hr>
+        <div class="row"><div class="nm">Understanding</div><div class="role">The resolution</div><div class="life">findings (atomic) + verdicts (aggregate) — the shared currency</div></div>
+        <hr>
+        <div class="row"><div class="nm">Progress</div><div class="role">What we'll do</div><div class="life">downstream — suggestions, scenarios, interventions, direction</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. The diamond shape -->
+  <section class="slide">
+    <div class="eyebrow">The shape</div>
+    <h1 class="headline"><em>Understanding</em> at the centre. Three feeders converging.</h1>
+    <div class="diamond">
+      <svg class="diamond-arrows" viewBox="0 0 100 35" preserveAspectRatio="none">
+        <defs>
+          <marker id="dj-arrow" viewBox="0 0 10 10" refX="8" refY="5"
+                  markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#7c3aed" />
+          </marker>
+        </defs>
+        <!-- Observations → Understanding (top → center) -->
+        <line x1="50" y1="7"  x2="50" y2="13"
+              stroke="#7c3aed" stroke-width="0.45" marker-end="url(#dj-arrow)" />
+        <!-- Knowledge → Understanding (left → center) -->
+        <line x1="22" y1="18" x2="36" y2="18"
+              stroke="#7c3aed" stroke-width="0.45" marker-end="url(#dj-arrow)" />
+        <!-- Data → Understanding (right → center) -->
+        <line x1="78" y1="18" x2="64" y2="18"
+              stroke="#7c3aed" stroke-width="0.45" marker-end="url(#dj-arrow)" />
+        <!-- Understanding → Progress (center → bottom) -->
+        <line x1="50" y1="23" x2="50" y2="29"
+              stroke="#7c3aed" stroke-width="0.45" marker-end="url(#dj-arrow)" />
+      </svg>
+      <div class="cell strategy">Observations</div>
+      <div class="cell expertise">Knowledge</div>
+      <div class="cell insight">Understanding</div>
+      <div class="cell analysis">Data</div>
+      <div class="cell evolution">Progress</div>
+    </div>
+    <p class="subhead">Observations enter from above. Knowledge informs from one side. Data feeds in from the other. Progress flows out below. Understanding is the only place where all three feeders agree on what's true. The three feeders develop in parallel — never sequentially.</p>
+  </section>
+
+  <!-- 4. Three feeders, one forward arm -->
+  <section class="slide">
+    <div class="eyebrow">What holds it together</div>
+    <h1 class="headline">Three feeders. <em>One resolution.</em> One forward arm.</h1>
+    <div class="body">
+      <div class="cols">
+        <div class="col">
+          <strong>Observations</strong>
+          <p>A signed notice by a named person — <em>"I suspect we're losing margin on generic substitutions."</em> It enters with stake, carries a state, seeks ratification from Understanding.</p>
+        </div>
+        <div class="col">
+          <strong>Knowledge</strong>
+          <p>What the system already holds before Data runs. Wisdom from the pack, 50cents from the tenant, and the library of activatable patterns the pack ships. It informs what Understanding can defensibly say at every layer.</p>
+        </div>
+        <div class="col">
+          <strong>Data</strong>
+          <p>What the data says. Bottom-up: Signals scan, Theses ask, Verdicts judge. Declarative, typed, compiled to SQL. The empirical ground every notice gets tested against.</p>
+        </div>
+      </div>
+    </div>
+    <p class="subhead">All three converge at <em>Understanding</em>. From there, <em>Progress</em> takes validated truth into modelled action.</p>
+  </section>
+
+  <!-- 5. Data tiers -->
+  <section class="slide">
+    <div class="eyebrow">Data · what the data says</div>
+    <h1 class="headline">Three tiers. <em>Each producing a distinct artifact.</em></h1>
+    <div class="body">
+      <div class="tiers">
+        <div class="tier">
+          <div class="tier-asks">Asks</div>
+          <div class="tier-name">Signal</div>
+          <p class="tier-body"><em>"What can we detect?"</em><br><br>Many rows per tenant — one per matching entity / time bucket. Lands as <code>signal_findings__&lt;id&gt;</code>.</p>
+        </div>
+        <div class="tier">
+          <div class="tier-asks">Asks</div>
+          <div class="tier-name">Thesis</div>
+          <p class="tier-body"><em>"Is this happening?"</em><br><br>Exactly one row per (tenant × thesis). <code>status</code> ∈ {confirmed, plausible, not_observed, insufficient}.</p>
+        </div>
+        <div class="tier">
+          <div class="tier-asks">Asks</div>
+          <div class="tier-name">Verdict</div>
+          <p class="tier-body"><em>"Why is this happening?"</em><br><br>Many rows per tenant — one per matched root-cause case. Lands as <code>verdict_findings</code>.</p>
+        </div>
+      </div>
+    </div>
+    <p class="subhead">Theses and verdicts are pack-shipped <em>Knowledge</em> patterns; their dbt models run inside Data and emit into Understanding.</p>
+  </section>
+
+  <!-- 6. The cascade gate -->
+  <section class="slide">
+    <div class="eyebrow">Staged disclosure</div>
+    <h1 class="headline">The data has to <em>earn its narrative</em>, one tier at a time.</h1>
+    <div class="body">
+      <div class="cols two">
+        <div class="col">
+          <strong>Thesis gate</strong>
+          <p>The thesis a verdict is bound to must be <code>confirmed</code>. If <code>plausible</code>, <code>not_observed</code>, or <code>insufficient</code>, the verdict never fires — even if signals scream.</p>
+        </div>
+        <div class="col">
+          <strong>Condition gate</strong>
+          <p>The verdict's own conditions — signal references with field thresholds — must match. The audience sees facts before interpretation, interpretation before explanation.</p>
+        </div>
+      </div>
+    </div>
+    <p class="subhead">A thesis that doesn't confirm acts as a silencer for the verdict layer below it. The result: no premature explanation.</p>
+  </section>
+
+  <!-- 7. Observations: entity with facets -->
+  <section class="slide">
+    <div class="eyebrow">Observations · what we notice</div>
+    <h1 class="headline">An entity. <em>With state. With facets.</em></h1>
+    <p class="subhead">An Observation is the entity. Explanation and Contributing Factor aren't peers — they're <em>facets</em> the Observation carries.</p>
+    <div class="body">
+      <div class="tiers">
+        <div class="tier">
+          <div class="tier-asks">Entity</div>
+          <div class="tier-name">Observation</div>
+          <p class="tier-body">A signed notice about a specific situation. Authored by a human. State: <code>suspected → validated / refuted / inconclusive → resolved</code>.</p>
+        </div>
+        <div class="tier">
+          <div class="tier-asks">Facet</div>
+          <div class="tier-name">Explanation</div>
+          <p class="tier-body"><em>"Why is the observation true?"</em><br><br>A facet the Observation carries. Composed of one or more Contributing Factors.</p>
+        </div>
+        <div class="tier">
+          <div class="tier-asks">Facet</div>
+          <div class="tier-name">Contributing Factor</div>
+          <p class="tier-body"><em>"Which Understanding backs this?"</em><br><br>A citation of a specific Finding or Verdict. Granular and individually-citable.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Understanding = the resolution -->
+  <section class="slide">
+    <div class="eyebrow">Understanding · the resolution</div>
+    <h1 class="headline">Where evidence becomes <em>narrative.</em></h1>
+    <div class="body">
+      <div class="cols two">
+        <div class="col">
+          <strong>Findings</strong>
+          <p>Atomic — one row, one observation. Each carries severity, entity, time, money at risk, machine-readable evidence. The unit of detection.</p>
+        </div>
+        <div class="col">
+          <strong>Verdicts</strong>
+          <p>Aggregate — one row per (tenant × thesis), summarising whether the thesis holds. The unit of judgment.</p>
+        </div>
+      </div>
+    </div>
+    <p class="subhead">Together they are the shared currency. Observations ratify against Understanding. Data lands its detections here. Knowledge informs how every row should be read. Progress draws its starting point from here.</p>
+  </section>
+
+  <!-- 9. Knowledge -->
+  <section class="slide">
+    <div class="eyebrow">Knowledge · what the system holds</div>
+    <h1 class="headline">Subject Matter. <em>Plus activatable patterns.</em></h1>
+    <p class="subhead">Two kinds of inhabitants. Both pre-formed before Data ever runs. Each carries a <em>provenance</em> state — pack-original, pack-modified, or tenant-original.</p>
+    <div class="body">
+      <div class="cols two">
+        <div class="col">
+          <strong>Subject Matter · always-on</strong>
+          <p><em>Wisdom</em> from the pack. <em>50cents</em> from the tenant. <em>Dossiers</em> group related entries into reading guides. Atomic expert knowledge that informs Understanding without being produced by it. <em>"Lehrauftrag positions without recent operational activity are normal here, not a ghost employee."</em></p>
+        </div>
+        <div class="col">
+          <strong>Activatable patterns · opt-in</strong>
+          <p><em>Theses</em> (question-shape) and <em>Verdicts</em> (root-cause-shape) shipped pre-formed by the pack. The tenant engages the ones that match its situation — the rest sit on the shelf. The pack's analytical lens collection.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10. Progress -->
+  <section class="slide">
+    <div class="eyebrow">Progress · what we'll do</div>
+    <h1 class="headline">Where validated truth <em>turns into change.</em></h1>
+    <div class="body">
+      <div class="tiers">
+        <div class="tier">
+          <div class="tier-asks">Steers</div>
+          <div class="tier-name">Direction</div>
+          <p class="tier-body">The attitude, goals, intent that suggestions are validated against. <em>"More employee happiness, or less salary spend?"</em></p>
+        </div>
+        <div class="tier">
+          <div class="tier-asks">Surface</div>
+          <div class="tier-name">Suggestion → Scenario</div>
+          <p class="tier-body">Suggestion → Intervention → Scenario → Simulation. Each step a tightening: <em>"what could be done"</em> → <em>"what the delta actually measures."</em></p>
+        </div>
+        <div class="tier">
+          <div class="tier-asks">Surface</div>
+          <div class="tier-name">Governance moves</div>
+          <p class="tier-body">Interventions in the world — update a contract, file a credential renewal, stage a hiring decision. Don't live in the data, but produce future deliveries the Data side will see.</p>
+        </div>
+      </div>
+    </div>
+    <p class="subhead">Progress is the last stop in the diagram and the first input to the next cycle.</p>
+  </section>
+
+  <!-- 11. Why this matters -->
+  <section class="slide">
+    <div class="eyebrow">What the model prevents</div>
+    <h1 class="headline">Three things analytical platforms <em>historically conflate.</em></h1>
+    <div class="body">
+      <div class="cols">
+        <div class="col">
+          <strong>No premature explanation</strong>
+          <p>Without thesis confirmation, verdict findings never fire. The audience never sees root-cause speculation about theses the data doesn't yet support. <em>Understanding is staged.</em></p>
+        </div>
+        <div class="col">
+          <strong>No unfounded narrative</strong>
+          <p>Without analytical ratification, an Observation can't progress past <code>suspected</code>. A hypothesis stays a hypothesis until evidence arrives. <em>Observations ratify against Data.</em></p>
+        </div>
+        <div class="col">
+          <strong>No siloed knowledge</strong>
+          <p>Knowledge sits as a peer feeder of Understanding and is queryable from any of the four other names. Subject Matter modifies what verdicts can defensibly say AND what observations can defensibly say. Knowledge that lives only in someone's head doesn't.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12. Closing -->
+  <section class="slide">
+    <div class="eyebrow">The whole product</div>
+    <h1 class="headline">In <em>one sentence.</em></h1>
+    <p class="sentence">Jinflow fosters <em>Progress</em> by gaining <em>Understanding</em> through <em>Observations</em>, <em>Knowledge</em>, and <em>Data</em>.</p>
+    <p class="subhead">A jinflow pack ships <strong>the rules</strong> for all five names. A jinflow tenant produces <strong>the rows</strong> those rules emit when run against its data. The narrative on top is authored by humans who care about the outcomes — and is verifiable against the analytical evidence underneath.</p>
+    <div class="diamond" style="margin-top: 2rem;">
+      <div class="cell strategy">Observations</div>
+      <div class="cell expertise">Knowledge</div>
+      <div class="cell insight">Understanding</div>
+      <div class="cell analysis">Data</div>
+      <div class="cell evolution">Progress</div>
+    </div>
+  </section>
+
+</div>
+
+<nav class="nav">
+  <span class="brand">The jinflow <span class="powered">· the sentence, five names, one shape, one centre</span></span>
+  <div class="dots" id="dots"></div>
+  <span class="progress" id="progress">1 / 12</span>
+</nav>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  const progress = document.getElementById('progress');
+  let i = 0;
+
+  slides.forEach((_, j) => {
+    const d = document.createElement('span');
+    d.className = 'dot' + (j === 0 ? ' active' : '');
+    d.addEventListener('click', () => show(j));
+    dotsEl.appendChild(d);
+  });
+  const dots = document.querySelectorAll('.dot');
+
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((s, j) => s.classList.toggle('active', j === i));
+    dots.forEach((d, j) => d.classList.toggle('active', j === i));
+    progress.textContent = (i + 1) + ' / ' + slides.length;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) { show(i + 1); e.preventDefault(); }
+    else if (['ArrowLeft', 'PageUp'].includes(e.key)) { show(i - 1); e.preventDefault(); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+  });
+
+  document.addEventListener('click', e => {
+    if (e.target.closest('a, .dot, .cta')) return;
+    const half = window.innerWidth / 2;
+    show(e.clientX > half ? i + 1 : i - 1);
+  });
+</script>
+</body>
+</html>

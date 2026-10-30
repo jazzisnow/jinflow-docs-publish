@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- UNLISTED, deliberately. This page has a stable public address but is absent
+     from docs/presentations/presentations.yaml, so it does not appear on the
+     presentations index, and noindex keeps it out of search. It is a readable
+     URL to hand to someone, not a published page. To list it: add an entry to
+     the manifest, run scripts/presentationsgen.py, and drop the robots line.
+     Source of record: docs/design/rationale_deck.html — edit there, then re-run
+     scripts/deckpublish.py. -->
+<meta name="robots" content="noindex">
+<title>jinflow Rationale</title>
+<!-- visibility: public — this file is served at a reachable address
+     (docs.jinflow.io/presentations/, unlisted). Read before you add an
+     example: it is publishable because it argues about SHAPES rather than
+     examples, which is the same reason sense_62_the_fleet.md is internal —
+     that paper's argument leans on a real org chart and this one does not.
+     scripts/deckpublish.py refuses to publish without this line, and refuses
+     again if the text names a private tenant. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap">
+<style>
+  /* Third of the outward set — same palette and faces as the roadmap and the
+     state-of-play deck, so the three read as one voice. */
+  :root {
+    --paper:#f7f8f8; --slab:#ffffff; --ink:#16202b; --ink-soft:#4a5a68;
+    --ink-faint:#7d8b98; --rule:#dde3e6;
+    --brand:#2a8f8f; --deep:#1a2744; --warm:#a9631f;
+    --slab-sh: 0 1px 2px rgba(22,32,43,.05), 0 10px 28px rgba(22,32,43,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:#0d1317; --slab:#141d23; --ink:#e9eff1; --ink-soft:#a2b0ba;
+      --ink-faint:#75858f; --rule:#25313a; --brand:#3bbfbf; --deep:#8fa6c8; --warm:#e0954f;
+      --slab-sh: 0 1px 2px rgba(0,0,0,.45), 0 10px 28px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:#0d1317; --slab:#141d23; --ink:#e9eff1; --ink-soft:#a2b0ba;
+    --ink-faint:#75858f; --rule:#25313a; --brand:#3bbfbf; --deep:#8fa6c8; --warm:#e0954f;
+    --slab-sh: 0 1px 2px rgba(0,0,0,.45), 0 10px 28px rgba(0,0,0,.35);
+  }
+  :root[data-theme="light"] {
+    --paper:#f7f8f8; --slab:#ffffff; --ink:#16202b; --ink-soft:#4a5a68;
+    --ink-faint:#7d8b98; --rule:#dde3e6; --brand:#2a8f8f; --deep:#1a2744; --warm:#a9631f;
+    --slab-sh: 0 1px 2px rgba(22,32,43,.05), 0 10px 28px rgba(22,32,43,.06);
+  }
+
+  body {
+    background: var(--paper); color: var(--ink); margin: 0;
+    font: 400 16.5px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Helvetica, Arial, sans-serif;
+    scroll-snap-type: y proximity; scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) { body { scroll-behavior: auto; } }
+  .slide {
+    scroll-snap-align: start; min-height: 100vh; box-sizing: border-box;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 7vh clamp(20px, 6vw, 88px); gap: 28px;
+    border-bottom: 1px solid var(--rule); max-width: 1100px; margin: 0 auto;
+  }
+  .eyebrow {
+    font: 600 11px/1 ui-monospace, "SF Mono", Menlo, monospace;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--ink-faint);
+    display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+  }
+  .eyebrow b { color: var(--brand); font-weight: 600; }
+  h1, h2 { font-family: Newsreader, Georgia, "Times New Roman", serif;
+           font-optical-sizing: auto; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(40px, 6.4vw, 72px); line-height: 1.03; font-weight: 300;
+       letter-spacing: -.02em; }
+  h2 { font-size: clamp(26px, 3.4vw, 39px); line-height: 1.14; font-weight: 400;
+       letter-spacing: -.012em; }
+  p { margin: 0; max-width: 66ch; color: var(--ink-soft); }
+  p.lead { font-size: 19px; color: var(--ink); }
+  strong { color: var(--ink); font-weight: 600; }
+  .m { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .87em; }
+
+  .spine {
+    border-left: 3px solid var(--brand); padding: 6px 0 6px 24px;
+    font: 300 clamp(21px, 2.5vw, 28px)/1.35 Newsreader, Georgia, serif;
+    color: var(--ink); max-width: 46ch;
+  }
+
+  .tbl { width: 100%; border-collapse: collapse; font-size: 15px; }
+  .scroller { overflow-x: auto; }
+  .tbl th { text-align: left; font: 600 10.5px/1 ui-monospace, Menlo, monospace;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--ink-faint);
+    padding: 0 18px 11px 0; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+  .tbl td { padding: 14px 18px 14px 0; border-bottom: 1px solid var(--rule);
+            vertical-align: top; color: var(--ink-soft); }
+  .tbl td:first-child { color: var(--ink); font-weight: 600; }
+  .tbl tr:last-child td { border-bottom: 0; }
+
+  .cards { display: grid; gap: 17px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  @media (max-width: 780px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 470px) { .cards { grid-template-columns: 1fr; } }
+  .c { background: var(--slab); border: 1px solid var(--rule); border-top: 3px solid var(--brand);
+       border-radius: 2px; padding: 20px; box-shadow: var(--slab-sh);
+       display: flex; flex-direction: column; gap: 10px; }
+  .c .k { font: 600 10.5px/1 ui-monospace, Menlo, monospace; letter-spacing: .13em;
+          text-transform: uppercase; color: var(--brand); }
+  .c .h { font: 400 20px/1.22 Newsreader, Georgia, serif; color: var(--ink); }
+  .c p { font-size: 14px; line-height: 1.5; }
+
+  ul.plain { margin: 0; padding: 0; list-style: none; display: grid; gap: 11px; max-width: 68ch; }
+  ul.plain li { padding-left: 20px; position: relative; color: var(--ink-soft); font-size: 15.5px; }
+  ul.plain li::before { content: ""; position: absolute; left: 0; top: .62em;
+    width: 7px; height: 7px; background: var(--brand); border-radius: 50%; }
+
+  .flag { display: inline-block; font: 600 10.5px/1 ui-monospace, Menlo, monospace;
+          letter-spacing: .1em; text-transform: uppercase; padding: 4px 8px;
+          border: 1px solid currentColor; border-radius: 2px; color: var(--warm); }
+  footer { padding: 44px clamp(20px, 6vw, 88px) 70px; max-width: 1100px; margin: 0 auto;
+           color: var(--ink-faint); font: 400 13px/1.7 ui-monospace, Menlo, monospace; }
+</style>
+</head>
+<body>
+<section class="slide">
+  <div class="eyebrow"><span>jinflow · a jazzisnow product</span><b>Rationale</b><span>9 September 2026</span></div>
+  <h1>Why this exists, and who it is for</h1>
+  <p class="lead">The third of three: one deck says what jinflow is and why it is shaped that
+     way, one says where it is going, and this one says <strong>why it should exist at all</strong>
+     — who buys it, what they lose without it, and what we are asking for.</p>
+  <p><strong>It is not an investment pitch, and the last slide is not a raise.</strong> What we
+     want is collaboration partners, domain partners, and early adopters with real data and real
+     questions. If money comes up it will be because one of those went well.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>01</span><span>Who it is for</span></div>
+  <h2>Three motions, and they buy different things</h2>
+  <div class="scroller"><table class="tbl">
+    <thead><tr><th>Who</th><th>What they are actually buying</th></tr></thead>
+    <tbody>
+      <tr><td>Public sector<br><span class="m">hospital finance · cantonal IT</span></td>
+          <td>Confidence in numbers they already report. The data exists and the questions
+              exist; what is missing is a systematic path from <em>something looks wrong</em> to
+              <em>here is why, and what to do</em> — and a record of how the answer was reached
+              that survives an audit and a staff change</td></tr>
+      <tr><td>Research<br><span class="m">institutes · individual scientists</span></td>
+          <td>Declared analyses instead of a folder of scripts, typed measurements instead of
+              unlabelled numbers, and a single portable store you can freeze, cite and reopen
+              years later and still get the same result</td></tr>
+      <tr><td>Domain partners<br><span class="m">a company that knows a field</span></td>
+          <td>The engine, so their expertise becomes a product rather than a repeated
+              engagement. They know the domain; we carry the machinery; the pack they build is
+              the thing they sell their work around</td></tr>
+    </tbody>
+  </table></div>
+  <p>The first two are end users, mostly public sector. The third is a channel — and it is the
+     one that scales, because a domain partner brings a market we would otherwise have to learn
+     from scratch.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>02</span><span>The alternative</span></div>
+  <h2>There is no competitor to point at. There is still an alternative.</h2>
+  <p class="lead">We are not aware of anyone doing this in the field we operate in. That can
+     change quickly and we would rather say so than build a slide around it — but it does mean
+     the honest comparison is not with a rival product.</p>
+  <div class="spine">The alternative is the status quo, and it is already expensive. It simply
+     never appears on an invoice.</div>
+  <p><strong>What an organisation that does not do this carries instead:</strong> a quality gap
+     they cannot see the size of, and a risk that stays exactly where it was — bad data reaching
+     a decision with nothing in the path designed to catch it. Both are absorbed quietly, which
+     is precisely why they persist. Nobody signs off on them.</p>
+  <p>That is also the honest limit of the pitch: this is rarely a purchase that replaces a line
+     item. It is a purchase that reduces an exposure, and the buyer has to already believe the
+     exposure is real. In our experience, finance and IT leadership in public institutions
+     usually do — they have met the consequence.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>03</span><span>Why now</span></div>
+  <h2>A whole domain used to be a project. It is now a few weeks.</h2>
+  <p class="lead">Two things changed at once, and both of them are recent enough that the answer
+     would have been different a year ago.</p>
+  <ul class="plain">
+    <li><strong>Building the framework got radically cheaper.</strong> An analytical framework
+        for a new field — the data contract, the extractors, the signals, the expert knowledge —
+        used to be measured in years of specialist work. Ten domain packs now exist, built
+        alongside a single engine, by one person.</li>
+    <li><strong>The same technology helps do the work inside it.</strong> Not only writing the
+        code: proposing the model, catching the inconsistency, keeping a vocabulary straight
+        across hundreds of declarations. That is the part that used to need a room of people
+        who all remembered the same things.</li>
+  </ul>
+  <p><strong>What follows from that is a strategy, not just a capability.</strong> When trying a
+     market costs weeks instead of years, the sensible move is to try several — and we think
+     there are several, not one niche. Which of them is <em>the</em> market, we do not know yet.
+     Being able to find out cheaply is the whole point, and we would rather say that plainly
+     than draw a hockey stick under a market we have not tested.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>04</span><span>What it is</span></div>
+  <h2>Three things, and only one of them is “an analytics tool”</h2>
+  <div class="cards">
+    <div class="c"><span class="k">The engine</span><span class="h">Declared analyses, compiled and run</span>
+      <p>You declare what should be detected; it compiles to SQL, runs against the data, and
+         produces an answer carrying its own provenance. A new question is a declaration, not a
+         project.</p></div>
+    <div class="c"><span class="k">The keeper</span><span class="h">Domain knowledge, held by the organisation</span>
+      <p>What the veteran knows — the workaround, the quirk, the event that explains the
+         anomaly — is captured with its author, its scope and its reason. It stops leaving when
+         people do. This is the part no data model can derive and no consultant hands back.</p></div>
+    <div class="c"><span class="k">The platform</span><span class="h">A view that keeps widening</span>
+      <p>Not a fixed report. New questions, new sources, new breadth on the same foundation —
+         which is why the second year with a tenant looks different from the first without
+         anything being rebuilt.</p></div>
+  </div>
+  <p class="lead"><strong>And one ambition we hold ourselves to:</strong> software good enough
+     that people use it because they want to, and the organisational insight arrives as a
+     by-product of them enjoying it. That is why the surface gets as much care as the engine.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>05</span><span>The business</span></div>
+  <h2>We sell subscriptions. Partners sell the work.</h2>
+  <p class="lead">jinflow is sold as a <strong>software subscription</strong>. We do not sell
+     the analysis, the onboarding or the consulting around it — <strong>partners do</strong>,
+     and that is deliberate rather than a stage we intend to grow out of.</p>
+  <p><strong>Which makes one sentence on our public site load-bearing:</strong>
+     <em>the pack is a head start; the analysis is the work.</em> Installing a domain pack gives
+     a new tenant a working framework on day one — the contract, the extractors, twenty-odd
+     signals, a catalogue of expert knowledge. Fitting it to <em>this</em> organisation's data
+     is a month of analytical work, and somebody has to do it: their own people, or a partner
+     who does this for a living.</p>
+  <p>Saying that before a contract rather than after is not modesty. It is the difference
+     between a customer who budgets for the first month and a customer who feels misled in
+     week three — and it is the reason a domain partner has a business at all.</p>
+</section>
+
+<section class="slide">
+  <div class="eyebrow"><span>06</span><b>The ask</b><span>What would help</span></div>
+  <h2>Three kinds of person, and none of them is an investor</h2>
+  <div class="cards">
+    <div class="c"><span class="k">Collaboration</span><span class="h">Build alongside us</span>
+      <p>People who will argue with the design and use the thing while it is still moving. The
+         decision documents are published for exactly this reason — the arguments are readable,
+         and they are better with more people in them.</p></div>
+    <div class="c"><span class="k">Domain partner</span><span class="h">Carry a field</span>
+      <p>A company that knows an industry and wants their expertise to become a product. They
+         shape the pack, they keep the client work; we carry the engine underneath it. Ten packs
+         exist; not one of them needed us to become domain experts first.</p></div>
+    <div class="c"><span class="k">Early adopter</span><span class="h">A real dataset, a real question</span>
+      <p>An end user willing to be the first person who is not us — and to say plainly what
+         breaks. The roadmap names this as the one thing on it we cannot do alone.</p></div>
+  </div>
+  <p><strong>We are not raising.</strong> If capital becomes the right conversation it will be
+     because one of the three above went well and there is something obvious to accelerate —
+     which is a better reason than a deck.</p>
+  <p class="lead">The plan to year-end, with dates and confidence markers, is a separate
+     document; so is the honest inventory of what is built, what is only specified, and what is
+     wrong this week. Both are linked from the front page of these papers.</p>
+</section>
+
+<footer>
+  jinflow · a jazzisnow product · the rationale, 9 September 2026<br>
+  Companion to jinflow Today (what it is, and the state of it) and jinflow Roadmap (to 31 Dec).<br>
+  Positions here come from the founder; no market sizing is claimed, and none is implied.
+</footer>
+</body>
+</html>
